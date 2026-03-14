@@ -2,21 +2,60 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 
+/**
+ * Seeds default users inside a tenant database context.
+ * Must be called after RolesAndPermissionsSeeder.
+ *
+ * Usage from TenantSeeder:
+ *   tenancy()->initialize($tenant);
+ *   (new RolesAndPermissionsSeeder)->run();
+ *   (new UserSeeder)->run();
+ */
 class UserSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        //admin seeder
-        User::create([
-            'name' => 'Admin',
-            'email' => 'admin@example.com',
-            'password' => bcrypt('password123'), // Replace with a secure password
-        ]);
+        $tenantId = tenant('id');
+
+        // Tenant Admin
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'tenant_id' => $tenantId,
+                'name'      => 'Admin',
+                'password'  => bcrypt('password'),
+                'is_active' => true,
+            ]
+        );
+        $admin->assignRole('tenant_admin');
+
+        // Manager
+        $manager = User::firstOrCreate(
+            ['email' => 'manager@example.com'],
+            [
+                'tenant_id' => $tenantId,
+                'name'      => 'Manager',
+                'password'  => bcrypt('password'),
+                'is_active' => true,
+            ]
+        );
+        $manager->assignRole('manager');
+
+        // Cashier
+        $cashier = User::firstOrCreate(
+            ['email' => 'cashier@example.com'],
+            [
+                'tenant_id' => $tenantId,
+                'name'      => 'Cashier',
+                'password'  => bcrypt('password'),
+                'is_active' => true,
+            ]
+        );
+        $cashier->assignRole('cashier');
+
+        $this->command->info("Users seeded for tenant: {$tenantId}");
     }
 }

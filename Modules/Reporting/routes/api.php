@@ -1,5 +1,6 @@
 <?php
 
+use Modules\Reporting\Services\ReportingService;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -8,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('api/reports')->middleware(['auth:sanctum'])->group(function () {
+Route::prefix('api/reports')->middleware(['auth:sanctum', 'permission:view_reports'])->group(function () {
 
     // Sales report by date range
     Route::get('sales', function (\Illuminate\Http\Request $request) {
@@ -17,36 +18,34 @@ Route::prefix('api/reports')->middleware(['auth:sanctum'])->group(function () {
             'to'   => 'required|date|after_or_equal:from',
         ]);
 
-        $data = \App\Models\Order::completed()
-            ->whereBetween('completed_at', [$request->from, $request->to])
-            ->selectRaw('DATE(completed_at) as date, COUNT(*) as orders, SUM(total_amount) as revenue')
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
-
-        return response()->json($data);
+        return response()->json(
+            app(ReportingService::class)->salesByDate($request->from, $request->to)
+        );
     });
 
     // Top-selling products
     Route::get('top-products', function (\Illuminate\Http\Request $request) {
-        $data = \App\Models\OrderItem::join('orders', 'orders.id', '=', 'order_items.order_id')
-            ->where('orders.status', 'completed')
-            ->selectRaw('product_id, product_name, SUM(quantity) as total_quantity, SUM(subtotal) as total_revenue')
-            ->groupBy('product_id', 'product_name')
-            ->orderByDesc('total_revenue')
-            ->limit(20)
-            ->get();
+        $limit = $request->integer('limit', 20);
 
-        return response()->json($data);
+        return response()->json(
+            app(ReportingService::class)->topProducts($limit)
+        );
     });
 
     // Revenue by payment method
     Route::get('payment-methods', function () {
-        $data = \App\Models\Payment::where('status', 'completed')
-            ->selectRaw('payment_method, COUNT(*) as count, SUM(amount) as total')
-            ->groupBy('payment_method')
-            ->get();
+        return response()->json(
+            app(ReportingService::class)->revenueByPaymentMethod()
+        );
+    });
 
-        return response()->json($data);
+    // Daily summary
+    Route::get('daily-summary', function (\Illuminate\Http\Request $request) {
+        $date = $request->date ?? today()->toDateString();
+
+        return response()->json([
+            'date'    => $date,
+            'summary' => app(ReportingService::class)->dailySummary($date),
+        ]);
     });
 });
