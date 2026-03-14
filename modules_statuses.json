@@ -1,0 +1,8 @@
+{
+    "Auth": true,
+    "Tenant": true,
+    "POS": true,
+    "Inventory": true,
+    "Finance": true,
+    "Reporting": true
+}
