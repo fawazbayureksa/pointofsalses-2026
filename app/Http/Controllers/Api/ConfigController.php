@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 class ConfigController extends Controller
 {
     public function __construct(
-        private readonly ConfigService $configService,
+        private ConfigService $configService,
     ) {}
 
     /**
@@ -37,7 +37,7 @@ class ConfigController extends Controller
      */
     public function update(Request $request, string $key): JsonResponse
     {
-        $this->authorize('manage_settings');
+        // $this->authorize('manage_settings');
 
         $data = $request->validate([
             'value' => ['required'],

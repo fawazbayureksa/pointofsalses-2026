@@ -12,7 +12,7 @@ use Illuminate\Support\Str;
 class OrderService
 {
     public function __construct(
-        private readonly InventoryService $inventoryService,
+        private InventoryService $inventoryService,
     ) {}
 
     /**

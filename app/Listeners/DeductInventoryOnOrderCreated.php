@@ -8,7 +8,7 @@ use App\Services\InventoryService;
 class DeductInventoryOnOrderCreated
 {
     public function __construct(
-        private readonly InventoryService $inventoryService,
+        private InventoryService $inventoryService,
     ) {}
 
     public function handle(OrderCreated $event): void

@@ -2,17 +2,17 @@
 
 namespace App\Listeners;
 
-use App\Events\OrderCreated;
+use Illuminate\Support\Facades\Auth;
 
 class LogOrderCreatedActivity
 {
-    public function handle(OrderCreated $event): void
+    public function handle($event): void
     {
         $order = $event->order;
-
+        $user = Auth::user();
         activity('pos')
             ->performedOn($order)
-            ->causedBy(auth()->user())
+            ->causedBy($user)
             ->withProperties([
                 'order_number' => $order->order_number,
                 'total_amount' => $order->total_amount,

@@ -11,7 +11,7 @@ use Illuminate\Validation\ValidationException;
 class PaymentService
 {
     public function __construct(
-        private readonly OrderService $orderService,
+        private OrderService $orderService,
     ) {}
 
     /**

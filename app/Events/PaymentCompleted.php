@@ -12,7 +12,7 @@ class PaymentCompleted
     use Dispatchable, SerializesModels;
 
     public function __construct(
-        public readonly Payment $payment,
-        public readonly Order $order,
+        public Payment $payment,
+        public Order $order,
     ) {}
 }

@@ -11,6 +11,6 @@ class OrderCreated
     use Dispatchable, SerializesModels;
 
     public function __construct(
-        public readonly Order $order,
+        public Order $order,
     ) {}
 }
