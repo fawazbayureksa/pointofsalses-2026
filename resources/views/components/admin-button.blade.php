@@ -25,11 +25,10 @@
     ];
 @endphp
 
-@if($href)
-    <a href="{{ $href }}" 
-       {{ $disabled ? 'tabindex="-1" class="opacity-50 cursor-not-allowed"' : '' }}
-       class="inline-flex items-center justify-center font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors {{ $variantClasses[$variant] }} {{ $sizeClasses[$size] }}">
-        @if($loading)
+@if ($href)
+    <a href="{{ $href }}" {{ $disabled ? 'tabindex="-1" class="opacity-50 cursor-not-allowed"' : '' }}
+        {{ $attributes->merge(['class' => 'inline-flex items-center justify-center font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors ' . $variantClasses[$variant] . ' ' . $sizeClasses[$size]]) }}>
+        @if ($loading)
             <i class="fa-solid fa-circle-notch fa-spin mr-2"></i>
         @elseif($icon)
             <i class="{{ $icon }} mr-2"></i>
@@ -37,11 +36,9 @@
         {{ $slot }}
     </a>
 @else
-    <button type="{{ $type }}" 
-            {{ $disabled ? 'disabled' : '' }}
-            {{ $loading ? 'disabled' : '' }}
-            class="inline-flex items-center justify-center font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors {{ $variantClasses[$variant] }} {{ $sizeClasses[$size] }} {{ $disabled || $loading ? 'opacity-50 cursor-not-allowed' : '' }}">
-        @if($loading)
+    <button type="{{ $type }}" {{ $disabled ? 'disabled' : '' }} {{ $loading ? 'disabled' : '' }}
+        {{ $attributes->merge(['class' => 'inline-flex items-center justify-center font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors ' . $variantClasses[$variant] . ' ' . $sizeClasses[$size] . ($disabled || $loading ? ' opacity-50 cursor-not-allowed' : '')]) }}>
+        @if ($loading)
             <i class="fa-solid fa-circle-notch fa-spin mr-2"></i>
         @elseif($icon)
             <i class="{{ $icon }} mr-2"></i>

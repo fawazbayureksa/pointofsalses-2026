@@ -25,9 +25,8 @@ class UserSeeder extends Seeder
 
         // If called outside a tenant context (e.g. php artisan db:seed --class=UserSeeder),
         // auto-initialize the first available tenant.
-        if (! tenancy()->initialized) {
-            $tenant = Tenant::first();
-
+        if (!tenancy()->initialized) {
+            $tenant = Tenant::latest()->first();
             if (! $tenant) {
                 $this->command->error('No tenants found. Run TenantSeeder first.');
                 return;

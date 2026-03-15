@@ -11,7 +11,7 @@ class TenantController extends Controller
 {
     public function index()
     {
-        $tenants = Tenant::latest()->paginate(15);
+        $tenants = Tenant::with('domains')->latest()->paginate(15);
         return view('admin.tenants.index', compact('tenants'));
     }
 
