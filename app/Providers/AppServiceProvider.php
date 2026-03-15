@@ -23,14 +23,12 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(
             OrderService::class,
-            fn($app) =>
-            new OrderService($app->make(InventoryService::class))
+            fn ($app) => new OrderService($app->make(InventoryService::class))
         );
 
         $this->app->singleton(
             PaymentService::class,
-            fn($app) =>
-            new PaymentService($app->make(OrderService::class))
+            fn ($app) => new PaymentService($app->make(OrderService::class))
         );
     }
 

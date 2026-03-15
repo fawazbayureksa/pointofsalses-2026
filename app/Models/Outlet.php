@@ -11,7 +11,6 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class Outlet extends Model
 {
     use SoftDeletes, LogsActivity;
-
     protected $fillable = [
         'tenant_id',
         'name',
@@ -22,11 +21,16 @@ class Outlet extends Model
         'city',
         'state',
         'country',
+        'currency',
+        'timezone',
         'is_active',
+        'logo',
+        'settings',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'settings'  => 'array',
     ];
 
     // -------------------------------------------------------------------------

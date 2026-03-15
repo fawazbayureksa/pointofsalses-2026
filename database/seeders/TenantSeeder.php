@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Outlet;
 use App\Models\Tenant;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Seeds a demo tenant with its entire stack:
@@ -20,20 +21,29 @@ class TenantSeeder extends Seeder
     public function run(): void
     {
         // ── 1. Create the tenant in the central DB ────────────────────────────
-        /** @var Tenant $tenant */
-        $tenant = Tenant::firstOrCreate(
-            ['slug' => 'demo'],
-            [
-                'name'          => 'Demo Store',
-                'slug'          => 'demo',
-                'business_type' => 'retail',
-                'plan'          => 'professional',
-                'status'        => 'active',
-            ]
-        );
+        // Always create fresh so TenantCreated fires → CreateDatabase + MigrateDatabase run.
+        // If a stale record exists (e.g. from a prior run without migrate:fresh), delete it first.
+        Tenant::where('slug', 'demo')->each(fn($t) => $t->delete());
 
-        // Attach a domain (used for subdomain tenancy resolution)
-        $tenant->createDomain(['domain' => 'demo.localhost']);
+        // migrate:fresh only drops central tables; tenant MySQL databases persist on the server.
+        // Drop it explicitly so CreateDatabase doesn't throw TenantDatabaseAlreadyExistsException.
+        $dbName = config('tenancy.database.prefix', 'tenant') . 'demo' . config('tenancy.database.suffix', '');
+        DB::statement("DROP DATABASE IF EXISTS `{$dbName}`");
+
+        /** @var Tenant $tenant */
+        $tenant = Tenant::create([
+            'id'            => 'demo',
+            'name'          => 'Demo Store',
+            'slug'          => 'demo',
+            'business_type' => 'retail',
+            'plan'          => 'professional',
+            'status'        => 'active',
+        ]);
+
+        // Attach a domain only if it doesn't already exist.
+        if (! $tenant->domains()->where('domain', 'demo.localhost')->exists()) {
+            $tenant->createDomain(['domain' => 'demo.localhost']);
+        }
 
         // ── 2. Switch to tenant DB context ───────────────────────────────────
         tenancy()->initialize($tenant);

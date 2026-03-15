@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -14,7 +13,20 @@ use Spatie\Activitylog\Traits\CausesActivity;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens, HasRoles, SoftDeletes, CausesActivity;
+    use HasFactory, Notifiable, HasApiTokens, HasRoles, CausesActivity;
+
+    /**
+     * Tenant-scoped users live in each tenant's own database.
+     * The 'tenant' connection is configured dynamically by stancl/tenancy
+     * via DatabaseTenancyBootstrapper when tenancy()->initialize() is called.
+     */
+    // protected $connection = 'tenant';
+
+    /**
+     * Spatie permissions guard name.
+     * Must match the guard used to authenticate tenant users.
+     */
+    protected $guard_name = 'web';
 
     protected $fillable = [
         'tenant_id',

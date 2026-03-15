@@ -12,13 +12,15 @@ class Customer extends Model
 
     protected $fillable = [
         'tenant_id',
+        'customer_code',
         'name',
         'email',
         'phone',
         'address',
         'date_of_birth',
+        'gender',
         'loyalty_points',
-        'customer_code',
+        'status',
     ];
 
     protected $casts = [

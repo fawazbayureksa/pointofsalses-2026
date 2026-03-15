@@ -12,8 +12,11 @@ class OrderItem extends Model
         'order_id',
         'product_id',
         'product_name',
+        'product_sku',
         'unit_price',
+        'cost_price',
         'quantity',
+        'unit',
         'discount_amount',
         'tax_amount',
         'subtotal',
@@ -22,6 +25,7 @@ class OrderItem extends Model
 
     protected $casts = [
         'unit_price'      => 'decimal:2',
+        'cost_price'      => 'decimal:2',
         'quantity'        => 'decimal:3',
         'discount_amount' => 'decimal:2',
         'tax_amount'      => 'decimal:2',

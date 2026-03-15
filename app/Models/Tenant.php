@@ -21,13 +21,20 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         'id',
         'name',
         'slug',
+        'email',
+        'phone',
+        'contact_name',
         'business_type',
+        'logo',
+        'address',
         'plan',
         'status',
+        'trial_ends_at',
     ];
 
     protected $casts = [
-        'data' => 'array',
+        'data'          => 'array',
+        'trial_ends_at' => 'datetime',
     ];
 
     // -------------------------------------------------------------------------
@@ -39,9 +46,15 @@ class Tenant extends BaseTenant implements TenantWithDatabase
             'id',
             'name',
             'slug',
+            'email',
+            'phone',
+            'contact_name',
             'business_type',
+            'logo',
+            'address',
             'plan',
             'status',
+            'trial_ends_at',
         ];
     }
 

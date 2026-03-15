@@ -1,0 +1,14 @@
+@props(['tenant'])
+
+<div class="flex items-center justify-end space-x-2">
+    <a href="{{ route('admin.tenants.show', $tenant->id) }}" class="text-blue-600 hover:text-blue-900">
+        <i class="fa-solid fa-eye"></i>
+    </a>
+    <button @click="$dispatch('open-edit-modal', { id: {{ $tenant->id }} })" class="text-green-600 hover:text-green-900">
+        <i class="fa-solid fa-edit"></i>
+    </button>
+    <button @click="if(confirm('Are you sure you want to delete this tenant?')) window.location.href='{{ route('admin.tenants.destroy', $tenant->id) }}'" 
+            class="text-red-600 hover:text-red-900">
+        <i class="fa-solid fa-trash"></i>
+    </button>
+</div>

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\Setting;
 use App\Services\ConfigService;
 
 if (! function_exists('configService')) {
@@ -22,5 +23,25 @@ if (! function_exists('configService')) {
         }
 
         return $service;
+    }
+}
+
+if (! function_exists('setting')) {
+    /**
+     * Get a setting value from the database, with an optional default.
+     *
+     * Usage:
+     *   setting('app_name')           → 'My POS'
+     *   setting('timezone', 'UTC')    → 'UTC'
+     */
+    function setting(string $key, mixed $default = null): mixed
+    {
+        $record = Setting::where('key', $key)->first();
+
+        if (! $record) {
+            return $default;
+        }
+
+        return $record->getTypedValue() ?? $default;
     }
 }
