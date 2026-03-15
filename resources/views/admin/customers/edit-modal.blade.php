@@ -1,21 +1,34 @@
-<div x-data="{ open: false }" @open-edit-modal.window="open = true">
+<div x-data="{ open: false, currentId: null, record: {} }"
+     @open-edit-modal.window="
+        open = true;
+        currentId = $event.detail.id;
+        record = $event.detail;
+        $nextTick(() => {
+            $el.querySelectorAll('[name]').forEach(el => {
+                const v = record[el.name];
+                if (v === undefined) return;
+                if (el.tagName === 'SELECT') el.value = v ?? '';
+                else if (el.tagName === 'TEXTAREA') el.textContent = v ?? '';
+                else el.value = v ?? '';
+            });
+        })">
     <x-admin-modal id="edit-customer-modal" title="Edit Customer" size="lg">
-        <form method="POST" action="{{ route('admin.customers.update', request()->route('customer')) }}">
+        <form method="POST" :action="'{{ url('/admin/customers') }}/' + currentId">
             @csrf
             @method('PUT')
             
-            <x-admin-form-input name="name" label="Customer Name" required value="{{ old('name', $customer->name ?? '') }}" />
-            
+            <x-admin-form-input name="name" label="Customer Name" required value="" />
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <x-admin-form-input name="email" label="Email" type="email" value="{{ old('email', $customer->email ?? '') }}" />
-                <x-admin-form-input name="phone" label="Phone" type="tel" value="{{ old('phone', $customer->phone ?? '') }}" />
+                <x-admin-form-input name="email" label="Email" type="email" value="" />
+                <x-admin-form-input name="phone" label="Phone" type="tel" value="" />
             </div>
-            
-            <x-admin-form-input name="address" label="Address" type="textarea" value="{{ old('address', $customer->address ?? '') }}" />
-            
+
+            <x-admin-form-input name="address" label="Address" type="textarea" value="" />
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <x-admin-form-input name="status" label="Status" type="select" :options="['active' => 'Active', 'inactive' => 'Inactive']" value="{{ old('status', $customer->status ?? 'active') }}" />
-                <x-admin-form-input name="notes" label="Notes" type="textarea" value="{{ old('notes', $customer->notes ?? '') }}" />
+                <x-admin-form-input name="gender" label="Gender" type="select" :options="['' => 'Select', 'male' => 'Male', 'female' => 'Female']" value="" />
+                <x-admin-form-input name="status" label="Status" type="select" :options="['active' => 'Active', 'inactive' => 'Inactive']" value="" />
             </div>
             
             <div class="flex items-center justify-end space-x-3 mt-6">

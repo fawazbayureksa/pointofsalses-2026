@@ -1,3 +1,4 @@
+
 <div x-data="{ open: false }" @open-show-modal.window="open = true">
     <x-admin-modal id="show-order-modal" title="Order Details" size="xl">
         <div class="space-y-6">

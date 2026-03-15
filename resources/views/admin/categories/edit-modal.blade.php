@@ -1,19 +1,35 @@
-<div x-data="{ open: false }" @open-edit-modal.window="open = true">
+<div x-data="{ open: false, currentId: null, record: {} }"
+     @open-edit-modal.window="
+        open = true;
+        currentId = $event.detail.id;
+        record = $event.detail;
+        $nextTick(() => {
+            $el.querySelectorAll('[name]').forEach(el => {
+                const v = record[el.name];
+                if (v === undefined) return;
+                if (el.tagName === 'SELECT') el.value = v ?? '';
+                else if (el.tagName === 'TEXTAREA') el.textContent = v ?? '';
+                else el.value = v ?? '';
+            });
+        })">
     <x-admin-modal id="edit-category-modal" title="Edit Category" size="lg">
-        <form method="POST" action="{{ route('admin.categories.update', request()->route('category')) }}">
+        <form method="POST" :action="'{{ url('/admin/categories') }}/' + currentId">
             @csrf
             @method('PUT')
             
-            <x-admin-form-input name="name" label="Category Name" required value="{{ old('name', $category->name ?? '') }}" />
-            
-            <x-admin-form-input name="slug" label="Slug" value="{{ old('slug', $category->slug ?? '') }}" />
-            
-            <x-admin-form-input name="description" label="Description" type="textarea" value="{{ old('description', $category->description ?? '') }}" />
-            
-            <x-admin-form-input name="parent_id" label="Parent Category" type="select" :options="['' => 'No Parent']" value="{{ old('parent_id', $category->parent_id ?? '') }}" />
-            
-            <x-admin-form-input name="status" label="Status" type="select" :options="['active' => 'Active', 'inactive' => 'Inactive']" value="{{ old('status', $category->status ?? 'active') }}" />
-            
+            <x-admin-form-input name="name" label="Category Name" required value="" />
+
+            <x-admin-form-input name="slug" label="Slug" value="" />
+
+            <x-admin-form-input name="description" label="Description" type="textarea" value="" />
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <x-admin-form-input name="parent_id" label="Parent Category" type="select" :options="['' => 'No Parent']" value="" />
+                <x-admin-form-input name="sort_order" label="Sort Order" type="number" value="" />
+            </div>
+
+            <x-admin-form-input name="is_active" label="Status" type="select" :options="[1 => 'Active', 0 => 'Inactive']" value="" />
+
             <x-admin-form-input name="image" label="Category Image" type="file" />
             
             <div class="flex items-center justify-end space-x-3 mt-6">

@@ -5,7 +5,15 @@
         <i class="fa-solid fa-eye"></i>
     </a>
     @can('edit customers')
-        <button @click="$dispatch('open-edit-modal', { id: {{ $customer->id }} })" class="text-green-600 hover:text-green-900">
+        <button @click="$dispatch('open-edit-modal', {
+            id: {{ $customer->id }},
+            name: @json($customer->name),
+            email: @json($customer->email),
+            phone: @json($customer->phone),
+            address: @json($customer->address),
+            gender: @json($customer->gender),
+            status: @json($customer->status)
+        })" class="text-green-600 hover:text-green-900">
             <i class="fa-solid fa-edit"></i>
         </button>
     @endcan

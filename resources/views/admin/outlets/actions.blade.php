@@ -5,7 +5,20 @@
         <i class="fa-solid fa-eye"></i>
     </a>
     @can('edit outlets')
-        <button @click="$dispatch('open-edit-modal', { id: {{ $outlet->id }} })" class="text-green-600 hover:text-green-900">
+        <button @click="$dispatch('open-edit-modal', {
+            id: {{ $outlet->id }},
+            name: @json($outlet->name),
+            code: @json($outlet->code),
+            phone: @json($outlet->phone),
+            email: @json($outlet->email),
+            address: @json($outlet->address),
+            city: @json($outlet->city),
+            state: @json($outlet->state),
+            country: @json($outlet->country),
+            currency: @json($outlet->currency),
+            timezone: @json($outlet->timezone),
+            is_active: {{ $outlet->is_active ? 1 : 0 }}
+        })" class="text-green-600 hover:text-green-900">
             <i class="fa-solid fa-edit"></i>
         </button>
     @endcan

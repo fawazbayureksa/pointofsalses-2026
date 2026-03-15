@@ -90,5 +90,5 @@
 </div>
 
 @include('admin.orders.create-modal')
-@include('admin.orders.show-modal')
+{{-- @include('admin.orders.show-modal') --}}
 @endsection
