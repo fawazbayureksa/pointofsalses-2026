@@ -39,7 +39,7 @@ Route::middleware([
 ])->group(function () {
 
     Route::get('/', function () {
-        return redirect()->route('admin.dashboard');
+        return redirect('/admin/dashboard');
     });
 
     // -------------------------------------------------------------------------

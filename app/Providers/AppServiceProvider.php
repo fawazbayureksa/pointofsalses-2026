@@ -6,6 +6,8 @@ use App\Services\ConfigService;
 use App\Services\InventoryService;
 use App\Services\OrderService;
 use App\Services\PaymentService;
+use Illuminate\Auth\Middleware\Authenticate;
+use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Permission\Models\Permission;
@@ -23,17 +25,23 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(
             OrderService::class,
-            fn ($app) => new OrderService($app->make(InventoryService::class))
+            fn($app) => new OrderService($app->make(InventoryService::class))
         );
 
         $this->app->singleton(
             PaymentService::class,
-            fn ($app) => new PaymentService($app->make(OrderService::class))
+            fn($app) => new PaymentService($app->make(OrderService::class))
         );
     }
 
     public function boot(): void
     {
+        // Use path-only redirects so auth middleware never crosses tenant domains.
+        // route('login') resolves to the central domain (127.0.0.1); using '/login'
+        // keeps the redirect on whichever domain the request came in on.
+        Authenticate::redirectUsing(fn() => '/login');
+        RedirectIfAuthenticated::redirectUsing(fn() => '/admin/dashboard');
+
         // Spatie Permission registers a Gate for every permission automatically
         // via its own ServiceProvider. This "before" callback grants super_admin
         // access to everything without needing individual permission checks.

@@ -34,6 +34,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('admin.dashboard'));
+        return redirect('/admin/dashboard');
     }
 }
