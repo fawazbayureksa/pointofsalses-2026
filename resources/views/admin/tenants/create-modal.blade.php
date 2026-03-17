@@ -23,6 +23,20 @@
 
             <x-admin-form-input name="address" label="Address" type="textarea" placeholder="Enter full address" />
 
+            <hr class="my-4 border-gray-200">
+            <p class="text-sm font-semibold text-gray-700 mb-3">Admin Account</p>
+
+            <x-admin-form-input name="admin_name" label="Admin Name" required placeholder="Enter admin name" />
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <x-admin-form-input name="admin_email" label="Admin Email" type="email" required placeholder="admin@tenant.com" />
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <x-admin-form-input name="admin_password" label="Admin Password" type="password" required placeholder="Min. 8 characters" />
+                <x-admin-form-input name="admin_password_confirmation" label="Confirm Password" type="password" required placeholder="Repeat password" />
+            </div>
+
             <div class="flex items-center justify-end space-x-3 mt-6">
                 <button type="button" @click="open = false"
                     class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
