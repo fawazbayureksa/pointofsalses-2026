@@ -47,7 +47,7 @@
             <x-admin-table :headers="[
                 ['label' => 'ID', 'key' => 'id'],
                 ['label' => 'Name', 'key' => 'name'],
-                ['label' => 'Domain', 'slot' => fn($t) => $t->domains->first()?->domain ?? '-'],
+                ['label' => 'Slug', 'key' => 'slug'],
                 ['label' => 'Plan', 'key' => 'plan'],
                 ['label' => 'Status', 'key' => 'status'],
                 ['label' => 'Created At', 'key' => 'created_at'],

@@ -64,16 +64,18 @@
                             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                             <i class="fa-solid fa-user mr-2"></i> Profile
                         </a>
-                        <a href="{{ route('admin.settings.index') }}"
+                        {{-- <a href="{{ route('admin.settings.index') }}"
                             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                             <i class="fa-solid fa-gear mr-2"></i> Settings
-                        </a>
-                        @if (tenancy()->initialized)
+                        </a> --}}
+                        {{-- @if (tenancy()->initialized) --}}
+                        @if (Auth::user()->tenant)
                             <div class="px-4 py-2 text-xs text-gray-500 border-t border-gray-100">
-                                <p class="font-medium">Current Tenant:</p>
-                                <p>{{ tenancy()->tenant->name }}</p>
+                                <p class="font-medium">Tenant:</p>
+                                <p>{{ Auth::user()->tenant->name }}</p>
                             </div>
                         @endif
+                        {{-- @endif --}}
                         <div class="border-t border-gray-200 mt-2 pt-2">
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf

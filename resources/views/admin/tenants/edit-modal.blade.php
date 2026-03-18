@@ -20,7 +20,7 @@
             <x-admin-form-input name="name" label="Tenant Name" required placeholder="Enter tenant name" />
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <x-admin-form-input name="domain" label="Domain" required placeholder="example.localhost" />
+                <x-admin-form-input name="slug" label="Slug" required placeholder="my-tenant" />
                 <x-admin-form-input name="email" label="Email" type="email" placeholder="admin@example.com" />
             </div>
 

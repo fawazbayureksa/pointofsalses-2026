@@ -6,7 +6,7 @@
             <x-admin-form-input name="name" label="Tenant Name" required placeholder="Enter tenant name" />
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <x-admin-form-input name="domain" label="Domain" required placeholder="example.com" />
+                <x-admin-form-input name="slug" label="Slug" required placeholder="my-tenant" />
                 <x-admin-form-input name="email" label="Email" type="email" required
                     placeholder="admin@example.com" />
             </div>
@@ -29,12 +29,15 @@
             <x-admin-form-input name="admin_name" label="Admin Name" required placeholder="Enter admin name" />
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <x-admin-form-input name="admin_email" label="Admin Email" type="email" required placeholder="admin@tenant.com" />
+                <x-admin-form-input name="admin_email" label="Admin Email" type="email" required
+                    placeholder="admin@tenant.com" />
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <x-admin-form-input name="admin_password" label="Admin Password" type="password" required placeholder="Min. 8 characters" />
-                <x-admin-form-input name="admin_password_confirmation" label="Confirm Password" type="password" required placeholder="Repeat password" />
+                <x-admin-form-input name="admin_password" label="Admin Password" type="password" required
+                    placeholder="Min. 8 characters" />
+                <x-admin-form-input name="admin_password_confirmation" label="Confirm Password" type="password" required
+                    placeholder="Repeat password" />
             </div>
 
             <div class="flex items-center justify-end space-x-3 mt-6">

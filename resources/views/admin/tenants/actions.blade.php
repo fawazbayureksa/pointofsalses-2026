@@ -8,7 +8,7 @@
         @click="$dispatch('open-edit-modal', {
         id: @json($tenant->id),
         name: @json($tenant->name),
-        domain: @json($tenant->domains->first()?->domain ?? ''),
+        slug: @json($tenant->slug ?? ''),
         email: @json($tenant->email ?? ''),
         phone: @json($tenant->phone ?? ''),
         status: @json($tenant->status ?? 'active'),

@@ -1,10 +1,10 @@
-aaq1<?php
+<?php
 
-    use App\Models\User;
+use App\Models\User;
 
-    return [
+return [
 
-        /*
+    /*
     |--------------------------------------------------------------------------
     | Authentication Defaults
     |--------------------------------------------------------------------------
@@ -15,12 +15,12 @@ aaq1<?php
     |
     */
 
-        'defaults' => [
-            'guard' => env('AUTH_GUARD', 'web'),
-            'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
-        ],
+    'defaults' => [
+        'guard' => env('AUTH_GUARD', 'web'),
+        'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
+    ],
 
-        /*
+    /*
     |--------------------------------------------------------------------------
     | Authentication Guards
     |--------------------------------------------------------------------------
@@ -37,14 +37,14 @@ aaq1<?php
     |
     */
 
-        'guards' => [
-            'web' => [
-                'driver' => 'session',
-                'provider' => 'users',
-            ],
+    'guards' => [
+        'web' => [
+            'driver' => 'session',
+            'provider' => 'users',
         ],
+    ],
 
-        /*
+    /*
     |--------------------------------------------------------------------------
     | User Providers
     |--------------------------------------------------------------------------
@@ -61,19 +61,19 @@ aaq1<?php
     |
     */
 
-        'providers' => [
-            'users' => [
-                'driver' => 'eloquent',
-                'model' => env('AUTH_MODEL', User::class),
-            ],
-
-            // 'users' => [
-            //     'driver' => 'database',
-            //     'table' => 'users',
-            // ],
+    'providers' => [
+        'users' => [
+            'driver' => 'eloquent',
+            'model' => env('AUTH_MODEL', User::class),
         ],
 
-        /*
+        // 'users' => [
+        //     'driver' => 'database',
+        //     'table' => 'users',
+        // ],
+    ],
+
+    /*
     |--------------------------------------------------------------------------
     | Resetting Passwords
     |--------------------------------------------------------------------------
@@ -92,16 +92,16 @@ aaq1<?php
     |
     */
 
-        'passwords' => [
-            'users' => [
-                'provider' => 'users',
-                'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
-                'expire' => 60,
-                'throttle' => 60,
-            ],
+    'passwords' => [
+        'users' => [
+            'provider' => 'users',
+            'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
+            'expire' => 60,
+            'throttle' => 60,
         ],
+    ],
 
-        /*
+    /*
     |--------------------------------------------------------------------------
     | Password Confirmation Timeout
     |--------------------------------------------------------------------------
@@ -112,6 +112,6 @@ aaq1<?php
     |
     */
 
-        'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
+    'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
-    ];
+];

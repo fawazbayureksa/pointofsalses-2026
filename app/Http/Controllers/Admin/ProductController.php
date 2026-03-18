@@ -6,13 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Outlet;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 class ProductController extends Controller
 {
     public function index()
     {
+        $categories = \App\Models\Category::where('is_active', true)->get();
         $products = Product::with(['category', 'outlets'])->latest()->paginate(15);
-        return view('admin.products.index', compact('products'));
+        return view('admin.products.index', compact('products', 'categories'));
     }
 
     public function create()
@@ -28,7 +30,7 @@ class ProductController extends Controller
             'sku'                 => 'nullable|string|max:100',
             'barcode'             => 'nullable|string|max:100',
             'description'         => 'nullable|string',
-            'category'            => 'nullable|string|max:100',
+            'category_id'         => 'nullable|exists:categories,id',
             'price'               => 'required|numeric|min:0',
             'cost_price'          => 'nullable|numeric|min:0',
             'stock'               => 'nullable|numeric|min:0',
@@ -44,7 +46,18 @@ class ProductController extends Controller
             $validated['image'] = $request->file('image')->store('products', 'public');
         }
 
-        Product::create($validated);
+        $outletId = $validated['outlet_id'] ?? null;
+        $stock = $validated['stock'] ?? 0;
+        $threshold = $validated['low_stock_threshold'] ?? 0;
+
+        $product = Product::create(\Arr::except($validated, ['outlet_id', 'stock', 'low_stock_threshold']));
+
+        if ($outletId) {
+            $product->outlets()->attach($outletId, [
+                'stock'               => $stock,
+                'low_stock_threshold' => $threshold,
+            ]);
+        }
 
         return redirect()->route('admin.products.index')->with('success', 'Product created successfully.');
     }
@@ -67,15 +80,12 @@ class ProductController extends Controller
             'sku'                 => 'nullable|string|max:100',
             'barcode'             => 'nullable|string|max:100',
             'description'         => 'nullable|string',
-            'category'            => 'nullable|string|max:100',
+            'category_id'         => 'nullable|exists:categories,id',
             'price'               => 'required|numeric|min:0',
             'cost_price'          => 'nullable|numeric|min:0',
-            'stock'               => 'nullable|numeric|min:0',
-            'low_stock_threshold' => 'nullable|numeric|min:0',
             'unit'                => 'nullable|string|max:20',
             'is_active'           => 'boolean',
             'track_stock'         => 'boolean',
-            'outlet_id'           => 'nullable|exists:outlets,id',
             'image'               => 'nullable|image|max:2048',
         ]);
 

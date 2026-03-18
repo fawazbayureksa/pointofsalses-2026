@@ -50,5 +50,17 @@ Route::middleware(['auth'])
         Route::resource('customers', \App\Http\Controllers\Admin\CustomerController::class);
         Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class);
 
+        Route::middleware('can:manage users')->group(function () {
+            Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
+            Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class);
+            Route::resource('permissions', \App\Http\Controllers\Admin\PermissionController::class);
+        });
+
+        Route::middleware('can:view activity logs')->prefix('logs')->name('logs.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\ActivityLogController::class, 'index'])->name('index');
+            Route::get('/export', [\App\Http\Controllers\Admin\ActivityLogController::class, 'export'])->name('export');
+            Route::delete('/clear', [\App\Http\Controllers\Admin\ActivityLogController::class, 'clear'])->name('clear');
+        });
+
         Route::fallback(fn() => response()->view('errors.404', [], 404));
     });

@@ -68,7 +68,7 @@ class TenantController extends Controller
 
     public function show(Tenant $tenant)
     {
-        $tenant->load(['users', 'outlets']);
+        $tenant->load(['users.roles', 'outlets']);
         return view('admin.tenants.show', compact('tenant'));
     }
 
