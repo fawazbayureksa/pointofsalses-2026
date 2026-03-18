@@ -12,6 +12,7 @@ class Setting extends Model
         'value',
         'type',
         'is_public',
+        'group',
     ];
 
     protected $casts = [

@@ -1,0 +1,38 @@
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Tenant-scoped activity log table.
+     * In the multi-DB setup, each tenant gets their own activity_log records.
+     */
+    public function up(): void
+    {
+        Schema::create('activity_log', function (Blueprint $table) {
+            $table->id();
+            $table->string('log_name')->nullable();
+            $table->text('description');
+            $table->string('event')->nullable();
+            $table->nullableMorphs('subject', 'subject');
+            $table->nullableMorphs('causer', 'causer');
+            $table->string('tenant_id')->nullable();
+            $table->json('properties')->nullable();
+            $table->uuid('batch_uuid')->nullable();
+            $table->timestamps();
+
+            $table->index('log_name');
+            $table->index('tenant_id');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('activity_log');
+    }
+};

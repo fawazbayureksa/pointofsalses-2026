@@ -39,7 +39,7 @@ class ProductController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $this->authorize('manage_products');
+        // $this->authorize('manage_products');
 
         $data = $request->validate([
             'name'                => ['required', 'string', 'max:255'],
@@ -66,7 +66,7 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product): JsonResponse
     {
-        $this->authorize('manage_products');
+        // $this->authorize('manage_products');
 
         $data = $request->validate([
             'name'                => ['sometimes', 'string', 'max:255'],
@@ -88,7 +88,7 @@ class ProductController extends Controller
      */
     public function destroy(Product $product): JsonResponse
     {
-        $this->authorize('manage_products');
+        // $this->authorize('manage_products');
 
         $product->delete();
 

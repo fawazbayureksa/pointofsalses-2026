@@ -7,16 +7,23 @@ use Illuminate\Database\Seeder;
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Seed the application – central DB first, then demo tenant.
+     * Seed the application.
      *
-     * Run all:          php artisan db:seed
-     * Tenant only:      php artisan db:seed --class=TenantSeeder
-     * Permissions only: php artisan db:seed --class=RolesAndPermissionsSeeder
+     * Run all (central + demo tenant): php artisan db:seed
+     * Specific tenant:                php artisan tenants:seed --tenants=<id>
      */
     public function run(): void
     {
-        // Seeds a demo tenant including its DB, roles, settings, users, and outlet.
-        // Remove or comment this line in production; provision tenants via the admin panel.
-        $this->call(TenantSeeder::class);
+        if (tenancy()->initialized) {
+            // Called via `php artisan tenants:seed` — tenant DB is already active.
+            $this->call([
+                RolesAndPermissionsSeeder::class,
+                TenantDefaultSettingsSeeder::class,
+                UserSeeder::class,
+            ]);
+        } else {
+            // Called via `php artisan db:seed` — seed the demo tenant from scratch.
+            $this->call(TenantSeeder::class);
+        }
     }
 }

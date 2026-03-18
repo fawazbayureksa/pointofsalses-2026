@@ -16,11 +16,11 @@ class Product extends Model
     protected $fillable = [
         'tenant_id',
         'outlet_id',
+        'category_id',
         'name',
         'sku',
         'barcode',
         'description',
-        'category',
         'price',
         'cost_price',
         'stock',
@@ -59,6 +59,11 @@ class Product extends Model
     public function outlet(): BelongsTo
     {
         return $this->belongsTo(Outlet::class);
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
     }
 
     public function orderItems(): HasMany

@@ -20,6 +20,7 @@ class Payment extends Model
         'status',
         'reference_number',
         'metadata',
+        'notes',
         'paid_at',
     ];
 

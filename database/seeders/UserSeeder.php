@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -9,15 +10,32 @@ use Illuminate\Database\Seeder;
  * Seeds default users inside a tenant database context.
  * Must be called after RolesAndPermissionsSeeder.
  *
- * Usage from TenantSeeder:
+ * Usage from TenantSeeder (recommended):
  *   tenancy()->initialize($tenant);
- *   (new RolesAndPermissionsSeeder)->run();
- *   (new UserSeeder)->run();
+ *   $this->call([RolesAndPermissionsSeeder::class, UserSeeder::class]);
+ *
+ * Or standalone (initializes the first/only tenant automatically):
+ *   php artisan db:seed --class=UserSeeder
  */
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
+        $endAfter = false;
+
+        // If called outside a tenant context (e.g. php artisan db:seed --class=UserSeeder),
+        // auto-initialize the first available tenant.
+        if (!tenancy()->initialized) {
+            $tenant = Tenant::latest()->first();
+            if (! $tenant) {
+                $this->command->error('No tenants found. Run TenantSeeder first.');
+                return;
+            }
+
+            tenancy()->initialize($tenant);
+            $endAfter = true;
+        }
+
         $tenantId = tenant('id');
 
         // Tenant Admin
@@ -57,5 +75,9 @@ class UserSeeder extends Seeder
         $cashier->assignRole('cashier');
 
         $this->command->info("Users seeded for tenant: {$tenantId}");
+
+        if ($endAfter) {
+            tenancy()->end();
+        }
     }
 }
