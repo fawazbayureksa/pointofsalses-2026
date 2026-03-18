@@ -43,9 +43,12 @@ class UserController extends Controller
             'email'     => $validated['email'],
             'password'  => Hash::make($validated['password']),
             'phone'     => $validated['phone'] ?? null,
-            'outlet_id' => $validated['outlet_id'] ?? null,
             'is_active' => $validated['is_active'] ?? true,
         ]);
+
+        if (!empty($validated['outlet_id'])) {
+            $user->outlets()->attach($validated['outlet_id'], ['is_default' => true]);
+        }
 
         if (!empty($validated['role'])) {
             $user->assignRole($validated['role']);
@@ -81,9 +84,16 @@ class UserController extends Controller
             'name'      => $validated['name'],
             'email'     => $validated['email'],
             'phone'     => $validated['phone'] ?? null,
-            'outlet_id' => $validated['outlet_id'] ?? null,
             'is_active' => $validated['is_active'] ?? true,
         ]);
+
+        if (!empty($validated['outlet_id'])) {
+            $defaultOutlet = $user->outlets()->wherePivot('is_default', true)->first();
+            if ($defaultOutlet) {
+                $user->outlets()->updateExistingPivot($defaultOutlet->id, ['is_default' => false]);
+            }
+            $user->outlets()->syncWithoutDetaching([$validated['outlet_id'] => ['is_default' => true]]);
+        }
 
         if (!empty($validated['role'])) {
             $user->syncRoles([$validated['role']]);

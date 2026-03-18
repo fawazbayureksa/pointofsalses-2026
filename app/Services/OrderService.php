@@ -6,8 +6,8 @@ use App\Events\OrderCreated;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class OrderService
 {
@@ -31,11 +31,12 @@ class OrderService
     public function create(array $payload, int $userId): Order
     {
         return DB::transaction(function () use ($payload, $userId) {
-            // Validate stock before creating
-            $this->inventoryService->validateStockForItems($payload['items']);
+            $this->inventoryService->validateStockForItems(
+                $payload['items'],
+                $payload['outlet_id']
+            );
 
             $order = Order::create([
-                'tenant_id'    => tenant('id'),
                 'outlet_id'    => $payload['outlet_id'],
                 'user_id'      => $userId,
                 'customer_id'  => $payload['customer_id'] ?? null,
@@ -53,9 +54,6 @@ class OrderService
         });
     }
 
-    /**
-     * Cancel an existing order and restore stock.
-     */
     public function cancel(Order $order, string $reason = ''): Order
     {
         DB::transaction(function () use ($order, $reason) {
@@ -70,9 +68,6 @@ class OrderService
         return $order->refresh();
     }
 
-    /**
-     * Mark order as completed after successful payment.
-     */
     public function complete(Order $order): Order
     {
         $order->update([
@@ -83,9 +78,7 @@ class OrderService
         return $order->refresh();
     }
 
-    // -------------------------------------------------------------------------
-    // Private helpers
-    // -------------------------------------------------------------------------
+    // ─── Private helpers ─────────────────────────────────────────────────────
 
     private function attachItems(Order $order, array $items): void
     {
@@ -95,29 +88,29 @@ class OrderService
             $unitPrice      = $product->price;
             $quantity       = (float) $item['quantity'];
             $discountAmount = (float) ($item['discount_amount'] ?? 0);
-
-            $subtotal = ($unitPrice * $quantity) - $discountAmount;
+            $subtotal       = ($unitPrice * $quantity) - $discountAmount;
 
             OrderItem::create([
-                'tenant_id'       => tenant('id'),
                 'order_id'        => $order->id,
                 'product_id'      => $product->id,
                 'product_name'    => $product->name,
+                'product_sku'     => $product->sku ?? '',
                 'unit_price'      => $unitPrice,
+                'cost_price'      => $product->cost_price,
                 'quantity'        => $quantity,
                 'discount_amount' => $discountAmount,
-                'tax_amount'      => 0, // tax is calculated at order level
+                'tax_amount'      => 0,
                 'subtotal'        => $subtotal,
-                'metadata'        => ['sku' => $product->sku, 'category' => $product->category],
             ]);
         }
     }
 
     private function generateOrderNumber(): string
     {
-        $prefix = strtoupper(substr(tenant('id'), 0, 3));
-        $date   = now()->format('Ymd');
-        $seq    = str_pad((string) (Order::whereDate('created_at', today())->count() + 1), 4, '0', STR_PAD_LEFT);
+        $tenantId = Auth::user()->tenant_id ?? 'SA';
+        $prefix   = strtoupper(substr((string) $tenantId, 0, 3));
+        $date     = now()->format('Ymd');
+        $seq      = str_pad((string) (Order::whereDate('created_at', today())->count() + 1), 4, '0', STR_PAD_LEFT);
 
         return "{$prefix}-{$date}-{$seq}";
     }

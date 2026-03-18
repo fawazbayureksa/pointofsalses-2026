@@ -16,7 +16,7 @@ class LogStockUpdatedActivity
                 'change'       => $event->stockAfter - $event->stockBefore,
                 'reason'       => $event->reason,
                 'notes'        => $event->notes,
-                'tenant_id'    => tenant('id'),
+                'tenant_id'    => auth()->user()?->tenant_id,
             ])
             ->log('stock_updated');
     }

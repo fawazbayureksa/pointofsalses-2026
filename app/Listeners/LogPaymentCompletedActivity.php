@@ -18,7 +18,7 @@ class LogPaymentCompletedActivity
                 'order_number'   => $order->order_number,
                 'payment_method' => $payment->payment_method,
                 'amount'         => $payment->amount,
-                'tenant_id'      => tenant('id'),
+                'tenant_id'      => auth()->user()?->tenant_id,
             ])
             ->log('payment_completed');
     }

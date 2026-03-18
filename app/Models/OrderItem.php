@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class OrderItem extends Model
 {
     protected $fillable = [
-        'tenant_id',
         'order_id',
         'product_id',
         'product_name',
@@ -16,11 +15,9 @@ class OrderItem extends Model
         'unit_price',
         'cost_price',
         'quantity',
-        'unit',
         'discount_amount',
         'tax_amount',
         'subtotal',
-        'metadata',
     ];
 
     protected $casts = [
@@ -30,12 +27,7 @@ class OrderItem extends Model
         'discount_amount' => 'decimal:2',
         'tax_amount'      => 'decimal:2',
         'subtotal'        => 'decimal:2',
-        'metadata'        => 'array',
     ];
-
-    // -------------------------------------------------------------------------
-    // Relationships
-    // -------------------------------------------------------------------------
 
     public function order(): BelongsTo
     {
@@ -45,14 +37,5 @@ class OrderItem extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
-    }
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    public function calculateSubtotal(): float
-    {
-        return ($this->unit_price * $this->quantity) - $this->discount_amount + $this->tax_amount;
     }
 }

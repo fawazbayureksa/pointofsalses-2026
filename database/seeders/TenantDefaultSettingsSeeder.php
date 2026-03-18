@@ -3,30 +3,36 @@
 namespace Database\Seeders;
 
 use App\Models\Setting;
+use App\Models\Tenant;
 use Illuminate\Database\Seeder;
 
 class TenantDefaultSettingsSeeder extends Seeder
 {
     private array $defaults = [
-        ['key' => 'currency',        'value' => 'IDR',                          'type' => 'string',  'is_public' => true],
-        ['key' => 'tax_rate',        'value' => '11',                           'type' => 'integer', 'is_public' => false],
-        ['key' => 'receipt_footer',  'value' => 'Thank you for your purchase!', 'type' => 'string',  'is_public' => true],
-        ['key' => 'timezone',        'value' => 'Asia/Jakarta',                 'type' => 'string',  'is_public' => true],
-        ['key' => 'date_format',     'value' => 'd/m/Y',                        'type' => 'string',  'is_public' => true],
-        ['key' => 'low_stock_alert', 'value' => 'true',                         'type' => 'boolean', 'is_public' => false],
+        'currency'        => ['value' => 'IDR',                         'type' => 'string'],
+        'tax_rate'        => ['value' => '11',                          'type' => 'integer'],
+        'receipt_footer'  => ['value' => 'Thank you for your purchase!', 'type' => 'string'],
+        'timezone'        => ['value' => 'Asia/Jakarta',                 'type' => 'string'],
+        'date_format'     => ['value' => 'd/m/Y',                        'type' => 'string'],
+        'low_stock_alert' => ['value' => 'true',                         'type' => 'boolean'],
     ];
 
     public function run(): void
     {
-        $tenantId = tenant('id');
-
-        foreach ($this->defaults as $setting) {
-            Setting::firstOrCreate(
-                ['tenant_id' => $tenantId, 'key' => $setting['key']],
-                array_merge($setting, ['tenant_id' => $tenantId]),
-            );
+        foreach (Tenant::all() as $tenant) {
+            foreach ($this->defaults as $key => $config) {
+                Setting::firstOrCreate(
+                    ['tenant_id' => $tenant->id, 'key' => $key],
+                    [
+                        'value'     => $config['value'],
+                        'type'      => $config['type'],
+                        'is_public' => false,
+                        'group'     => 'general',
+                    ]
+                );
+            }
         }
 
-        $this->command->info('Default tenant settings seeded.');
+        $this->command->info('Default settings seeded for all tenants.');
     }
 }

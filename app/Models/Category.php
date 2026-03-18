@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,27 +10,21 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Category extends Model
 {
-    use SoftDeletes;
+    use BelongsToTenant, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
         'parent_id',
         'name',
         'slug',
-        'description',
-        'image',
-        'sort_order',
         'is_active',
+        'sort_order',
     ];
 
     protected $casts = [
         'is_active'  => 'boolean',
         'sort_order' => 'integer',
     ];
-
-    // -------------------------------------------------------------------------
-    // Relationships
-    // -------------------------------------------------------------------------
 
     public function parent(): BelongsTo
     {
@@ -45,10 +40,6 @@ class Category extends Model
     {
         return $this->hasMany(Product::class);
     }
-
-    // -------------------------------------------------------------------------
-    // Scopes
-    // -------------------------------------------------------------------------
 
     public function scopeActive($query)
     {

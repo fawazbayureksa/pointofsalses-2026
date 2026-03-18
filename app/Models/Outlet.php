@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
@@ -10,7 +12,8 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Outlet extends Model
 {
-    use SoftDeletes, LogsActivity;
+    use BelongsToTenant, SoftDeletes, LogsActivity;
+
     protected $fillable = [
         'tenant_id',
         'name',
@@ -19,23 +22,12 @@ class Outlet extends Model
         'email',
         'address',
         'city',
-        'state',
-        'country',
-        'currency',
-        'timezone',
         'is_active',
-        'logo',
-        'settings',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
-        'settings'  => 'array',
     ];
-
-    // -------------------------------------------------------------------------
-    // Activity Log
-    // -------------------------------------------------------------------------
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -45,28 +37,24 @@ class Outlet extends Model
             ->setDescriptionForEvent(fn(string $e) => "Outlet {$this->name} was {$e}");
     }
 
-    // -------------------------------------------------------------------------
-    // Relationships
-    // -------------------------------------------------------------------------
-
-    public function users(): HasMany
+    public function users(): BelongsToMany
     {
-        return $this->hasMany(User::class);
+        return $this->belongsToMany(User::class, 'outlet_user')
+                    ->withPivot('is_default')
+                    ->withTimestamps();
     }
 
-    public function products(): HasMany
+    public function products(): BelongsToMany
     {
-        return $this->hasMany(Product::class);
+        return $this->belongsToMany(Product::class, 'product_outlet')
+                    ->withPivot(['stock', 'low_stock_threshold'])
+                    ->withTimestamps();
     }
 
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
     }
-
-    // -------------------------------------------------------------------------
-    // Scopes
-    // -------------------------------------------------------------------------
 
     public function scopeActive($query)
     {

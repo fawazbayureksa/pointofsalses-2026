@@ -39,7 +39,6 @@ class PaymentService
             }
 
             $payment = Payment::create([
-                'tenant_id'        => tenant('id'),
                 'order_id'         => $order->id,
                 'payment_method'   => $payload['payment_method'],
                 'amount'           => $amount,
@@ -58,14 +57,14 @@ class PaymentService
         });
     }
 
-    /**
-     * Refund a completed payment.
-     */
     public function refund(Payment $payment, string $reason = ''): Payment
     {
         DB::transaction(function () use ($payment, $reason) {
             $payment->update(['status' => 'refunded']);
-            $payment->order->update(['payment_status' => 'refunded', 'status' => 'refunded']);
+            $payment->order->update([
+                'payment_status' => 'refunded',
+                'status'         => 'refunded',
+            ]);
 
             activity()
                 ->on($payment)
@@ -76,9 +75,7 @@ class PaymentService
         return $payment->refresh();
     }
 
-    // -------------------------------------------------------------------------
-    // Private helpers
-    // -------------------------------------------------------------------------
+    // ─── Private helpers ─────────────────────────────────────────────────────
 
     private function ensureOrderIsPayable(Order $order): void
     {

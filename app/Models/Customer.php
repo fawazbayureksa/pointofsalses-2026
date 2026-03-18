@@ -2,47 +2,37 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Customer extends Model
 {
-    use SoftDeletes;
+    use BelongsToTenant, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
-        'customer_code',
         'name',
         'email',
         'phone',
         'address',
-        'date_of_birth',
-        'gender',
         'loyalty_points',
-        'status',
+        'is_active',
     ];
 
     protected $casts = [
-        'date_of_birth'  => 'date',
         'loyalty_points' => 'integer',
+        'is_active'      => 'boolean',
     ];
-
-    // -------------------------------------------------------------------------
-    // Relationships
-    // -------------------------------------------------------------------------
 
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
     }
 
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    public function addLoyaltyPoints(int $points): void
+    public function scopeActive($query)
     {
-        $this->increment('loyalty_points', $points);
+        return $query->where('is_active', true);
     }
 }

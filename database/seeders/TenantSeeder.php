@@ -4,60 +4,31 @@ namespace Database\Seeders;
 
 use App\Models\Outlet;
 use App\Models\Tenant;
+use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
-/**
- * Seeds a demo tenant with its entire stack:
- *   1. Tenant record in the central DB
- *   2. Tenant DB is auto-created via stancl/tenancy TenantCreated pipeline
- *   3. Switch to tenant context → run tenant-level seeders
- *
- * Run with:
- *   php artisan db:seed --class=TenantSeeder
- */
 class TenantSeeder extends Seeder
 {
     public function run(): void
     {
-        // ── 1. Create the tenant in the central DB ────────────────────────────
-        // Always create fresh so TenantCreated fires → CreateDatabase + MigrateDatabase run.
-        // If a stale record exists (e.g. from a prior run without migrate:fresh), delete it first.
-        Tenant::where('slug', 'demo')->each(fn($t) => $t->delete());
+        // Create demo tenant
+        $tenant = Tenant::firstOrCreate(
+            ['slug' => 'demo'],
+            [
+                'name'          => 'Demo Store',
+                'slug'          => 'demo',
+                'email'         => 'demo@example.com',
+                'business_type' => 'retail',
+                'plan'          => 'professional',
+                'status'        => 'active',
+            ]
+        );
 
-        // migrate:fresh only drops central tables; tenant MySQL databases persist on the server.
-        // Drop it explicitly so CreateDatabase doesn't throw TenantDatabaseAlreadyExistsException.
-        $dbName = config('tenancy.database.prefix', 'tenant') . 'demo' . config('tenancy.database.suffix', '');
-        DB::statement("DROP DATABASE IF EXISTS `{$dbName}`");
-
-        /** @var Tenant $tenant */
-        $tenant = Tenant::create([
-            'id'            => 'demo',
-            'name'          => 'Demo Store',
-            'slug'          => 'demo',
-            'business_type' => 'retail',
-            'plan'          => 'professional',
-            'status'        => 'active',
-        ]);
-
-        // Attach a domain only if it doesn't already exist.
-        if (! $tenant->domains()->where('domain', 'demo.localhost')->exists()) {
-            $tenant->createDomain(['domain' => 'demo.localhost']);
-        }
-
-        // ── 2. Switch to tenant DB context ───────────────────────────────────
-        tenancy()->initialize($tenant);
-
-        // ── 3. Seed tenant-level data ─────────────────────────────────────────
-        $this->call([
-            RolesAndPermissionsSeeder::class,   // roles + permissions
-            TenantDefaultSettingsSeeder::class, // currency, tax_rate, etc.
-            UserSeeder::class,                  // default admin/manager/cashier
-        ]);
-
-        // Seed a default outlet
-        Outlet::firstOrCreate(
-            ['name' => 'Main Outlet'],
+        // Create default outlet
+        $outlet = Outlet::firstOrCreate(
+            ['tenant_id' => $tenant->id, 'code' => 'HO'],
             [
                 'tenant_id' => $tenant->id,
                 'name'      => 'Main Outlet',
@@ -65,14 +36,63 @@ class TenantSeeder extends Seeder
                 'phone'     => '+62 21 12345678',
                 'address'   => 'Jl. Sudirman No. 1',
                 'city'      => 'Jakarta',
-                'country'   => 'ID',
                 'is_active' => true,
             ]
         );
 
-        // ── 4. End tenancy context ────────────────────────────────────────────
-        tenancy()->end();
+        // Super admin (no tenant_id)
+        $superAdmin = User::firstOrCreate(
+            ['email' => 'superadmin@example.com'],
+            [
+                'tenant_id' => null,
+                'name'      => 'Super Admin',
+                'password'  => Hash::make('password'),
+                'is_active' => true,
+            ]
+        );
+        $superAdmin->syncRoles(['super_admin']);
 
-        $this->command->info("Tenant '{$tenant->name}' seeded successfully.");
+        // Tenant admin
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@example.com', 'tenant_id' => $tenant->id],
+            [
+                'tenant_id' => $tenant->id,
+                'name'      => 'Demo Admin',
+                'password'  => Hash::make('password'),
+                'is_active' => true,
+            ]
+        );
+        $admin->syncRoles(['tenant_admin']);
+        $admin->outlets()->syncWithoutDetaching([$outlet->id => ['is_default' => true]]);
+
+        // Manager
+        $manager = User::firstOrCreate(
+            ['email' => 'manager@example.com', 'tenant_id' => $tenant->id],
+            [
+                'tenant_id' => $tenant->id,
+                'name'      => 'Demo Manager',
+                'password'  => Hash::make('password'),
+                'is_active' => true,
+            ]
+        );
+        $manager->syncRoles(['manager']);
+        $manager->outlets()->syncWithoutDetaching([$outlet->id => ['is_default' => true]]);
+
+        // Cashier
+        $cashier = User::firstOrCreate(
+            ['email' => 'cashier@example.com', 'tenant_id' => $tenant->id],
+            [
+                'tenant_id' => $tenant->id,
+                'name'      => 'Demo Cashier',
+                'password'  => Hash::make('password'),
+                'is_active' => true,
+            ]
+        );
+        $cashier->syncRoles(['cashier']);
+        $cashier->outlets()->syncWithoutDetaching([$outlet->id => ['is_default' => true]]);
+
+        $this->command->info("Demo tenant '{$tenant->name}' seeded successfully.");
+        $this->command->info("Super admin: superadmin@example.com / password");
+        $this->command->info("Tenant admin: admin@example.com / password");
     }
 }

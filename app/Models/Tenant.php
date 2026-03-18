@@ -1,24 +1,19 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
-use Stancl\Tenancy\Contracts\TenantWithDatabase;
-use Stancl\Tenancy\Database\Concerns\HasDatabase;
-use Stancl\Tenancy\Database\Concerns\HasDomains;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
-class Tenant extends BaseTenant implements TenantWithDatabase
+class Tenant extends Model
 {
-    use HasDatabase, HasDomains;
+    use HasFactory, SoftDeletes, LogsActivity;
 
-    /**
-     * Columns stored directly on the `tenants` table.
-     * Everything else goes into the `data` JSON column via stancl magic.
-     */
     protected $fillable = [
-        'id',
         'name',
         'slug',
         'email',
@@ -30,37 +25,31 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         'plan',
         'status',
         'trial_ends_at',
+        'settings',
     ];
 
     protected $casts = [
-        'data'          => 'array',
         'trial_ends_at' => 'datetime',
+        'settings'      => 'array',
     ];
 
-    // -------------------------------------------------------------------------
-    // stancl/tenancy: declare which custom columns live on the table
-    // -------------------------------------------------------------------------
-    public static function getCustomColumns(): array
+    public function getActivitylogOptions(): LogOptions
     {
-        return [
-            'id',
-            'name',
-            'slug',
-            'email',
-            'phone',
-            'contact_name',
-            'business_type',
-            'logo',
-            'address',
-            'plan',
-            'status',
-            'trial_ends_at',
-        ];
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->setDescriptionForEvent(fn(string $e) => "Tenant {$this->name} was {$e}");
     }
 
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
+
+    public function outlets(): HasMany
+    {
+        return $this->hasMany(Outlet::class);
+    }
 
     public function isActive(): bool
     {
@@ -70,5 +59,17 @@ class Tenant extends BaseTenant implements TenantWithDatabase
     public function isSuspended(): bool
     {
         return $this->status === 'suspended';
+    }
+
+    public function getSetting(string $key, mixed $default = null): mixed
+    {
+        return data_get($this->settings, $key, $default);
+    }
+
+    public function setSetting(string $key, mixed $value): void
+    {
+        $settings = $this->settings ?? [];
+        data_set($settings, $key, $value);
+        $this->update(['settings' => $settings]);
     }
 }

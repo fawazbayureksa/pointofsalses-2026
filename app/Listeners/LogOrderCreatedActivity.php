@@ -17,7 +17,7 @@ class LogOrderCreatedActivity
                 'order_number' => $order->order_number,
                 'total_amount' => $order->total_amount,
                 'items_count'  => $order->items->count(),
-                'tenant_id'    => tenant('id'),
+                'tenant_id'    => $user?->tenant_id,
             ])
             ->log('order_created');
     }

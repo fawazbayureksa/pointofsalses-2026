@@ -10,11 +10,11 @@ use Illuminate\Validation\ValidationException;
 class InventoryService
 {
     /**
-     * Validate that all items in a cart have sufficient stock.
+     * Validate that all items have sufficient stock at the given outlet.
      *
      * @throws ValidationException
      */
-    public function validateStockForItems(array $items): void
+    public function validateStockForItems(array $items, int $outletId): void
     {
         $errors = [];
 
@@ -26,8 +26,13 @@ class InventoryService
                 continue;
             }
 
-            if ($product->track_stock && $product->stock < $item['quantity']) {
-                $errors["items.{$item['product_id']}"] = "Insufficient stock for '{$product->name}'. Available: {$product->stock}";
+            if ($product->track_stock) {
+                $pivot = $product->outlets()->wherePivot('outlet_id', $outletId)->first();
+                $stock = $pivot ? (float) $pivot->pivot->stock : 0.0;
+
+                if ($stock < $item['quantity']) {
+                    $errors["items.{$item['product_id']}"] = "Insufficient stock for '{$product->name}'. Available: {$stock}";
+                }
             }
         }
 
@@ -37,7 +42,7 @@ class InventoryService
     }
 
     /**
-     * Deduct stock for all items in an order.
+     * Deduct stock for all items in an order from the order's outlet.
      */
     public function deductStockForOrder(Order $order): void
     {
@@ -45,10 +50,16 @@ class InventoryService
             $product = $item->product;
 
             if ($product && $product->track_stock) {
-                $before = $product->stock;
-                $product->decrementStock($item->quantity);
+                $pivot = $product->outlets()->wherePivot('outlet_id', $order->outlet_id)->first();
 
-                event(new StockUpdated($product, $before, $product->fresh()->stock));
+                if ($pivot) {
+                    $before = (float) $pivot->pivot->stock;
+                    $after  = max(0, $before - (float) $item->quantity);
+
+                    $product->outlets()->updateExistingPivot($order->outlet_id, ['stock' => $after]);
+
+                    event(new StockUpdated($product, $before, $after));
+                }
             }
         }
     }
@@ -62,31 +73,33 @@ class InventoryService
             $product = $item->product;
 
             if ($product && $product->track_stock) {
-                $before = $product->stock;
-                $product->incrementStock($item->quantity);
+                $pivot = $product->outlets()->wherePivot('outlet_id', $order->outlet_id)->first();
 
-                event(new StockUpdated($product, $before, $product->fresh()->stock, 'restored'));
+                if ($pivot) {
+                    $before = (float) $pivot->pivot->stock;
+                    $after  = $before + (float) $item->quantity;
+
+                    $product->outlets()->updateExistingPivot($order->outlet_id, ['stock' => $after]);
+
+                    event(new StockUpdated($product, $before, $after, 'restored'));
+                }
             }
         }
     }
 
     /**
-     * Manually adjust stock (e.g., stock-take, receiving).
+     * Get products at/below low-stock threshold for an outlet.
      */
-    public function adjustStock(Product $product, float $newQuantity, string $reason = ''): void
+    public function getLowStockProducts(int $outletId): \Illuminate\Support\Collection
     {
-        $before = $product->stock;
-
-        $product->update(['stock' => $newQuantity]);
-
-        event(new StockUpdated($product, $before, $newQuantity, 'adjustment', $reason));
-    }
-
-    /**
-     * Get products that are at or below their low-stock threshold.
-     */
-    public function getLowStockProducts(): \Illuminate\Database\Eloquent\Collection
-    {
-        return Product::active()->lowStock()->get();
+        return Product::where('track_stock', true)
+            ->where('is_active', true)
+            ->with(['outlets' => fn($q) => $q->wherePivot('outlet_id', $outletId)])
+            ->get()
+            ->filter(function (Product $product) use ($outletId) {
+                $pivot = $product->outlets->firstWhere('id', $outletId);
+                if (! $pivot) return false;
+                return $pivot->pivot->stock <= $pivot->pivot->low_stock_threshold;
+            });
     }
 }

@@ -4,29 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Traits\HasRoles;
 use Spatie\Activitylog\Traits\CausesActivity;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens, HasRoles, CausesActivity;
-
-    /**
-     * Tenant-scoped users live in each tenant's own database.
-     * The 'tenant' connection is configured dynamically by stancl/tenancy
-     * via DatabaseTenancyBootstrapper when tenancy()->initialize() is called.
-     */
-    // protected $connection = 'tenant';
-
-    /**
-     * Spatie permissions guard name.
-     * Must match the guard used to authenticate tenant users.
-     */
-    protected $guard_name = 'web';
+    use HasFactory, Notifiable, HasApiTokens, HasRoles, CausesActivity, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -52,23 +41,27 @@ class User extends Authenticatable
         ];
     }
 
-    // -------------------------------------------------------------------------
-    // Relationships
-    // -------------------------------------------------------------------------
-
-    public function outlet(): BelongsTo
+    public function tenant(): BelongsTo
     {
-        return $this->belongsTo(Outlet::class);
+        return $this->belongsTo(Tenant::class);
     }
 
-    public function orders()
+    public function outlets(): BelongsToMany
+    {
+        return $this->belongsToMany(Outlet::class, 'outlet_user')
+                    ->withPivot('is_default')
+                    ->withTimestamps();
+    }
+
+    public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
     }
 
-    // -------------------------------------------------------------------------
-    // Scopes
-    // -------------------------------------------------------------------------
+    public function isSuperAdmin(): bool
+    {
+        return $this->tenant_id === null;
+    }
 
     public function scopeActive($query)
     {

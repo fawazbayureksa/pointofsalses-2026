@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,7 +13,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Order extends Model
 {
-    use SoftDeletes, LogsActivity;
+    use BelongsToTenant, SoftDeletes, LogsActivity;
 
     protected $fillable = [
         'tenant_id',
@@ -39,10 +40,6 @@ class Order extends Model
         'completed_at'    => 'datetime',
     ];
 
-    // -------------------------------------------------------------------------
-    // Activity Log
-    // -------------------------------------------------------------------------
-
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
@@ -50,10 +47,6 @@ class Order extends Model
             ->logOnlyDirty()
             ->setDescriptionForEvent(fn(string $e) => "Order {$this->order_number} was {$e}");
     }
-
-    // -------------------------------------------------------------------------
-    // Relationships
-    // -------------------------------------------------------------------------
 
     public function outlet(): BelongsTo
     {
@@ -85,23 +78,10 @@ class Order extends Model
         return $this->hasOne(Payment::class)->latestOfMany();
     }
 
-    // -------------------------------------------------------------------------
-    // Scopes
-    // -------------------------------------------------------------------------
-
     public function scopeCompleted($query)
     {
         return $query->where('status', 'completed');
     }
-
-    public function scopePending($query)
-    {
-        return $query->where('status', 'pending');
-    }
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
 
     public function isCompleted(): bool
     {
@@ -115,8 +95,10 @@ class Order extends Model
 
     public function recalculateTotals(): void
     {
-        $subtotal = $this->items->sum('subtotal');
-        $taxAmount = $this->items->sum('tax_amount');
+        $this->loadMissing('items');
+
+        $subtotal       = $this->items->sum('subtotal');
+        $taxAmount      = $this->items->sum('tax_amount');
         $discountAmount = $this->items->sum('discount_amount');
 
         $this->update([

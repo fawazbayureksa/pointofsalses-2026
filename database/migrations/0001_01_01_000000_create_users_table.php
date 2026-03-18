@@ -6,16 +6,13 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Central users table — super-admins / platform-level accounts.
-     * Tenant-specific users live in each tenant's own database.
-     */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('tenant_id')->nullable()->index();
             $table->string('name');
-            $table->string('email')->unique();
+            $table->string('email');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('phone')->nullable();
@@ -24,6 +21,9 @@ return new class extends Migration
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();
+
+            $table->unique(['tenant_id', 'email']);
+            $table->index(['tenant_id', 'is_active']);
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

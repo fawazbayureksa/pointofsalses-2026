@@ -11,7 +11,7 @@ class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::with('outlet')->latest()->paginate(15);
+        $products = Product::with(['category', 'outlets'])->latest()->paginate(15);
         return view('admin.products.index', compact('products'));
     }
 
@@ -97,7 +97,7 @@ class ProductController extends Controller
 
     public function stock()
     {
-        $products = Product::with('outlet')->where('track_stock', true)->orderBy('stock')->paginate(20);
+        $products = Product::with('outlets')->where('track_stock', true)->latest()->paginate(20);
         return view('admin.inventory.stock', compact('products'));
     }
 
@@ -109,11 +109,14 @@ class ProductController extends Controller
     public function adjustStock(Request $request, Product $product)
     {
         $validated = $request->validate([
-            'quantity' => 'required|numeric',
-            'reason'   => 'nullable|string|max:255',
+            'outlet_id' => 'required|exists:outlets,id',
+            'quantity'  => 'required|numeric',
+            'reason'    => 'nullable|string|max:255',
         ]);
 
-        $product->increment('stock', $validated['quantity']);
+        $product->outlets()->syncWithoutDetaching([
+            $validated['outlet_id'] => ['stock' => \DB::raw("stock + {$validated['quantity']}")],
+        ]);
 
         return redirect()->back()->with('success', 'Stock adjusted successfully.');
     }

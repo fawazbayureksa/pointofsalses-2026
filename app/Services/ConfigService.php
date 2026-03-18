@@ -3,13 +3,11 @@
 namespace App\Services;
 
 use App\Models\Setting;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
 class ConfigService
 {
-    /**
-     * Default values for tenant settings.
-     */
     private array $defaults = [
         'currency'        => 'IDR',
         'tax_rate'        => '11',
@@ -19,14 +17,10 @@ class ConfigService
         'low_stock_alert' => 'true',
     ];
 
-    /**
-     * Retrieve a tenant config value by key.
-     *
-     * Example: $configService->get('tax_rate')
-     */
     public function get(string $key, mixed $default = null): mixed
     {
-        $cacheKey = $this->cacheKey($key);
+        $tenantId = $this->tenantId();
+        $cacheKey = 'config.' . $tenantId . '.' . $key;
 
         return Cache::remember($cacheKey, now()->addHour(), function () use ($key, $default) {
             $setting = Setting::where('key', $key)->first();
@@ -39,24 +33,20 @@ class ConfigService
         });
     }
 
-    /**
-     * Set a tenant config value.
-     */
     public function set(string $key, mixed $value, string $type = 'string'): Setting
     {
+        $tenantId = $this->tenantId();
+
         $setting = Setting::updateOrCreate(
-            ['tenant_id' => tenant('id'), 'key' => $key],
-            ['value' => $value, 'type' => $type, 'tenant_id' => tenant('id')],
+            ['tenant_id' => $tenantId, 'key' => $key],
+            ['value' => $value, 'type' => $type]
         );
 
-        Cache::forget($this->cacheKey($key));
+        Cache::forget('config.' . $tenantId . '.' . $key);
 
         return $setting;
     }
 
-    /**
-     * Get all settings for the current tenant as a key->value array.
-     */
     public function all(): array
     {
         $settings = Setting::all()->keyBy('key');
@@ -66,20 +56,13 @@ class ConfigService
             ->toArray();
     }
 
-    /**
-     * Bust cache for a specific key.
-     */
     public function forget(string $key): void
     {
-        Cache::forget($this->cacheKey($key));
+        Cache::forget('config.' . $this->tenantId() . '.' . $key);
     }
 
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    private function cacheKey(string $key): string
+    private function tenantId(): ?int
     {
-        return 'config.' . tenant('id') . '.' . $key;
+        return Auth::check() ? Auth::user()->tenant_id : null;
     }
 }

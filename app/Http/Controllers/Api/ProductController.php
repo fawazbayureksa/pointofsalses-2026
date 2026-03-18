@@ -56,7 +56,7 @@ class ProductController extends Controller
             'track_stock'         => ['boolean'],
         ]);
 
-        $product = Product::create(['tenant_id' => tenant('id'), ...$data]);
+        $product = Product::create($data);
 
         return response()->json($product, 201);
     }

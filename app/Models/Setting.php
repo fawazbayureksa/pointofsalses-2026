@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 
 class Setting extends Model
 {
+    use BelongsToTenant;
+
     protected $fillable = [
         'tenant_id',
         'key',
@@ -18,24 +21,6 @@ class Setting extends Model
     protected $casts = [
         'is_public' => 'boolean',
     ];
-
-    // -------------------------------------------------------------------------
-    // Scopes
-    // -------------------------------------------------------------------------
-
-    public function scopeForTenant($query, string $tenantId)
-    {
-        return $query->where('tenant_id', $tenantId);
-    }
-
-    public function scopePublic($query)
-    {
-        return $query->where('is_public', true);
-    }
-
-    // -------------------------------------------------------------------------
-    // Cast value based on type
-    // -------------------------------------------------------------------------
 
     public function getTypedValue(): mixed
     {

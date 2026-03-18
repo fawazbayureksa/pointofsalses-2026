@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
@@ -11,11 +13,10 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Product extends Model
 {
-    use SoftDeletes, LogsActivity;
+    use BelongsToTenant, SoftDeletes, LogsActivity;
 
     protected $fillable = [
         'tenant_id',
-        'outlet_id',
         'category_id',
         'name',
         'sku',
@@ -23,8 +24,6 @@ class Product extends Model
         'description',
         'price',
         'cost_price',
-        'stock',
-        'low_stock_threshold',
         'unit',
         'is_active',
         'track_stock',
@@ -32,17 +31,11 @@ class Product extends Model
     ];
 
     protected $casts = [
-        'price'               => 'decimal:2',
-        'cost_price'          => 'decimal:2',
-        'stock'               => 'decimal:3',
-        'low_stock_threshold' => 'decimal:3',
-        'is_active'           => 'boolean',
-        'track_stock'         => 'boolean',
+        'price'       => 'decimal:2',
+        'cost_price'  => 'decimal:2',
+        'is_active'   => 'boolean',
+        'track_stock' => 'boolean',
     ];
-
-    // -------------------------------------------------------------------------
-    // Activity Log
-    // -------------------------------------------------------------------------
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -52,18 +45,16 @@ class Product extends Model
             ->setDescriptionForEvent(fn(string $e) => "Product {$this->name} was {$e}");
     }
 
-    // -------------------------------------------------------------------------
-    // Relationships
-    // -------------------------------------------------------------------------
-
-    public function outlet(): BelongsTo
-    {
-        return $this->belongsTo(Outlet::class);
-    }
-
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function outlets(): BelongsToMany
+    {
+        return $this->belongsToMany(Outlet::class, 'product_outlet')
+                    ->withPivot(['stock', 'low_stock_threshold'])
+                    ->withTimestamps();
     }
 
     public function orderItems(): HasMany
@@ -71,37 +62,14 @@ class Product extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    // -------------------------------------------------------------------------
-    // Scopes
-    // -------------------------------------------------------------------------
-
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
 
-    public function scopeLowStock($query)
+    public function getStockForOutlet(int $outletId): float
     {
-        return $query->where('track_stock', true)
-            ->whereColumn('stock', '<=', 'low_stock_threshold');
-    }
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    public function isLowStock(): bool
-    {
-        return $this->track_stock && $this->stock <= $this->low_stock_threshold;
-    }
-
-    public function decrementStock(float $quantity): void
-    {
-        $this->decrement('stock', $quantity);
-    }
-
-    public function incrementStock(float $quantity): void
-    {
-        $this->increment('stock', $quantity);
+        $pivot = $this->outlets()->wherePivot('outlet_id', $outletId)->first();
+        return $pivot ? (float) $pivot->pivot->stock : 0.0;
     }
 }
