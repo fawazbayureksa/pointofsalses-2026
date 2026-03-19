@@ -9,40 +9,110 @@ use Spatie\Permission\Models\Role;
 class RolesAndPermissionsSeeder extends Seeder
 {
     private array $permissions = [
-        'manage_users',
-        'manage_products',
-        'view_products',
-        'manage_orders',
-        'view_orders',
-        'view_reports',
-        'manage_settings',
-        'view_payments',
-        'manage_payments',
-        'manage_outlets',
-        'manage_tenants',
+        // Outlets
+        'create outlets',
+        'edit outlets',
+        'delete outlets',
+        'manage outlets',
+        // Products
+        'create products',
+        'edit products',
+        'delete products',
+        'manage products',
+        'view products',
+        // Categories
+        'create categories',
+        'edit categories',
+        'delete categories',
+        // Customers
+        'create customers',
+        'edit customers',
+        'delete customers',
+        // Orders
+        'create orders',
+        'edit orders',
+        'delete orders',
+        'manage orders',
+        'view orders',
+        // Payments
+        'view payments',
+        'manage payments',
+        // Users
+        'create users',
+        'edit users',
+        'delete users',
+        'manage users',
+        // Other
+        'view reports',
+        'manage settings',
+        'manage tenants',
+        'view activity logs',
     ];
 
     private array $roles = [
         'super_admin'  => [],  // gets all permissions via Gate::before
         'tenant_admin' => [
-            'manage_users',
-            'manage_products', 'view_products',
-            'manage_orders', 'view_orders',
-            'view_reports',
-            'manage_settings',
-            'view_payments', 'manage_payments',
-            'manage_outlets',
+            // Outlets
+            'create outlets',
+            'edit outlets',
+            'delete outlets',
+            'manage outlets',
+            // Products
+            'create products',
+            'edit products',
+            'delete products',
+            'manage products',
+            'view products',
+            // Categories
+            'create categories',
+            'edit categories',
+            'delete categories',
+            // Customers
+            'create customers',
+            'edit customers',
+            'delete customers',
+            // Orders
+            'create orders',
+            'edit orders',
+            'delete orders',
+            'manage orders',
+            'view orders',
+            // Payments
+            'view payments',
+            'manage payments',
+            // Users
+            'create users',
+            'edit users',
+            'delete users',
+            'manage users',
+            // Other
+            'view reports',
+            'manage settings',
+            'view activity logs',
         ],
         'manager' => [
-            'view_products', 'manage_products',
-            'manage_orders', 'view_orders',
-            'view_reports',
-            'view_payments',
+            'create products',
+            'edit products',
+            'view products',
+            'manage products',
+            'create categories',
+            'edit categories',
+            'create customers',
+            'edit customers',
+            'create orders',
+            'edit orders',
+            'manage orders',
+            'view orders',
+            'view payments',
+            'view reports',
+            'view activity logs',
         ],
         'cashier' => [
-            'view_products',
-            'manage_orders', 'view_orders',
-            'view_payments',
+            'view products',
+            'create orders',
+            'view orders',
+            'view payments',
+            'create customers',
         ],
     ];
 

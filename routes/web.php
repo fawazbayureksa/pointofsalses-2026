@@ -47,8 +47,26 @@ Route::middleware(['auth'])
         Route::resource('outlets', \App\Http\Controllers\Admin\OutletController::class);
         Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
         Route::resource('products', \App\Http\Controllers\Admin\ProductController::class);
+        Route::post('products/{product}/adjust-stock', [\App\Http\Controllers\Admin\ProductController::class, 'adjustStock'])->name('products.adjust-stock');
+        Route::post('products/transfer-stock', [\App\Http\Controllers\Admin\ProductController::class, 'transferStock'])->name('products.transfer-stock');
         Route::resource('customers', \App\Http\Controllers\Admin\CustomerController::class);
         Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class);
+
+        // Inventory
+        Route::prefix('inventory')->name('inventory.')->group(function () {
+            Route::get('/stock', [\App\Http\Controllers\Admin\ProductController::class, 'stock'])->name('stock');
+            Route::get('/movements', [\App\Http\Controllers\Admin\ProductController::class, 'movements'])->name('movements');
+        });
+
+        // Settings
+        Route::middleware('can:manage settings')->prefix('settings')->name('settings.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('index');
+            Route::put('/', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('update');
+            Route::get('/tax', [\App\Http\Controllers\Admin\SettingController::class, 'tax'])->name('tax');
+            Route::put('/tax', [\App\Http\Controllers\Admin\SettingController::class, 'updateTax'])->name('tax.update');
+            Route::get('/currency', [\App\Http\Controllers\Admin\SettingController::class, 'currency'])->name('currency');
+            Route::put('/currency', [\App\Http\Controllers\Admin\SettingController::class, 'updateCurrency'])->name('currency.update');
+        });
 
         Route::middleware('can:manage users')->group(function () {
             Route::resource('users', \App\Http\Controllers\Admin\UserController::class);

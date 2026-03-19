@@ -64,7 +64,7 @@
             </x-admin-card>
 
             <x-admin-card title="Change Password">
-                <form method="POST" action="{{ route('admin.password.update') }}">
+                <form method="POST" action="{{ route('admin.password.change') }}">
                     @csrf
                     @method('PUT')
                     <div class="space-y-4">

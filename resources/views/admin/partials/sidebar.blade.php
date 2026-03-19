@@ -19,22 +19,22 @@
                         <span x-show="sidebarOpen" x-transition class="ml-3">Dashboard</span>
                     </a>
                 </li>
-                {{-- @role('super_admin') --}}
-                <li>
-                    <div class="pt-4 pb-2">
-                        <span x-show="sidebarOpen"
-                            class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Tenant
-                            Management</span>
-                    </div>
-                    <a href="{{ route('admin.tenants.index') }}"
-                        :class="currentPage.includes('tenants') ? 'bg-slate-700 text-white' :
-                            'text-slate-300 hover:bg-slate-700 hover:text-white'"
-                        class="flex items-center px-3 py-2 rounded-lg transition-colors">
-                        <i class="fa-solid fa-building w-5 text-center"></i>
-                        <span x-show="sidebarOpen" x-transition class="ml-3">Tenants</span>
-                    </a>
-                </li>
-                {{-- @endrole --}}
+                @role('super_admin')
+                    <li>
+                        <div class="pt-4 pb-2">
+                            <span x-show="sidebarOpen"
+                                class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Tenant
+                                Management</span>
+                        </div>
+                        <a href="{{ route('admin.tenants.index') }}"
+                            :class="currentPage.includes('tenants') ? 'bg-slate-700 text-white' :
+                                'text-slate-300 hover:bg-slate-700 hover:text-white'"
+                            class="flex items-center px-3 py-2 rounded-lg transition-colors">
+                            <i class="fa-solid fa-building w-5 text-center"></i>
+                            <span x-show="sidebarOpen" x-transition class="ml-3">Tenants</span>
+                        </a>
+                    </li>
+                @endrole
 
                 <li>
                     <div class="pt-4 pb-2">
@@ -112,7 +112,7 @@
                         <span x-show="sidebarOpen"
                             class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Inventory</span>
                     </div>
-                    {{-- <a href="{{ route('admin.inventory.stock') }}"
+                    <a href="{{ route('admin.inventory.stock') }}"
                         :class="currentPage.includes('inventory/stock') ? 'bg-slate-700 text-white' :
                             'text-slate-300 hover:bg-slate-700 hover:text-white'"
                         class="flex items-center px-3 py-2 rounded-lg transition-colors">
@@ -125,7 +125,7 @@
                         class="flex items-center px-3 py-2 rounded-lg transition-colors">
                         <i class="fa-solid fa-arrow-right-arrow-left w-5 text-center"></i>
                         <span x-show="sidebarOpen" x-transition class="ml-3">Movements</span>
-                    </a> --}}
+                    </a>
                 </li>
 
                 @can('manage users')
@@ -159,35 +159,37 @@
                     </li>
                 @endcan
 
-                <li>
-                    <div class="pt-4 pb-2">
-                        <span x-show="sidebarOpen"
-                            class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">System
-                            Settings</span>
-                    </div>
-                    {{-- <a href="{{ route('admin.settings.index') }}"
-                        :class="currentPage.includes('settings') && !currentPage.includes('tax') && !currentPage.includes(
-                                'currency') ? 'bg-slate-700 text-white' :
-                            'text-slate-300 hover:bg-slate-700 hover:text-white'"
-                        class="flex items-center px-3 py-2 rounded-lg transition-colors">
-                        <i class="fa-solid fa-gear w-5 text-center"></i>
-                        <span x-show="sidebarOpen" x-transition class="ml-3">Settings</span>
-                    </a>
-                    <a href="{{ route('admin.settings.tax') }}"
-                        :class="currentPage.includes('tax') ? 'bg-slate-700 text-white' :
-                            'text-slate-300 hover:bg-slate-700 hover:text-white'"
-                        class="flex items-center px-3 py-2 rounded-lg transition-colors">
-                        <i class="fa-solid fa-percent w-5 text-center"></i>
-                        <span x-show="sidebarOpen" x-transition class="ml-3">Tax</span>
-                    </a>
-                    <a href="{{ route('admin.settings.currency') }}"
-                        :class="currentPage.includes('currency') ? 'bg-slate-700 text-white' :
-                            'text-slate-300 hover:bg-slate-700 hover:text-white'"
-                        class="flex items-center px-3 py-2 rounded-lg transition-colors">
-                        <i class="fa-solid fa-dollar-sign w-5 text-center"></i>
-                        <span x-show="sidebarOpen" x-transition class="ml-3">Currency</span>
-                    </a> --}}
-                </li>
+                @can('manage settings')
+                    <li>
+                        <div class="pt-4 pb-2">
+                            <span x-show="sidebarOpen"
+                                class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">System
+                                Settings</span>
+                        </div>
+                        <a href="{{ route('admin.settings.index') }}"
+                            :class="currentPage.includes('settings') && !currentPage.includes('tax') && !currentPage.includes(
+                                    'currency') ? 'bg-slate-700 text-white' :
+                                'text-slate-300 hover:bg-slate-700 hover:text-white'"
+                            class="flex items-center px-3 py-2 rounded-lg transition-colors">
+                            <i class="fa-solid fa-gear w-5 text-center"></i>
+                            <span x-show="sidebarOpen" x-transition class="ml-3">Settings</span>
+                        </a>
+                        <a href="{{ route('admin.settings.tax') }}"
+                            :class="currentPage.includes('tax') ? 'bg-slate-700 text-white' :
+                                'text-slate-300 hover:bg-slate-700 hover:text-white'"
+                            class="flex items-center px-3 py-2 rounded-lg transition-colors">
+                            <i class="fa-solid fa-percent w-5 text-center"></i>
+                            <span x-show="sidebarOpen" x-transition class="ml-3">Tax</span>
+                        </a>
+                        <a href="{{ route('admin.settings.currency') }}"
+                            :class="currentPage.includes('currency') ? 'bg-slate-700 text-white' :
+                                'text-slate-300 hover:bg-slate-700 hover:text-white'"
+                            class="flex items-center px-3 py-2 rounded-lg transition-colors">
+                            <i class="fa-solid fa-dollar-sign w-5 text-center"></i>
+                            <span x-show="sidebarOpen" x-transition class="ml-3">Currency</span>
+                        </a>
+                    </li>
+                @endcan
 
                 @can('view activity logs')
                     <li>
