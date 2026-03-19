@@ -3,24 +3,25 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Product;
 use App\Models\Outlet;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
     public function index()
     {
         $categories = \App\Models\Category::where('is_active', true)->get();
+        $outlets = Outlet::where('is_active', true)->get();
         $products = Product::with(['category', 'outlets'])->latest()->paginate(15);
-        return view('admin.products.index', compact('products', 'categories'));
+        return view('admin.products.index', compact('products', 'categories', 'outlets'));
     }
 
     public function create()
     {
-        $outlets = Outlet::where('is_active', true)->get();
-        return view('admin.products.index', compact('outlets'));
+        return redirect()->route('admin.products.index');
     }
 
     public function store(Request $request)
@@ -50,7 +51,7 @@ class ProductController extends Controller
         $stock = $validated['stock'] ?? 0;
         $threshold = $validated['low_stock_threshold'] ?? 0;
 
-        $product = Product::create(\Arr::except($validated, ['outlet_id', 'stock', 'low_stock_threshold']));
+        $product = Product::create(Arr::except($validated, ['outlet_id', 'stock', 'low_stock_threshold']));
 
         if ($outletId) {
             $product->outlets()->attach($outletId, [
@@ -64,13 +65,13 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
-        return view('admin.products.index', compact('product'));
+        $product->load(['category', 'outlets']);
+        return view('admin.products.show', compact('product'));
     }
 
     public function edit(Product $product)
     {
-        $outlets = Outlet::where('is_active', true)->get();
-        return view('admin.products.index', compact('product', 'outlets'));
+        return redirect()->route('admin.products.index');
     }
 
     public function update(Request $request, Product $product)
@@ -125,7 +126,7 @@ class ProductController extends Controller
         ]);
 
         $product->outlets()->syncWithoutDetaching([
-            $validated['outlet_id'] => ['stock' => \DB::raw("stock + {$validated['quantity']}")],
+            $validated['outlet_id'] => ['stock' => DB::raw("stock + {$validated['quantity']}")],
         ]);
 
         return redirect()->back()->with('success', 'Stock adjusted successfully.');

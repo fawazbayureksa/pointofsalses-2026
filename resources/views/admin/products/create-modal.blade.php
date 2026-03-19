@@ -7,7 +7,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <x-admin-form-input name="sku" label="SKU" required placeholder="PROD-001" />
-                <x-admin-form-input name="category_id" label="Category" type="select" :options="['' => 'Select Category']" />
+                <x-admin-form-input name="category_id" label="Category" type="select" :options="['' => 'Select Category'] + ($categories ?? collect())->pluck('name', 'id')->toArray()" />
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -40,6 +40,22 @@
         @endif
 
         <x-admin-card title="All Categories">
+            @php
+                $tableHeaders = [
+                    ['label' => 'ID', 'key' => 'id'],
+                    ['label' => 'Name', 'key' => 'name'],
+                    ['label' => 'Slug', 'key' => 'slug'],
+                    ['label' => 'Parent', 'slot' => fn($c) => $c->parent?->name ?? '—'],
+                    ['label' => 'Products', 'slot' => fn($c) => $c->products_count ?? 0],
+                    [
+                        'label' => 'Status',
+                        'slot' => fn($c) => $c->is_active
+                            ? '<span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800">Active</span>'
+                            : '<span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-red-100 text-red-800">Inactive</span>',
+                    ],
+                    ['label' => 'Created At', 'key' => 'created_at'],
+                ];
+            @endphp
             <div class="mb-4 flex items-center justify-between">
                 <input type="text" placeholder="Search categories..."
                     class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64">
@@ -50,15 +66,7 @@
                 @endcan
             </div>
 
-            <x-admin-table :headers="[
-                ['label' => 'ID', 'key' => 'id'],
-                ['label' => 'Name', 'key' => 'name'],
-                ['label' => 'Slug', 'key' => 'slug'],
-                ['label' => 'Description', 'key' => 'description'],
-                ['label' => 'Products Count', 'key' => 'products_count'],
-                ['label' => 'Status', 'key' => 'status'],
-                ['label' => 'Created At', 'key' => 'created_at'],
-            ]" :rows="$categories ?? []" :actions="function ($category) {
+            <x-admin-table :headers="$tableHeaders" :rows="$categories ?? []" :actions="function ($category) {
                 return view('admin.categories.actions', ['category' => $category])->render();
             }" />
         </x-admin-card>

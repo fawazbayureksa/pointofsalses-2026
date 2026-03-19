@@ -59,17 +59,17 @@
 
             @can('edit outlets')
                 <div class="mt-6 pt-4 border-t border-gray-200 flex justify-end">
-                    <button
-                        @click="$dispatch('open-edit-modal', {
-                        id: {{ $outlet->id }},
-                        name: @json($outlet->name),
-                        code: @json($outlet->code),
-                        phone: @json($outlet->phone),
-                        email: @json($outlet->email),
-                        address: @json($outlet->address),
-                        city: @json($outlet->city),
-                        is_active: {{ $outlet->is_active ? 1 : 0 }}
-                    })"
+                    <button type="button"
+                        onclick="window.dispatchEvent(new CustomEvent('open-edit-modal', { detail: {
+                            id: {{ $outlet->id }},
+                            name: {{ Js::from($outlet->name) }},
+                            code: {{ Js::from($outlet->code) }},
+                            phone: {{ Js::from($outlet->phone) }},
+                            email: {{ Js::from($outlet->email) }},
+                            address: {{ Js::from($outlet->address) }},
+                            city: {{ Js::from($outlet->city) }},
+                            is_active: {{ $outlet->is_active ? 1 : 0 }}
+                        }}))"
                         class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg">
                         <i class="fa-solid fa-edit mr-2"></i> Edit Outlet
                     </button>
