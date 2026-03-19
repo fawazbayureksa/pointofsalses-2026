@@ -50,7 +50,7 @@ class TenantController extends Controller
             'address'       => $validated['address'] ?? null,
         ]);
 
-        $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+        $adminRole = Role::firstOrCreate(['name' => 'tenant_admin', 'guard_name' => 'web']);
 
         $user = User::create([
             'tenant_id' => $tenant->id,

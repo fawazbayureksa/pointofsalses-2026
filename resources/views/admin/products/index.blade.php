@@ -89,8 +89,8 @@
                     </select>
                 </div>
                 @can('create products')
-                    <x-admin-button variant="primary" icon="fa-solid fa-plus">
-                        <button x-data @click="$dispatch('open-create-modal')">Add New Product</button>
+                    <x-admin-button variant="primary" icon="fa-solid fa-plus" x-data @click="$dispatch('open-create-modal')">
+                        Add New Product
                     </x-admin-button>
                 @endcan
             </div>

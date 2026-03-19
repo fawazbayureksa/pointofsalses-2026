@@ -59,8 +59,8 @@
                     </select>
                 </div>
                 @can('create users')
-                    <x-admin-button variant="primary" icon="fa-solid fa-plus">
-                        <button x-data @click="$dispatch('open-create-modal')">Add New User</button>
+                    <x-admin-button variant="primary" icon="fa-solid fa-plus" x-data @click="$dispatch('open-create-modal')">
+                        Add New User
                     </x-admin-button>
                 @endcan
             </div>

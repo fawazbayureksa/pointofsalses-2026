@@ -5,7 +5,8 @@
         <i class="fa-solid fa-eye"></i>
     </a>
     @can('edit outlets')
-        <button @click="$dispatch('open-edit-modal', {
+        <button
+            @click="$dispatch('open-edit-modal', {
             id: {{ $outlet->id }},
             name: @json($outlet->name),
             code: @json($outlet->code),
@@ -13,18 +14,16 @@
             email: @json($outlet->email),
             address: @json($outlet->address),
             city: @json($outlet->city),
-            state: @json($outlet->state),
-            country: @json($outlet->country),
-            currency: @json($outlet->currency),
-            timezone: @json($outlet->timezone),
             is_active: {{ $outlet->is_active ? 1 : 0 }}
-        })" class="text-green-600 hover:text-green-900">
+        })"
+            class="text-green-600 hover:text-green-900">
             <i class="fa-solid fa-edit"></i>
         </button>
     @endcan
     @can('delete outlets')
-        <button @click="if(confirm('Are you sure you want to delete this outlet?')) window.location.href='{{ route('admin.outlets.destroy', $outlet->id) }}'" 
-                class="text-red-600 hover:text-red-900">
+        <button
+            @click="if(confirm('Are you sure you want to delete this outlet?')) window.location.href='{{ route('admin.outlets.destroy', $outlet->id) }}'"
+            class="text-red-600 hover:text-red-900">
             <i class="fa-solid fa-trash"></i>
         </button>
     @endcan
