@@ -11,13 +11,14 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::withCount('children')->latest()->paginate(15);
-        return view('admin.categories.index', compact('categories'));
+        $categories = Category::withCount(['children', 'products'])->with('parent')->latest()->paginate(15);
+        $parentCategories = Category::whereNull('parent_id')->orderBy('name')->get();
+        return view('admin.categories.index', compact('categories', 'parentCategories'));
     }
 
     public function create()
     {
-        return view('admin.categories.index');
+        return redirect()->route('admin.categories.index');
     }
 
     public function store(Request $request)
@@ -25,18 +26,13 @@ class CategoryController extends Controller
         $validated = $request->validate([
             'name'        => 'required|string|max:255',
             'slug'        => 'nullable|string|max:255',
-            'description' => 'nullable|string',
             'parent_id'   => 'nullable|exists:categories,id',
-            'status'      => 'required|in:active,inactive',
-            'image'       => 'nullable|image|max:2048',
+            'sort_order'  => 'nullable|integer|min:0',
+            'is_active'   => 'boolean',
         ]);
 
         if (empty($validated['slug'])) {
             $validated['slug'] = Str::slug($validated['name']);
-        }
-
-        if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('categories', 'public');
         }
 
         Category::create($validated);
@@ -59,18 +55,13 @@ class CategoryController extends Controller
         $validated = $request->validate([
             'name'        => 'required|string|max:255',
             'slug'        => 'nullable|string|max:255',
-            'description' => 'nullable|string',
             'parent_id'   => 'nullable|exists:categories,id',
-            'status'      => 'required|in:active,inactive',
-            'image'       => 'nullable|image|max:2048',
+            'sort_order'  => 'nullable|integer|min:0',
+            'is_active'   => 'boolean',
         ]);
 
         if (empty($validated['slug'])) {
             $validated['slug'] = Str::slug($validated['name']);
-        }
-
-        if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('categories', 'public');
         }
 
         $category->update($validated);
