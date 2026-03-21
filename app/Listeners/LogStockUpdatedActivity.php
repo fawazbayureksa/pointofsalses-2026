@@ -3,6 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\StockUpdated;
+use Illuminate\Support\Facades\Auth;
 
 class LogStockUpdatedActivity
 {
@@ -16,7 +17,7 @@ class LogStockUpdatedActivity
                 'change'       => $event->stockAfter - $event->stockBefore,
                 'reason'       => $event->reason,
                 'notes'        => $event->notes,
-                'tenant_id'    => auth()->user()?->tenant_id,
+                'tenant_id'    => Auth::user()?->tenant_id,
             ])
             ->log('stock_updated');
     }

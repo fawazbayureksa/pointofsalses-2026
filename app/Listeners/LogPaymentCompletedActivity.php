@@ -3,6 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\PaymentCompleted;
+use Illuminate\Support\Facades\Auth;
 
 class LogPaymentCompletedActivity
 {
@@ -13,12 +14,12 @@ class LogPaymentCompletedActivity
 
         activity('finance')
             ->performedOn($payment)
-            ->causedBy(auth()->user())
+            ->causedBy(Auth::user())
             ->withProperties([
                 'order_number'   => $order->order_number,
                 'payment_method' => $payment->payment_method,
                 'amount'         => $payment->amount,
-                'tenant_id'      => auth()->user()?->tenant_id,
+                'tenant_id'      => Auth::user()?->tenant_id,
             ])
             ->log('payment_completed');
     }

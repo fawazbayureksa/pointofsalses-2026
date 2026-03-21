@@ -1,6 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\PermissionController;
+use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\TenantController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -60,24 +64,26 @@ Route::middleware(['auth'])
 
         // Settings
         Route::middleware('can:manage settings')->prefix('settings')->name('settings.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('index');
-            Route::put('/', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('update');
-            Route::get('/tax', [\App\Http\Controllers\Admin\SettingController::class, 'tax'])->name('tax');
-            Route::put('/tax', [\App\Http\Controllers\Admin\SettingController::class, 'updateTax'])->name('tax.update');
-            Route::get('/currency', [\App\Http\Controllers\Admin\SettingController::class, 'currency'])->name('currency');
-            Route::put('/currency', [\App\Http\Controllers\Admin\SettingController::class, 'updateCurrency'])->name('currency.update');
+            Route::get('/', [SettingController::class, 'index'])->name('index');
+            Route::put('/', [SettingController::class, 'update'])->name('update');
+            Route::put('/email', [SettingController::class, 'updateEmail'])->name('email.update');
+            Route::put('/backup', [SettingController::class, 'updateBackup'])->name('backup.update');
+            Route::get('/tax', [SettingController::class, 'tax'])->name('tax');
+            Route::put('/tax', [SettingController::class, 'updateTax'])->name('tax.update');
+            Route::get('/currency', [SettingController::class, 'currency'])->name('currency');
+            Route::put('/currency', [SettingController::class, 'updateCurrency'])->name('currency.update');
         });
 
         Route::middleware('can:manage users')->group(function () {
-            Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
-            Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class);
-            Route::resource('permissions', \App\Http\Controllers\Admin\PermissionController::class);
+            Route::resource('users', UserController::class);
+            Route::resource('roles', RoleController::class);
+            Route::resource('permissions', PermissionController::class);
         });
 
         Route::middleware('can:view activity logs')->prefix('logs')->name('logs.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Admin\ActivityLogController::class, 'index'])->name('index');
-            Route::get('/export', [\App\Http\Controllers\Admin\ActivityLogController::class, 'export'])->name('export');
-            Route::delete('/clear', [\App\Http\Controllers\Admin\ActivityLogController::class, 'clear'])->name('clear');
+            Route::get('/', [ActivityLogController::class, 'index'])->name('index');
+            Route::get('/export', [ActivityLogController::class, 'export'])->name('export');
+            Route::delete('/clear', [ActivityLogController::class, 'clear'])->name('clear');
         });
 
         Route::fallback(fn() => response()->view('errors.404', [], 404));
