@@ -4,8 +4,26 @@
             @csrf
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <x-admin-form-input name="customer_id" label="Customer" type="select" :options="['' => 'Select Customer']" />
-                <x-admin-form-input name="outlet_id" label="Outlet" type="select" :options="['' => 'Select Outlet']" />
+                <div class="mb-4">
+                    <label for="customer_id" class="block text-sm font-medium text-gray-700 mb-1">Customer</label>
+                    <select name="customer_id" id="customer_id"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">-- Walk-in / Guest --</option>
+                        @foreach ($customers ?? [] as $customer)
+                            <option value="{{ $customer->id }}">{{ $customer->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="outlet_id" class="block text-sm font-medium text-gray-700 mb-1">Outlet <span class="text-red-500">*</span></label>
+                    <select name="outlet_id" id="outlet_id" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Select Outlet</option>
+                        @foreach ($outlets ?? [] as $outlet)
+                            <option value="{{ $outlet->id }}">{{ $outlet->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
             
             <div class="mb-4">
@@ -48,7 +66,24 @@
     </x-admin-modal>
 </div>
 
+@php
+    $productsForJs = ($products ?? collect())->map(function ($p) {
+        return ['id' => $p->id, 'name' => $p->name, 'price' => (float) $p->price];
+    })->values()->all();
+@endphp
 <script>
+const orderProducts = @json($productsForJs);
+
+function buildProductOptions(selectedId) {
+    let html = '<option value="">Select Product</option>';
+    orderProducts.forEach(function(p) {
+        const price = parseFloat(p.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const selected = (selectedId && selectedId == p.id) ? ' selected' : '';
+        html += `<option value="${p.id}"${selected}>${p.name} - Rp ${price}</option>`;
+    });
+    return html;
+}
+
 function addOrderItem() {
     const container = document.getElementById('order-items');
     const itemCount = container.querySelectorAll('.order-item').length;
@@ -56,12 +91,10 @@ function addOrderItem() {
     newItem.className = 'flex items-center space-x-2 order-item';
     newItem.innerHTML = `
         <select name="items[${itemCount}][product_id]" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-            <option value="">Select Product</option>
-            @foreach($products ?? [] as $product)
-                <option value="{{ $product->id }}">{{ $product->name }} - ${{ number_format($product->price, 2) }}</option>
-            @endforeach
+            ${buildProductOptions(null)}
         </select>
-        <input type="number" name="items[${itemCount}][quantity]" placeholder="Qty" min="1" class="w-20 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        <input type="number" name="items[${itemCount}][quantity]" placeholder="Qty" min="1" value="1"
+            class="w-20 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
         <button type="button" onclick="this.parentElement.remove()" class="text-red-600 hover:text-red-900">
             <i class="fa-solid fa-trash"></i>
         </button>
