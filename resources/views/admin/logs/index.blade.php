@@ -58,38 +58,43 @@
             </div>
         </form>
 
-        <x-admin-table 
-            :headers="[
+        @php
+            $tableHeaders = [
                 ['label' => 'ID', 'key' => 'id'],
-                ['label' => 'User', 'slot' => function($log) {
-                    $user = $log->causer;
+                ['label' => 'User', 'slot' => function($row) {
+                    $user = $row->causer;
                     if ($user) {
-                        return '<div class=\"flex items-center\">
-                            <div class=\"w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm\">' . strtoupper(substr($user->name, 0, 1)) . '</div>
-                            <div class=\"ml-3\">
-                                <p class=\"text-sm font-medium text-gray-900\">' . $user->name . '</p>
-                                <p class=\"text-xs text-gray-500\">' . $user->email . '</p>
+                        return '<div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold">' . strtoupper(substr($user->name, 0, 1)) . '</div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-gray-900">' . e($user->name) . '</p>
+                                <p class="text-xs text-gray-500">' . e($user->email) . '</p>
                             </div>
                         </div>';
                     }
-                    return '<span class=\"text-gray-500\">System</span>';
+                    return '<span class="text-gray-500">System</span>';
                 }],
                 ['label' => 'Description', 'key' => 'description'],
-                ['label' => 'Subject Type', 'slot' => function($log) {
-                    return $log->subject_type ? class_basename($log->subject_type) : '-';
+                ['label' => 'Subject Type', 'slot' => function($row) {
+                    return $row->subject_type ? class_basename($row->subject_type) : '-';
                 }],
-                ['label' => 'Subject ID', 'slot' => function($log) {
-                    return $log->subject_id ? '#' . $log->subject_id : '-';
+                ['label' => 'Subject ID', 'slot' => function($row) {
+                    return $row->subject_id ? '#' . $row->subject_id : '-';
                 }],
                 ['label' => 'IP Address', 'key' => 'ip_address'],
                 ['label' => 'Created At', 'key' => 'created_at'],
-            ]"
-            :rows="$logs ?? []"
-            :actions="function($log) {
-                return '<button onclick=\"showLogDetails(' . $log->id . ')\" class=\"text-blue-600 hover:text-blue-900\">
-                    <i class=\"fa-solid fa-eye\"></i>
+            ];
+            $tableActions = function($row) {
+                return '<button onclick="showLogDetails(' . $row->id . ')" class="text-blue-600 hover:text-blue-900" title="View Details">
+                    <i class="fa-solid fa-eye"></i>
                 </button>';
-            }"
+            };
+        @endphp
+
+        <x-admin-table
+            :headers="$tableHeaders"
+            :rows="$logs ?? []"
+            :actions="$tableActions"
         />
 
         @if(isset($logs) && method_exists($logs, 'links'))
@@ -106,40 +111,38 @@
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <p class="text-sm font-medium text-gray-500">User</p>
-                    <p class="text-gray-900">{{ $log?->causer?->name ?? 'System' }}</p>
+                    <p class="text-gray-900" x-text="log?.causer?.name ?? 'System'"></p>
                 </div>
                 <div>
                     <p class="text-sm font-medium text-gray-500">IP Address</p>
-                    <p class="text-gray-900">{{ $log?->ip_address ?? '-' }}</p>
+                    <p class="text-gray-900" x-text="log?.ip_address ?? '-'"></p>
                 </div>
             </div>
 
             <div>
                 <p class="text-sm font-medium text-gray-500">Description</p>
-                <p class="text-gray-900">{{ $log?->description ?? '-' }}</p>
+                <p class="text-gray-900" x-text="log?.description ?? '-'"></p>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <p class="text-sm font-medium text-gray-500">Subject Type</p>
-                    <p class="text-gray-900">{{ $log?->subject_type ? class_basename($log->subject_type) : '-' }}</p>
+                    <p class="text-gray-900" x-text="log?.subject_type ?? '-'"></p>
                 </div>
                 <div>
                     <p class="text-sm font-medium text-gray-500">Subject ID</p>
-                    <p class="text-gray-900">{{ $log?->subject_id ? '#' . $log->subject_id : '-' }}</p>
+                    <p class="text-gray-900" x-text="log?.subject_id ? '#' + log.subject_id : '-'"></p>
                 </div>
             </div>
 
-            @if($log?->properties ?? null)
-                <div>
-                    <p class="text-sm font-medium text-gray-500 mb-2">Properties</p>
-                    <pre class="bg-gray-50 p-4 rounded-lg text-sm overflow-x-auto">{{ json_encode($log->properties, JSON_PRETTY_PRINT) }}</pre>
-                </div>
-            @endif
+            <div x-show="log?.properties && Object.keys(log.properties).length > 0">
+                <p class="text-sm font-medium text-gray-500 mb-2">Properties</p>
+                <pre class="bg-gray-50 p-4 rounded-lg text-sm overflow-x-auto" x-text="JSON.stringify(log?.properties, null, 2)"></pre>
+            </div>
 
             <div>
                 <p class="text-sm font-medium text-gray-500">Created At</p>
-                <p class="text-gray-900">{{ $log?->created_at?->format('M d, Y H:i:s') ?? '-' }}</p>
+                <p class="text-gray-900" x-text="log?.created_at ?? '-'"></p>
             </div>
         </div>
 
