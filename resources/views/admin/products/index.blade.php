@@ -9,7 +9,7 @@
         @if ($errors->any())
             <div class="bg-red-50 border border-red-200 rounded-lg p-4">
                 <div class="flex">
-                    <div class="flex-shrink-0">
+                    <div class="shrink-0">
                         <i class="fa-solid fa-circle-exclamation text-red-400"></i>
                     </div>
                     <div class="ml-3">
@@ -29,7 +29,7 @@
         @if (session('success'))
             <div class="bg-green-50 border border-green-200 rounded-lg p-4">
                 <div class="flex">
-                    <div class="flex-shrink-0">
+                    <div class="shrink-0">
                         <i class="fa-solid fa-circle-check text-green-400"></i>
                     </div>
                     <div class="ml-3">
