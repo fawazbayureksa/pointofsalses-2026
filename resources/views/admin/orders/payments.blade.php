@@ -97,7 +97,7 @@
                                     </a>
                                     @if ($payment->status === 'completed')
                                         <form method="POST"
-                                            action="{{ route('admin.payments.refund', $payment->order_id) }}"
+                                            action="{{ route('admin.orders.refund-payment', $payment->order_id) }}"
                                             class="inline" onsubmit="return confirm('Refund this payment?')">
                                             @csrf
                                             <button type="submit" class="text-red-600 hover:text-red-900">
