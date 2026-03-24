@@ -12,10 +12,40 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $orders = Order::with(['customer', 'outlet'])->latest()->paginate(15);
-        return view('admin.orders.index', compact('orders'));
+        $query = Order::with(['customer', 'outlet'])->latest();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('order_number', 'like', "%{$search}%")
+                    ->orWhereHas('customer', fn($q) => $q->where('name', 'like', "%{$search}%"));
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('outlet_id')) {
+            $query->where('outlet_id', $request->outlet_id);
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $orders    = $query->paginate(15)->withQueryString();
+        $outlets   = Outlet::where('is_active', true)->get();
+        $customers = Customer::orderBy('name')->get();
+        $products  = Product::where('is_active', true)->get();
+
+        return view('admin.orders.index', compact('orders', 'outlets', 'customers', 'products'));
     }
 
     public function create()
@@ -25,6 +55,7 @@ class OrderController extends Controller
         $products  = Product::where('is_active', true)->get();
         return view('admin.orders.index', compact('outlets', 'customers', 'products'));
     }
+
 
     public function store(Request $request)
     {
@@ -40,6 +71,7 @@ class OrderController extends Controller
             'subtotal'     => 0,
             'tax_amount'   => 0,
             'total_amount' => 0,
+            'user_id'      => auth()->id(),
         ]));
 
         return redirect()->route('admin.orders.index')->with('success', 'Order created successfully.');
