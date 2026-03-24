@@ -100,8 +100,38 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
-        $order->load(['items.product', 'customer', 'outlet', 'payment']);
-        return view('admin.orders.index', compact('order'));
+        $order->load(['items.product', 'customer', 'outlet', 'payments']);
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'id'             => $order->id,
+                'order_number'   => $order->order_number ?? '#' . $order->id,
+                'status'         => $order->status,
+                'total_amount'   => $order->total_amount,
+                'discount_amount' => $order->discount_amount,
+                'tax_amount'     => $order->tax_amount,
+                'notes'          => $order->notes,
+                'created_at'     => $order->created_at?->format('M d, Y H:i'),
+                'customer'       => $order->customer ? [
+                    'name'  => $order->customer->name,
+                    'email' => $order->customer->email,
+                    'phone' => $order->customer->phone,
+                ] : null,
+                'outlet' => $order->outlet ? [
+                    'name'    => $order->outlet->name,
+                    'address' => $order->outlet->address,
+                ] : null,
+                'payment_method' => $order->payments->first()?->payment_method,
+                'items' => $order->items->map(fn($item) => [
+                    'product_name' => $item->product_name ?? optional($item->product)->name ?? '-',
+                    'unit_price'   => $item->unit_price,
+                    'quantity'     => $item->quantity,
+                    'subtotal'     => $item->subtotal,
+                ]),
+            ]);
+        }
+
+        return redirect()->route('admin.orders.index');
     }
 
     public function edit(Order $order)
