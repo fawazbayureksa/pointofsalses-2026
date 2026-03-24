@@ -8,10 +8,18 @@ use App\Models\Outlet;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Payment;
+use App\Services\OrderService;
+use App\Services\PaymentService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
+    public function __construct(
+        private OrderService $orderService,
+        private PaymentService $paymentService,
+    ) {}
+
     public function index(Request $request)
     {
         $query = Order::with(['customer', 'outlet'])->latest();
@@ -60,21 +68,34 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'outlet_id'   => 'required|exists:outlets,id',
-            'customer_id' => 'nullable|exists:customers,id',
-            'notes'       => 'nullable|string',
+            'outlet_id'               => 'required|exists:outlets,id',
+            'customer_id'             => 'nullable|exists:customers,id',
+            'notes'                   => 'nullable|string',
+            'discount_amount'         => 'nullable|numeric|min:0',
+            'discount_type'           => 'nullable|in:fixed,percentage',
+            'payment_method'          => 'required|in:cash,card,qris,transfer',
+            'amount_tendered'         => 'required|numeric|min:0',
+            'items'                   => 'required|array|min:1',
+            'items.*.product_id'      => 'required|exists:products,id',
+            'items.*.quantity'        => 'required|numeric|min:0.001',
+            'items.*.discount_amount' => 'nullable|numeric|min:0',
         ]);
 
-        $order = Order::create(array_merge($validated, [
-            'order_number' => 'ORD-' . strtoupper(uniqid()),
-            'status'       => 'pending',
-            'subtotal'     => 0,
-            'tax_amount'   => 0,
-            'total_amount' => 0,
-            'user_id'      => auth()->id(),
-        ]));
+        $order = $this->orderService->create([
+            'outlet_id'       => $validated['outlet_id'],
+            'customer_id'     => $validated['customer_id'] ?? null,
+            'notes'           => $validated['notes'] ?? null,
+            'discount_amount' => $validated['discount_amount'] ?? 0,
+            'discount_type'   => $validated['discount_type'] ?? 'fixed',
+            'items'           => $validated['items'],
+        ], Auth::user()->id);
 
-        return redirect()->route('admin.orders.index')->with('success', 'Order created successfully.');
+        $this->paymentService->pay($order, [
+            'payment_method' => $validated['payment_method'],
+            'amount'         => (float) $validated['amount_tendered'],
+        ]);
+
+        return redirect()->route('admin.orders.print', $order)->with('success', 'Order created and payment recorded.');
     }
 
     public function show(Order $order)
@@ -121,13 +142,18 @@ class OrderController extends Controller
         ]);
 
         $product = Product::findOrFail($validated['product_id']);
+        $qty      = (float) $validated['quantity'];
 
         $order->items()->create([
-            'product_id'  => $product->id,
-            'name'        => $product->name,
-            'price'       => $product->price,
-            'quantity'    => $validated['quantity'],
-            'total'       => $product->price * $validated['quantity'],
+            'product_id'      => $product->id,
+            'product_name'    => $product->name,
+            'product_sku'     => $product->sku ?? '',
+            'unit_price'      => $product->price,
+            'cost_price'      => $product->cost_price,
+            'quantity'        => $qty,
+            'discount_amount' => 0,
+            'tax_amount'      => 0,
+            'subtotal'        => $product->price * $qty,
         ]);
 
         $order->recalculateTotals();
@@ -152,27 +178,19 @@ class OrderController extends Controller
     public function processPayment(Request $request, Order $order)
     {
         $validated = $request->validate([
-            'method' => 'required|string',
-            'amount' => 'required|numeric|min:0',
+            'payment_method' => 'required|in:cash,card,qris,transfer',
+            'amount'         => 'required|numeric|min:0',
         ]);
 
-        Payment::create([
-            'order_id'       => $order->id,
-            'method'         => $validated['method'],
-            'amount'         => $validated['amount'],
-            'status'         => 'completed',
-            'transaction_id' => 'TXN-' . strtoupper(uniqid()),
-        ]);
-
-        $order->update(['payment_status' => 'paid', 'status' => 'completed']);
+        $this->paymentService->pay($order, $validated);
 
         return redirect()->back()->with('success', 'Payment processed.');
     }
 
     public function refundPayment(Request $request, Order $order)
     {
-        $order->update(['payment_status' => 'refunded', 'status' => 'cancelled']);
-
+        $payment = $order->payments()->where('status', 'completed')->latest()->firstOrFail();
+        $this->paymentService->refund($payment, $request->reason ?? '');
         return redirect()->back()->with('success', 'Payment refunded.');
     }
 }

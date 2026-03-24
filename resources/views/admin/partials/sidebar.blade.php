@@ -77,6 +77,13 @@
                         <span x-show="sidebarOpen"
                             class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Sales</span>
                     </div>
+                    <a href="{{ route('admin.pos.index') }}"
+                        :class="currentPage.includes('pos') ? 'bg-slate-700 text-white' :
+                            'text-slate-300 hover:bg-slate-700 hover:text-white'"
+                        class="flex items-center px-3 py-2 rounded-lg transition-colors">
+                        <i class="fa-solid fa-cash-register w-5 text-center"></i>
+                        <span x-show="sidebarOpen" x-transition class="ml-3">Cashier / POS</span>
+                    </a>
                     <a href="{{ route('admin.orders.index') }}"
                         :class="currentPage.includes('orders') ? 'bg-slate-700 text-white' :
                             'text-slate-300 hover:bg-slate-700 hover:text-white'"
@@ -84,13 +91,13 @@
                         <i class="fa-solid fa-shopping-cart w-5 text-center"></i>
                         <span x-show="sidebarOpen" x-transition class="ml-3">Orders</span>
                     </a>
-                    {{-- <a href="{{ route('admin.payments.index') }}"
-                        :class="currentPage.includes('payments') ? 'bg-slate-700 text-white' :
+                    <a href="{{ route('admin.orders.payments') }}"
+                        :class="currentPage.includes('orders-payments') ? 'bg-slate-700 text-white' :
                             'text-slate-300 hover:bg-slate-700 hover:text-white'"
                         class="flex items-center px-3 py-2 rounded-lg transition-colors">
                         <i class="fa-solid fa-money-bill w-5 text-center"></i>
                         <span x-show="sidebarOpen" x-transition class="ml-3">Payments</span>
-                    </a> --}}
+                    </a>
                 </li>
 
                 <li>

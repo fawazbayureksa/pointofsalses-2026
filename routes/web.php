@@ -55,6 +55,14 @@ Route::middleware(['auth'])
         Route::post('products/transfer-stock', [\App\Http\Controllers\Admin\ProductController::class, 'transferStock'])->name('products.transfer-stock');
         Route::resource('customers', \App\Http\Controllers\Admin\CustomerController::class);
         Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class);
+        Route::get('orders/{order}/print', [\App\Http\Controllers\Admin\OrderController::class, 'print'])->name('orders.print');
+        Route::get('orders-payments', [\App\Http\Controllers\Admin\OrderController::class, 'payments'])->name('orders.payments');
+        Route::post('orders/{order}/process-payment', [\App\Http\Controllers\Admin\OrderController::class, 'processPayment'])->name('orders.process-payment');
+        Route::post('orders/{order}/refund-payment', [\App\Http\Controllers\Admin\OrderController::class, 'refundPayment'])->name('orders.refund-payment');
+        Route::post('orders/{order}/items', [\App\Http\Controllers\Admin\OrderController::class, 'addItem'])->name('orders.items.store');
+        Route::delete('orders/{order}/items/{item}', [\App\Http\Controllers\Admin\OrderController::class, 'removeItem'])->name('orders.items.destroy');
+
+        Route::get('pos', [\App\Http\Controllers\Admin\PosController::class, 'index'])->name('pos.index');
 
         // Inventory
         Route::prefix('inventory')->name('inventory.')->group(function () {
