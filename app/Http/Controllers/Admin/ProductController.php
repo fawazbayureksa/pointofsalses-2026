@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Outlet;
 use App\Models\Product;
+use App\Models\StockMovement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -112,9 +113,31 @@ class ProductController extends Controller
         return view('admin.inventory.stock', compact('products'));
     }
 
-    public function movements()
+    public function movements(Request $request)
     {
-        return view('admin.inventory.movements');
+        $query = StockMovement::with(['product', 'outlet', 'user'])->latest();
+
+        if ($request->filled('product_id')) {
+            $query->where('product_id', $request->product_id);
+        }
+        if ($request->filled('outlet_id')) {
+            $query->where('outlet_id', $request->outlet_id);
+        }
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $movements = $query->paginate(25)->withQueryString();
+        $products  = Product::where('is_active', true)->orderBy('name')->get();
+        $outlets   = Outlet::where('is_active', true)->orderBy('name')->get();
+
+        return view('admin.inventory.movements', compact('movements', 'products', 'outlets'));
     }
 
     public function adjustStock(Request $request, Product $product)
@@ -125,20 +148,32 @@ class ProductController extends Controller
             'reason'    => 'nullable|string|max:255',
         ]);
 
-        $exists = $product->outlets()->where('outlet_id', $validated['outlet_id'])->exists();
+        $outletId = (int) $validated['outlet_id'];
+        $change   = (float) $validated['quantity'];
 
-        if ($exists) {
-            // Adjust existing stock (add or subtract)
-            $product->outlets()->syncWithoutDetaching([
-                $validated['outlet_id'] => ['stock' => DB::raw("stock + {$validated['quantity']}")],
-            ]);
+        $pivot  = $product->outlets()->wherePivot('outlet_id', $outletId)->first();
+        $before = $pivot ? (float) $pivot->pivot->stock : 0.0;
+
+        if ($pivot) {
+            $after = max(0, $before + $change);
+            $product->outlets()->updateExistingPivot($outletId, ['stock' => $after]);
         } else {
-            // Assign product to outlet with initial stock
-            $product->outlets()->attach($validated['outlet_id'], [
-                'stock'               => max(0, (float) $validated['quantity']),
+            $after = max(0, $change);
+            $product->outlets()->attach($outletId, [
+                'stock'               => $after,
                 'low_stock_threshold' => 0,
             ]);
         }
+
+        StockMovement::record(
+            product: $product,
+            outletId: $outletId,
+            type: 'adjustment',
+            before: $before,
+            change: $after - $before,
+            after: $after,
+            reason: $validated['reason'] ?? null,
+        );
 
         return redirect()->back()->with('success', 'Stock updated successfully.');
     }
@@ -149,8 +184,36 @@ class ProductController extends Controller
             'product_id'      => 'required|exists:products,id',
             'from_outlet_id'  => 'required|exists:outlets,id',
             'to_outlet_id'    => 'required|exists:outlets,id|different:from_outlet_id',
-            'quantity'        => 'required|numeric|min:1',
+            'quantity'        => 'required|numeric|min:0.001',
         ]);
+
+        $product  = Product::findOrFail($validated['product_id']);
+        $qty      = (float) $validated['quantity'];
+        $fromId   = (int) $validated['from_outlet_id'];
+        $toId     = (int) $validated['to_outlet_id'];
+
+        $fromPivot  = $product->outlets()->wherePivot('outlet_id', $fromId)->first();
+        $fromBefore = $fromPivot ? (float) $fromPivot->pivot->stock : 0.0;
+
+        if ($fromBefore < $qty) {
+            return redirect()->back()->withErrors(['quantity' => 'Insufficient stock at source outlet.']);
+        }
+
+        $fromAfter = $fromBefore - $qty;
+        $product->outlets()->updateExistingPivot($fromId, ['stock' => $fromAfter]);
+
+        $toPivot  = $product->outlets()->wherePivot('outlet_id', $toId)->first();
+        $toBefore = $toPivot ? (float) $toPivot->pivot->stock : 0.0;
+        $toAfter  = $toBefore + $qty;
+
+        if ($toPivot) {
+            $product->outlets()->updateExistingPivot($toId, ['stock' => $toAfter]);
+        } else {
+            $product->outlets()->attach($toId, ['stock' => $toAfter, 'low_stock_threshold' => 0]);
+        }
+
+        StockMovement::record($product, $fromId, 'transfer_out', $fromBefore, -$qty, $fromAfter);
+        StockMovement::record($product, $toId,   'transfer_in',  $toBefore,   $qty,  $toAfter);
 
         return redirect()->back()->with('success', 'Stock transferred successfully.');
     }

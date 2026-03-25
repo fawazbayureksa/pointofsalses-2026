@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Events\StockUpdated;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\StockMovement;
 use Illuminate\Validation\ValidationException;
 
 class InventoryService
@@ -58,6 +59,8 @@ class InventoryService
 
                     $product->outlets()->updateExistingPivot($order->outlet_id, ['stock' => $after]);
 
+                    StockMovement::record($product, $order->outlet_id, 'sale', $before, $before - $after, $after, null, $order);
+
                     event(new StockUpdated($product, $before, $after));
                 }
             }
@@ -80,6 +83,8 @@ class InventoryService
                     $after  = $before + (float) $item->quantity;
 
                     $product->outlets()->updateExistingPivot($order->outlet_id, ['stock' => $after]);
+
+                    StockMovement::record($product, $order->outlet_id, 'return', $before, $after - $before, $after, null, $order);
 
                     event(new StockUpdated($product, $before, $after, 'restored'));
                 }
