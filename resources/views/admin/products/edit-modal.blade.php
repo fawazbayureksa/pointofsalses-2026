@@ -32,7 +32,8 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <x-admin-form-input name="unit" label="Unit" value="" />
+                <x-admin-form-input name="unit" label="Unit" placeholder="pcs, kg, liter, box, etc."
+                    value="" />
                 <x-admin-form-input name="is_active" label="Status" type="select" :options="[1 => 'Active', 0 => 'Inactive']" value="" />
             </div>
 

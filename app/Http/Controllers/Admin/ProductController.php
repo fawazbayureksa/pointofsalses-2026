@@ -125,11 +125,22 @@ class ProductController extends Controller
             'reason'    => 'nullable|string|max:255',
         ]);
 
-        $product->outlets()->syncWithoutDetaching([
-            $validated['outlet_id'] => ['stock' => DB::raw("stock + {$validated['quantity']}")],
-        ]);
+        $exists = $product->outlets()->where('outlet_id', $validated['outlet_id'])->exists();
 
-        return redirect()->back()->with('success', 'Stock adjusted successfully.');
+        if ($exists) {
+            // Adjust existing stock (add or subtract)
+            $product->outlets()->syncWithoutDetaching([
+                $validated['outlet_id'] => ['stock' => DB::raw("stock + {$validated['quantity']}")],
+            ]);
+        } else {
+            // Assign product to outlet with initial stock
+            $product->outlets()->attach($validated['outlet_id'], [
+                'stock'               => max(0, (float) $validated['quantity']),
+                'low_stock_threshold' => 0,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Stock updated successfully.');
     }
 
     public function transferStock(Request $request)

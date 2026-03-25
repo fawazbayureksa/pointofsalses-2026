@@ -6,19 +6,19 @@
     </a>
     @can('edit products')
         <button
-            @click="$dispatch('open-edit-modal', {
-            id: {{ $product->id }},
-            name: @json($product->name),
-            sku: @json($product->sku),
-            barcode: @json($product->barcode ?? ''),
-            description: @json($product->description ?? ''),
-            price: @json((string) $product->price),
-            cost_price: @json((string) ($product->cost_price ?? '')),
-            unit: @json($product->unit ?? ''),
-            category_id: {{ $product->category_id ?? 'null' }},
-            is_active: {{ $product->is_active ? 1 : 0 }},
-            track_stock: {{ $product->track_stock ? 1 : 0 }}
-        })"
+            @click="window.dispatchEvent(new CustomEvent('open-edit-modal', { detail: {
+                id: {{ $product->id }},
+                name: {{ Js::from($product->name) }},
+                sku: {{ Js::from($product->sku) }},
+                barcode: {{ Js::from($product->barcode ?? '') }},
+                description: {{ Js::from($product->description ?? '') }},
+                price: {{ Js::from((string) $product->price) }},
+                cost_price: {{ Js::from((string) ($product->cost_price ?? '')) }},
+                unit: {{ Js::from($product->unit ?? '') }},
+                category_id: {{ $product->category_id ?? 'null' }},
+                is_active: {{ $product->is_active ? 1 : 0 }},
+                track_stock: {{ $product->track_stock ? 1 : 0 }}
+            }}))"
             class="text-green-600 hover:text-green-900">
             <i class="fa-solid fa-edit"></i>
         </button>
