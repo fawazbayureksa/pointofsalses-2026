@@ -160,85 +160,80 @@
         roleId: null,
         roleName: '',
         rolePermissions: [],
-        hasPermission(id) { return this.rolePermissions.includes(id); },
-        toggle(id) {
-            const idx = this.rolePermissions.indexOf(id);
-            idx === -1 ? this.rolePermissions.push(id) : this.rolePermissions.splice(idx, 1);
+        selectAll(ids) {
+            ids.map(String).forEach(id => { if (!this.rolePermissions.includes(id)) this.rolePermissions.push(id); });
         },
-        selectAll(ids) { ids.forEach(id => { if (!this.rolePermissions.includes(id)) this.rolePermissions.push(id); }); },
-        deselectAll(ids) { this.rolePermissions = this.rolePermissions.filter(id => !ids.includes(id)); },
+        deselectAll(ids) {
+            const strIds = ids.map(String);
+            this.rolePermissions = this.rolePermissions.filter(id => !strIds.includes(String(id)));
+        },
     }"
         @open-edit-role.window="
             roleId = $event.detail.id;
             roleName = $event.detail.name;
-            rolePermissions = $event.detail.permissions.map(Number);
+            rolePermissions = $event.detail.permissions.map(String);
             open = true;
         ">
         <x-admin-modal id="edit-role-modal" title="Edit Role" size="lg">
-            <template x-if="roleId">
-                <form :method="'POST'" :action="`/admin/roles/${roleId}`">
-                    @csrf
-                    <input type="hidden" name="_method" value="PUT">
+            <form method="POST" :action="`/admin/roles/${roleId ?? ''}`">
+                @csrf
+                <input type="hidden" name="_method" value="PUT">
 
-                    <div class="space-y-5">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Role Name <span
-                                    class="text-red-500">*</span></label>
-                            <input type="text" name="name" required x-model="roleName"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        </div>
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Role Name <span
+                                class="text-red-500">*</span></label>
+                        <input type="text" name="name" required x-model="roleName"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Permissions</label>
-                            <div
-                                class="border border-gray-200 rounded-lg divide-y divide-gray-100 max-h-80 overflow-y-auto">
-                                @foreach ($grouped as $resource => $perms)
-                                    @php $permIds = $perms->pluck('id')->toArray(); @endphp
-                                    <div class="px-4 py-3">
-                                        <div class="flex items-center justify-between mb-2">
-                                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                                                {{ $resource }}</p>
-                                            <div class="flex items-center space-x-2 text-xs">
-                                                <button type="button"
-                                                    @click="selectAll({{ \Illuminate\Support\Js::from($permIds) }})"
-                                                    class="text-blue-600 hover:underline">all</button>
-                                                <span class="text-gray-300">|</span>
-                                                <button type="button"
-                                                    @click="deselectAll({{ \Illuminate\Support\Js::from($permIds) }})"
-                                                    class="text-gray-500 hover:underline">none</button>
-                                            </div>
-                                        </div>
-                                        <div class="grid grid-cols-2 gap-1">
-                                            @foreach ($perms as $permission)
-                                                <label
-                                                    class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:text-blue-600">
-                                                    <input type="checkbox" name="permissions[]"
-                                                        value="{{ $permission->id }}"
-                                                        :checked="hasPermission({{ $permission->id }})"
-                                                        @change="toggle({{ $permission->id }})"
-                                                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                                    <span>{{ $permission->name }}</span>
-                                                </label>
-                                            @endforeach
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Permissions</label>
+                        <div class="border border-gray-200 rounded-lg divide-y divide-gray-100 max-h-80 overflow-y-auto">
+                            @foreach ($grouped as $resource => $perms)
+                                @php $permIds = $perms->pluck('id')->toArray(); @endphp
+                                <div class="px-4 py-3">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                            {{ $resource }}</p>
+                                        <div class="flex items-center space-x-2 text-xs">
+                                            <button type="button"
+                                                @click="selectAll({{ \Illuminate\Support\Js::from($permIds) }})"
+                                                class="text-blue-600 hover:underline">all</button>
+                                            <span class="text-gray-300">|</span>
+                                            <button type="button"
+                                                @click="deselectAll({{ \Illuminate\Support\Js::from($permIds) }})"
+                                                class="text-gray-500 hover:underline">none</button>
                                         </div>
                                     </div>
-                                @endforeach
-                            </div>
+                                    <div class="grid grid-cols-2 gap-1">
+                                        @foreach ($perms as $permission)
+                                            <label
+                                                class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:text-blue-600">
+                                                <input type="checkbox" name="permissions[]"
+                                                    value="{{ $permission->id }}" x-model="rolePermissions"
+                                                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                                <span>{{ $permission->name }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
                     </div>
+                </div>
 
-                    <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
-                        <button type="button" @click="open = false"
-                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
-                            Cancel
-                        </button>
-                        <button type="submit"
-                            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
-                            Save Changes
-                        </button>
-                    </div>
-                </form>
-            </template>
+                <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
+                    <button type="button" @click="open = false"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                        class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
         </x-admin-modal>
     </div>
 @endsection
