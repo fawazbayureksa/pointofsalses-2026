@@ -45,6 +45,7 @@
                     'id' => $p->id,
                     'name' => $p->name,
                     'sku' => $p->sku,
+                    'barcode' => $p->barcode ?? null,
                     'price' => (float) $p->price,
                     'category_id' => $p->category_id,
                     'category' => $p->category?->name ?? 'Uncategorized',
@@ -64,6 +65,31 @@
 
             {{-- Search + Category Filter --}}
             <div class="p-4 border-b border-gray-100 space-y-3">
+                {{-- Barcode Scanner Input --}}
+                <div class="relative">
+                    <i class="fa-solid fa-barcode absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" x-ref="barcodeInput" x-model="barcodeInput"
+                        @keydown.enter.prevent="scanBarcode()"
+                        placeholder="Scan barcode or type SKU, then press Enter…"
+                        :class="{
+                            'border-green-400 bg-green-50 focus:ring-green-400': barcodeStatus === 'found',
+                            'border-red-400 bg-red-50 focus:ring-red-400': barcodeStatus === 'notfound',
+                            'border-gray-200': barcodeStatus === null
+                        }"
+                        class="w-full pl-9 pr-24 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2">
+                    <span x-show="barcodeStatus === 'found'"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-green-600 text-xs font-semibold">
+                        <i class="fa-solid fa-check mr-1"></i>Added!
+                    </span>
+                    <span x-show="barcodeStatus === 'notfound'"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-red-500 text-xs font-semibold">
+                        <i class="fa-solid fa-times mr-1"></i>Not found
+                    </span>
+                    <span x-show="barcodeStatus === 'outofstock'"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-orange-500 text-xs font-semibold">
+                        <i class="fa-solid fa-ban mr-1"></i>Out of stock
+                    </span>
+                </div>
                 <div class="relative">
                     <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                     <input type="text" x-model="search" placeholder="Search products…"
@@ -323,13 +349,28 @@
                     amountTendered: 0,
                     notes: '',
                     submitError: '',
+                    barcodeInput: '',
+                    barcodeStatus: null,
+                    _productIndex: {},
+
+                    // -- Lifecycle --
+                    init() {
+                        // Build O(1) barcode/SKU index for fast lookups
+                        this._productIndex = {};
+                        this.allProducts.forEach(p => {
+                            if (p.barcode) this._productIndex[p.barcode] = p;
+                            if (p.sku) this._productIndex[p.sku] = p;
+                        });
+                        this.$nextTick(() => this.$refs.barcodeInput.focus());
+                    },
 
                     // -- Computed --
                     get filteredProducts() {
                         return this.allProducts.filter(p => {
                             const matchesSearch = !this.search ||
                                 p.name.toLowerCase().includes(this.search.toLowerCase()) ||
-                                (p.sku && p.sku.toLowerCase().includes(this.search.toLowerCase()));
+                                (p.sku && p.sku.toLowerCase().includes(this.search.toLowerCase())) ||
+                                (p.barcode && p.barcode.toLowerCase().includes(this.search.toLowerCase()));
                             const matchesCat = this.selectedCategory === null || p.category_id === this
                                 .selectedCategory;
                             return matchesSearch && matchesCat;
@@ -382,6 +423,21 @@
                                 discount: 0,
                             });
                         }
+                    },
+                    scanBarcode() {
+                        const code = this.barcodeInput.trim();
+                        this.barcodeInput = '';
+                        if (!code) return;
+                        const product = this._productIndex[code] || null;
+                        if (!product) {
+                            this.barcodeStatus = 'notfound';
+                        } else if (product.stock <= 0) {
+                            this.barcodeStatus = 'outofstock';
+                        } else {
+                            this.addToCart(product);
+                            this.barcodeStatus = 'found';
+                        }
+                        setTimeout(() => { this.barcodeStatus = null; }, 1500);
                     },
                     removeFromCart(idx) {
                         this.cart.splice(idx, 1);
