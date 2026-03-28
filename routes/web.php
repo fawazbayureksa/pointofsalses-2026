@@ -15,6 +15,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn() => view('welcome'));
 
+// Subscription expired page (auth required, no subscription check)
+Route::middleware('auth')->get('/subscription/expired', fn() => view('subscription.expired'))->name('subscription.expired');
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store']);
@@ -33,7 +36,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 });
 
-Route::middleware(['auth'])
+Route::middleware(['auth', 'tenant.active', 'subscription.active'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {

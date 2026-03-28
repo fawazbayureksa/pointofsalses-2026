@@ -7,7 +7,8 @@
             $el.querySelectorAll('[name]').forEach(el => {
                 const v = record[el.name];
                 if (v === undefined) return;
-                if (el.tagName === 'SELECT') el.value = v ?? '';
+                if (el.type === 'checkbox') { el.checked = !!v; }
+                else if (el.tagName === 'SELECT') el.value = v ?? '';
                 else if (el.tagName === 'TEXTAREA') el.textContent = v ?? '';
                 else el.value = v ?? '';
             });
@@ -27,6 +28,29 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <x-admin-form-input name="plan" label="Plan" type="select" :options="['basic' => 'Basic', 'professional' => 'Professional', 'enterprise' => 'Enterprise']" />
                 <x-admin-form-input name="status" label="Status" type="select" :options="['active' => 'Active', 'inactive' => 'Inactive', 'suspended' => 'Suspended']" />
+            </div>
+
+            {{-- Subscription --}}
+            <div class="border-t border-gray-200 pt-4 mt-2">
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Subscription</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <x-admin-form-input name="subscription_status" label="Subscription Status" type="select"
+                        :options="['trial' => 'Trial', 'active' => 'Active (Paid)', 'expired' => 'Expired', 'cancelled' => 'Cancelled']" />
+                    <x-admin-form-input name="trial_ends_at" label="Trial Ends At" type="datetime-local" />
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <x-admin-form-input name="subscription_ends_at" label="Subscription Ends At" type="datetime-local" />
+                    <div class="flex items-center gap-3 pt-6">
+                        <input type="checkbox" name="is_subscription_exempt" id="edit_is_subscription_exempt"
+                               value="1" class="w-4 h-4 text-indigo-600 rounded">
+                        <label for="edit_is_subscription_exempt" class="text-sm font-medium text-gray-700">
+                            Exempt from subscription check
+                            <span class="text-xs text-gray-400 block font-normal">For testing or free accounts</span>
+                        </label>
+                    </div>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
