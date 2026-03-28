@@ -285,12 +285,12 @@ return [
     | required parameter is 'class'.
     | The file activator will store the activation status in storage/installed_modules
     */
-    'activators' => [
-        'file' => [
-            'class' => FileActivator::class,
-            'statuses-file' => base_path('modules_statuses.json'),
-        ],
-    ],
+    // 'activators' => [
+    //     'file' => [
+    //         'class' => FileActivator::class,
+    //         'statuses-file' => base_path('modules_statuses.json'),
+    //     ],
+    // ],
 
     'activator' => 'file',
 ];
