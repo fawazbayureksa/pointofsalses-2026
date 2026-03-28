@@ -33,6 +33,36 @@
         input[type=number]::-webkit-outer-spin-button {
             -webkit-appearance: none;
         }
+
+        /* Camera scanner modal */
+        .scan-line {
+            position: absolute;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: rgba(37, 99, 235, 0.8);
+            box-shadow: 0 0 6px 2px rgba(37, 99, 235, 0.5);
+            animation: scan 2s linear infinite;
+            top: 0;
+        }
+
+        @keyframes scan {
+            0%   { top: 10%; }
+            50%  { top: 90%; }
+            100% { top: 10%; }
+        }
+
+        .scan-corner {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-color: #2563eb;
+            border-style: solid;
+        }
+        .scan-corner-tl { top: 8px;  left: 8px;  border-width: 3px 0 0 3px; }
+        .scan-corner-tr { top: 8px;  right: 8px; border-width: 3px 3px 0 0; }
+        .scan-corner-bl { bottom: 8px; left: 8px;  border-width: 0 0 3px 3px; }
+        .scan-corner-br { bottom: 8px; right: 8px; border-width: 0 3px 3px 0; }
     </style>
 @endpush
 
@@ -66,29 +96,38 @@
             {{-- Search + Category Filter --}}
             <div class="p-4 border-b border-gray-100 space-y-3">
                 {{-- Barcode Scanner Input --}}
-                <div class="relative">
-                    <i class="fa-solid fa-barcode absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                    <input type="text" x-ref="barcodeInput" x-model="barcodeInput"
-                        @keydown.enter.prevent="scanBarcode()"
-                        placeholder="Scan barcode or type SKU, then press Enter…"
-                        :class="{
-                            'border-green-400 bg-green-50 focus:ring-green-400': barcodeStatus === 'found',
-                            'border-red-400 bg-red-50 focus:ring-red-400': barcodeStatus === 'notfound',
-                            'border-gray-200': barcodeStatus === null
-                        }"
-                        class="w-full pl-9 pr-24 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2">
-                    <span x-show="barcodeStatus === 'found'"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-green-600 text-xs font-semibold">
-                        <i class="fa-solid fa-check mr-1"></i>Added!
-                    </span>
-                    <span x-show="barcodeStatus === 'notfound'"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-red-500 text-xs font-semibold">
-                        <i class="fa-solid fa-times mr-1"></i>Not found
-                    </span>
-                    <span x-show="barcodeStatus === 'outofstock'"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-orange-500 text-xs font-semibold">
-                        <i class="fa-solid fa-ban mr-1"></i>Out of stock
-                    </span>
+                <div class="flex items-center gap-2">
+                    <div class="relative flex-1">
+                        <i class="fa-solid fa-barcode absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" x-ref="barcodeInput" x-model="barcodeInput"
+                            @keydown.enter.prevent="scanBarcode()"
+                            placeholder="Scan barcode or type SKU, then press Enter…"
+                            :class="{
+                                'border-green-400 bg-green-50 focus:ring-green-400': barcodeStatus === 'found',
+                                'border-red-400 bg-red-50 focus:ring-red-400': barcodeStatus === 'notfound',
+                                'border-orange-400 bg-orange-50 focus:ring-orange-400': barcodeStatus === 'outofstock',
+                                'border-gray-200': barcodeStatus === null
+                            }"
+                            class="w-full pl-9 pr-24 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2">
+                        <span x-show="barcodeStatus === 'found'"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-green-600 text-xs font-semibold">
+                            <i class="fa-solid fa-check mr-1"></i>Added!
+                        </span>
+                        <span x-show="barcodeStatus === 'notfound'"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-red-500 text-xs font-semibold">
+                            <i class="fa-solid fa-times mr-1"></i>Not found
+                        </span>
+                        <span x-show="barcodeStatus === 'outofstock'"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-orange-500 text-xs font-semibold">
+                            <i class="fa-solid fa-ban mr-1"></i>Out of stock
+                        </span>
+                    </div>
+                    {{-- Camera scan button --}}
+                    <button @click="openCamera()" title="Scan with camera"
+                        class="shrink-0 flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
+                        <i class="fa-solid fa-camera"></i>
+                        <span class="hidden sm:inline">Camera</span>
+                    </button>
                 </div>
                 <div class="relative">
                     <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
@@ -328,6 +367,59 @@
             <input type="hidden" name="amount_tendered" x-bind:value="effectiveTendered">
             <div id="pos-items-container"></div>
         </form>
+
+        {{-- ============================================================ --}}
+        {{-- Camera Barcode Scanner Modal --}}
+        {{-- ============================================================ --}}
+        <div x-show="cameraOpen" x-cloak
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+            @keydown.escape.window="stopCamera()">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-md flex flex-col">
+                {{-- Modal Header --}}
+                <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                    <div>
+                        <h3 class="text-base font-semibold text-gray-800">
+                            <i class="fa-solid fa-camera mr-2 text-blue-500"></i>Scan with Camera
+                        </h3>
+                        <p class="text-xs text-gray-400 mt-0.5">Point your camera at a barcode</p>
+                    </div>
+                    <button @click="stopCamera()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <i class="fa-solid fa-times text-lg"></i>
+                    </button>
+                </div>
+
+                {{-- Camera Preview --}}
+                <div class="px-5 py-4">
+                    <div class="relative bg-black rounded-xl overflow-hidden aspect-[4/3]">
+                        <video x-ref="cameraVideo" class="w-full h-full object-cover" autoplay muted playsinline></video>
+                        {{-- Scanning overlay --}}
+                        <div class="absolute inset-0 pointer-events-none" x-show="!cameraError">
+                            <div class="scan-line"></div>
+                            <div class="scan-corner scan-corner-tl"></div>
+                            <div class="scan-corner scan-corner-tr"></div>
+                            <div class="scan-corner scan-corner-bl"></div>
+                            <div class="scan-corner scan-corner-br"></div>
+                        </div>
+                        {{-- Error overlay --}}
+                        <div x-show="cameraError" class="absolute inset-0 flex flex-col items-center justify-center bg-black/80 p-4">
+                            <i class="fa-solid fa-video-slash text-white text-3xl mb-3"></i>
+                            <p class="text-white text-sm text-center" x-text="cameraError"></p>
+                        </div>
+                    </div>
+
+                    <p class="text-xs text-gray-400 text-center mt-3">
+                        Supports EAN-13, EAN-8, UPC-A, Code 128, Code 39, QR Code
+                    </p>
+                </div>
+
+                <div class="px-5 pb-4">
+                    <button @click="stopCamera()"
+                        class="w-full py-2 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                        <i class="fa-solid fa-times mr-1"></i>Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     @push('scripts')
@@ -352,6 +444,12 @@
                     barcodeInput: '',
                     barcodeStatus: null,
                     _productIndex: {},
+                    cameraOpen: false,
+                    cameraError: '',
+                    _scannerStream: null,
+                    _scannerInterval: null,
+                    _zxingReader: null,
+                    _cameraIdealWidth: 1280,
 
                     // -- Lifecycle --
                     init() {
@@ -438,6 +536,104 @@
                             this.barcodeStatus = 'found';
                         }
                         setTimeout(() => { this.barcodeStatus = null; }, 1500);
+                    },
+                    async openCamera() {
+                        this.cameraError = '';
+                        this.cameraOpen = true;
+                        await this.$nextTick();
+                        try {
+                            const stream = await navigator.mediaDevices.getUserMedia({
+                                video: { facingMode: { ideal: 'environment' }, width: { ideal: this._cameraIdealWidth } }
+                            });
+                            this._scannerStream = stream;
+                            const video = this.$refs.cameraVideo;
+                            video.srcObject = stream;
+                            await video.play();
+                            this._startScanLoop();
+                        } catch (err) {
+                            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                                this.cameraError = 'Camera access denied. Please allow camera permission in your browser.';
+                            } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+                                this.cameraError = 'No camera found on this device.';
+                            } else {
+                                this.cameraError = 'Camera unavailable: ' + err.message;
+                            }
+                        }
+                    },
+                    stopCamera() {
+                        if (this._scannerInterval) {
+                            clearInterval(this._scannerInterval);
+                            this._scannerInterval = null;
+                        }
+                        if (this._zxingReader) {
+                            try { this._zxingReader.reset(); } catch { /* reset() may throw if stream already closed */ }
+                            this._zxingReader = null;
+                        }
+                        if (this._scannerStream) {
+                            this._scannerStream.getTracks().forEach(t => t.stop());
+                            this._scannerStream = null;
+                        }
+                        this.cameraOpen = false;
+                        this.cameraError = '';
+                        this.$nextTick(() => this.$refs.barcodeInput.focus());
+                    },
+                    async _startScanLoop() {
+                        if ('BarcodeDetector' in window) {
+                            // Native BarcodeDetector (Chrome 83+, Edge 83+, Samsung Internet)
+                            let supported = ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39', 'code_93', 'qr_code', 'data_matrix'];
+                            try {
+                                const detected = await BarcodeDetector.getSupportedFormats();
+                                supported = supported.filter(f => detected.includes(f));
+                            } catch {}
+                            const detector = new BarcodeDetector({ formats: supported.length ? supported : ['ean_13', 'code_128'] });
+                            const video = this.$refs.cameraVideo;
+                            this._scannerInterval = setInterval(async () => {
+                                if (!this.cameraOpen || !video.readyState || video.readyState < 2) return;
+                                try {
+                                    const barcodes = await detector.detect(video);
+                                    if (barcodes.length > 0) {
+                                        const code = barcodes[0].rawValue;
+                                        this.stopCamera();
+                                        this.barcodeInput = code;
+                                        this.scanBarcode();
+                                    }
+                                } catch {}
+                            }, 300);
+                        } else {
+                            // Fallback: @zxing/browser (Firefox and other browsers)
+                            try {
+                                await this._loadScript(
+                                    'https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/index.min.js',
+                                    'sha384-OLBgp1GsljhM2TJ+sbHjaiH9txEUvgdDTAzHv2P24donTt6/529l+9Ua0vFImLlb'
+                                );
+                                const video = this.$refs.cameraVideo;
+                                this._zxingReader = new ZXingBrowser.BrowserMultiFormatReader();
+                                this._zxingReader.decodeFromVideoElement(video, (result, err) => {
+                                    if (result && this.cameraOpen) {
+                                        const code = result.getText();
+                                        this.stopCamera();
+                                        this.barcodeInput = code;
+                                        this.scanBarcode();
+                                    }
+                                });
+                            } catch (err) {
+                                this.cameraError = 'Barcode detection not available in this browser. Please use Chrome or Edge.';
+                            }
+                        }
+                    },
+                    _loadScript(src, integrity) {
+                        return new Promise((resolve, reject) => {
+                            if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+                            const s = document.createElement('script');
+                            s.src = src;
+                            if (integrity) {
+                                s.integrity = integrity;
+                                s.crossOrigin = 'anonymous';
+                            }
+                            s.onload = resolve;
+                            s.onerror = () => reject(new Error('Failed to load ' + src));
+                            document.head.appendChild(s);
+                        });
                     },
                     removeFromCart(idx) {
                         this.cart.splice(idx, 1);
