@@ -47,9 +47,49 @@ class AuthController extends Controller
      */
     public function logout(Request $request): JsonResponse
     {
-        // $request->user()->currentAccessToken()->delete();
+        $request->user()->currentAccessToken()->delete();
 
         return response()->json(['message' => 'Logged out successfully.']);
+    }
+
+    /**
+     * PUT /api/auth/profile
+     */
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $data = $request->validate([
+            'name'  => ['sometimes', 'string', 'max:255'],
+            'email' => ['sometimes', 'email', 'unique:users,email,' . $user->id],
+            'phone' => ['sometimes', 'nullable', 'string', 'max:20'],
+        ]);
+
+        $user->update($data);
+
+        return response()->json([
+            'id'    => $user->id,
+            'name'  => $user->name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+        ]);
+    }
+
+    /**
+     * PUT /api/auth/password
+     */
+    public function changePassword(Request $request): JsonResponse
+    {
+        $request->validate([
+            'current_password' => ['required', 'string', 'current_password'],
+            'password'         => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $request->user()->update([
+            'password' => $request->password,
+        ]);
+
+        return response()->json(['message' => 'Password changed successfully.']);
     }
 
     /**
