@@ -56,7 +56,7 @@
             ->values();
     @endphp
 
-    <div x-data="posApp({{ Js::from($productsJson) }}, {{ Js::from($outlets->values()) }}, {{ Js::from($customers->values()) }})" class="flex h-[calc(100vh-130px)] gap-4">
+    <div x-data="posApp({{ Js::from($productsJson) }}, {{ Js::from($outlets->values()) }}, {{ Js::from($customersJson) }})" class="flex h-[calc(100vh-130px)] gap-4">
         {{-- ============================================================ --}}
         {{-- LEFT PANEL: Product Browser --}}
         {{-- ============================================================ --}}
@@ -149,15 +149,72 @@
                         @endforeach
                     </select>
                 </div>
-                <div>
+                <div class="relative">
                     <label class="text-xs font-medium text-gray-500 block mb-1">Customer</label>
-                    <select x-model="selectedCustomer"
-                        class="w-full text-sm border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">Walk-in / Guest</option>
-                        @foreach ($customers as $customer)
-                            <option value="{{ $customer->id }}">{{ $customer->name }}</option>
-                        @endforeach
-                    </select>
+                    <div class="relative">
+                        <i
+                            class="fa-solid fa-user absolute left-2 top-1/2 -translate-y-1/2 text-gray-300 text-xs pointer-events-none"></i>
+                        <input type="text" x-model="customerQuery" @focus="customerDropdownOpen = true"
+                            @input="customerDropdownOpen = true" @keydown.escape="customerDropdownOpen = false"
+                            :placeholder="selectedCustomerObj ? selectedCustomerObj.name : 'Walk-in / Guest'"
+                            class="w-full text-sm border border-gray-200 rounded-lg pl-6 pr-6 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button x-show="selectedCustomerObj" @click="clearCustomer()" type="button" tabindex="-1"
+                            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500">
+                            <i class="fa-solid fa-xmark text-xs"></i>
+                        </button>
+                    </div>
+                    <div x-show="customerDropdownOpen" @click.outside="customerDropdownOpen = false"
+                        class="absolute z-50 top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg max-h-52 overflow-y-auto mt-0.5">
+                        <button @click="clearCustomer()" type="button"
+                            class="w-full text-left px-3 py-2 text-xs text-gray-400 hover:bg-gray-50 border-b border-gray-100 flex items-center gap-1.5">
+                            <i class="fa-solid fa-person-walking"></i> Walk-in / Guest
+                        </button>
+                        <template x-for="c in filteredCustomers" :key="c.id">
+                            <button @click="selectCustomer(c)" type="button"
+                                class="w-full text-left px-3 py-2 hover:bg-blue-50 flex items-center justify-between gap-2 border-b border-gray-50">
+                                <div class="min-w-0">
+                                    <span x-text="c.name" class="text-sm font-medium text-gray-800 block truncate"></span>
+                                    <span x-show="c.phone" x-text="c.phone" class="text-xs text-gray-400"></span>
+                                </div>
+                                <div x-show="c.is_member" class="shrink-0 text-right">
+                                    <span x-text="c.membership_tier"
+                                        class="text-xs px-1.5 py-0.5 rounded-full bg-yellow-100 text-yellow-700 capitalize block mb-0.5"></span>
+                                    <span x-text="formatNumber(c.loyalty_points) + ' pts'"
+                                        class="text-xs text-blue-500"></span>
+                                </div>
+                            </button>
+                        </template>
+                        <div x-show="filteredCustomers.length === 0 && customerQuery"
+                            class="px-3 py-3 text-xs text-gray-400 text-center italic">No customers found</div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Member info card --}}
+            <div x-show="selectedCustomerObj && selectedCustomerObj.is_member"
+                class="px-5 pt-2 pb-3 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
+                            :class="{
+                                'bg-gray-400': selectedCustomerObj?.membership_tier === 'regular',
+                                'bg-slate-500': selectedCustomerObj?.membership_tier === 'silver',
+                                'bg-yellow-500': selectedCustomerObj?.membership_tier === 'gold',
+                                'bg-purple-600': selectedCustomerObj?.membership_tier === 'platinum'
+                            }"
+                            x-text="selectedCustomerObj?.name?.charAt(0)?.toUpperCase()"></div>
+                        <div>
+                            <div class="text-xs font-semibold text-gray-800 truncate max-w-[110px]"
+                                x-text="selectedCustomerObj?.name"></div>
+                            <div class="text-xs text-gray-500 capitalize"
+                                x-text="(selectedCustomerObj?.membership_tier ?? '') + ' Member'"></div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs text-gray-500">Current Points</div>
+                        <div class="text-sm font-bold text-blue-600"
+                            x-text="formatNumber(selectedCustomerObj?.loyalty_points ?? 0) + ' pts'"></div>
+                    </div>
                 </div>
             </div>
 
@@ -231,6 +288,12 @@
                 <div class="flex justify-between text-sm text-gray-600">
                     <span>Tax</span>
                     <span x-text="'Rp ' + formatNumber(taxAmount)"></span>
+                </div>
+
+                <div x-show="selectedCustomerObj && selectedCustomerObj.is_member && total > 0"
+                    class="flex justify-between text-sm text-green-700 bg-green-50 rounded-lg px-3 py-1.5">
+                    <span class="flex items-center gap-1"><i class="fa-solid fa-star text-xs"></i> Points to earn</span>
+                    <span x-text="'+' + pointsToEarn + ' pts'" class="font-semibold"></span>
                 </div>
 
                 <div class="flex justify-between text-lg font-bold text-gray-900 border-t border-gray-200 pt-2">
@@ -317,6 +380,9 @@
                     selectedCategory: null,
                     selectedOutlet: outlets.length === 1 ? String(outlets[0].id) : '',
                     selectedCustomer: '',
+                    selectedCustomerObj: null,
+                    customerQuery: '',
+                    customerDropdownOpen: false,
                     discountType: 'fixed',
                     discountAmount: 0,
                     paymentMethod: 'cash',
@@ -334,6 +400,17 @@
                                 .selectedCategory;
                             return matchesSearch && matchesCat;
                         });
+                    },
+                    get filteredCustomers() {
+                        if (!this.customerQuery) return this.customers;
+                        const q = this.customerQuery.toLowerCase();
+                        return this.customers.filter(c =>
+                            c.name.toLowerCase().includes(q) ||
+                            (c.phone && c.phone.includes(q))
+                        );
+                    },
+                    get pointsToEarn() {
+                        return Math.floor(this.total / 1000);
                     },
                     get cartSubtotal() {
                         return this.cart.reduce((sum, item) => sum + this.lineTotal(item), 0);
@@ -398,6 +475,18 @@
                         if (confirm('Clear all items from cart?')) {
                             this.cart = [];
                         }
+                    },
+                    selectCustomer(c) {
+                        this.selectedCustomer = String(c.id);
+                        this.selectedCustomerObj = c;
+                        this.customerQuery = '';
+                        this.customerDropdownOpen = false;
+                    },
+                    clearCustomer() {
+                        this.selectedCustomer = '';
+                        this.selectedCustomerObj = null;
+                        this.customerQuery = '';
+                        this.customerDropdownOpen = false;
                     },
                     submitOrder() {
                         this.submitError = '';
