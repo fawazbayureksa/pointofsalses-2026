@@ -1,9 +1,23 @@
-<div x-data="{ open: false, currentId: null, record: {} }"
+<div x-data="{ open: false, currentId: null, record: {}, photoPreview: null }"
     @barcode-scanned.window="if ($event.detail.target === 'edit' && open) { record.barcode = $event.detail.code; $nextTick(() => { const f = $el.querySelector('[name=barcode]'); if(f) f.value = $event.detail.code; }) }"
+    @product-photo-captured.window="
+        if ($event.detail.target === 'edit' && open) {
+            photoPreview = $event.detail.dataUrl;
+            $nextTick(() => {
+                const inp = $el.querySelector('input[name=image]');
+                if (inp && $event.detail.blob) {
+                    const dt = new DataTransfer();
+                    dt.items.add(new File([$event.detail.blob], 'product-photo.jpg', { type: 'image/jpeg' }));
+                    inp.files = dt.files;
+                }
+            });
+        }
+    "
     @open-edit-modal.window="
         open = true;
         currentId = $event.detail.id;
         record = $event.detail;
+        photoPreview = null;
         $nextTick(() => {
             $el.querySelectorAll('[name]').forEach(el => {
                 const v = record[el.name];
@@ -60,7 +74,43 @@
 
             <x-admin-form-input name="description" label="Description" type="textarea" value="" />
 
-            <x-admin-form-input name="image" label="Image" type="file" />
+            {{-- Image upload + camera capture --}}
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Image</label>
+                <div class="flex flex-col gap-2">
+                    {{-- Existing image preview (from record) --}}
+                    <div x-show="!photoPreview && record.image"
+                        class="relative rounded-xl overflow-hidden bg-gray-100 aspect-video w-full">
+                        <img :src="'/storage/' + record.image" class="w-full h-full object-cover" alt="Current image">
+                        <span
+                            class="absolute bottom-2 left-2 text-xs bg-black/50 text-white px-2 py-0.5 rounded-full">Current</span>
+                    </div>
+                    {{-- New capture preview --}}
+                    <div x-show="photoPreview"
+                        class="relative rounded-xl overflow-hidden bg-gray-100 aspect-video w-full">
+                        <img :src="photoPreview" class="w-full h-full object-cover" alt="New photo">
+                        <span
+                            class="absolute bottom-2 left-2 text-xs bg-green-500 text-white px-2 py-0.5 rounded-full">New</span>
+                        <button type="button"
+                            @click="photoPreview = null; $el.closest('.mb-4').querySelector('input[type=file]').value = ''"
+                            class="absolute top-2 right-2 p-1.5 bg-white/80 hover:bg-white rounded-full text-gray-600 hover:text-red-500 shadow transition-colors"
+                            title="Remove">
+                            <i class="fa-solid fa-xmark text-sm"></i>
+                        </button>
+                    </div>
+                    {{-- File input --}}
+                    <input type="file" name="image" accept="image/*"
+                        @change="photoPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null"
+                        class="block w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors">
+                    {{-- Camera button --}}
+                    <button type="button"
+                        @click="window.dispatchEvent(new CustomEvent('open-photo-capture', { detail: { target: 'edit' } }))"
+                        class="flex items-center justify-center gap-2 w-full py-2 border-2 border-dashed border-blue-300 hover:border-blue-500 text-blue-600 hover:text-blue-700 rounded-xl text-sm font-medium transition-colors hover:bg-blue-50">
+                        <i class="fa-solid fa-camera"></i>
+                        Take Photo with Camera
+                    </button>
+                </div>
+            </div>
 
             <div class="flex items-center justify-end space-x-3 mt-6">
                 <button type="button" @click="open = false"

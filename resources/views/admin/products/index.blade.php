@@ -113,4 +113,5 @@
     @include('admin.products.create-modal')
     @include('admin.products.edit-modal')
     @include('admin.products.barcode-scanner-modal')
+    @include('admin.products.photo-capture-modal')
 @endsection

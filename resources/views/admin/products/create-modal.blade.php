@@ -1,5 +1,18 @@
-<div x-data="{ open: false, barcodeValue: '' }" @open-create-modal.window="open = true"
-    @barcode-scanned.window="if ($event.detail.target === 'create') { barcodeValue = $event.detail.code }">
+<div x-data="{ open: false, barcodeValue: '', photoPreview: null }" @open-create-modal.window="open = true"
+    @barcode-scanned.window="if ($event.detail.target === 'create') { barcodeValue = $event.detail.code }"
+    @product-photo-captured.window="
+        if ($event.detail.target === 'create') {
+            photoPreview = $event.detail.dataUrl;
+            $nextTick(() => {
+                const inp = $el.querySelector('input[name=image]');
+                if (inp && $event.detail.blob) {
+                    const dt = new DataTransfer();
+                    dt.items.add(new File([$event.detail.blob], 'product-photo.jpg', { type: 'image/jpeg' }));
+                    inp.files = dt.files;
+                }
+            });
+        }
+    ">
     <x-admin-modal id="create-product-modal" title="Create New Product" size="lg">
         <form method="POST" action="{{ route('admin.products.store') }}" enctype="multipart/form-data">
             @csrf
@@ -56,7 +69,34 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <x-admin-form-input name="low_stock_threshold" label="Low Stock Alert Threshold" type="number"
                     step="0.001" placeholder="5" />
-                <x-admin-form-input name="image" label="Image" type="file" />
+                {{-- Image upload + camera capture --}}
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Image</label>
+                    <div class="flex flex-col gap-2">
+                        {{-- Preview --}}
+                        <div x-show="photoPreview"
+                            class="relative rounded-xl overflow-hidden bg-gray-100 aspect-video w-full">
+                            <img :src="photoPreview" class="w-full h-full object-cover" alt="Preview">
+                            <button type="button"
+                                @click="photoPreview = null; $el.closest('.mb-4').querySelector('input[type=file]').value = ''"
+                                class="absolute top-2 right-2 p-1.5 bg-white/80 hover:bg-white rounded-full text-gray-600 hover:text-red-500 shadow transition-colors"
+                                title="Remove photo">
+                                <i class="fa-solid fa-xmark text-sm"></i>
+                            </button>
+                        </div>
+                        {{-- File input --}}
+                        <input type="file" name="image" accept="image/*"
+                            @change="photoPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null"
+                            class="block w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors">
+                        {{-- Camera button --}}
+                        <button type="button"
+                            @click="window.dispatchEvent(new CustomEvent('open-photo-capture', { detail: { target: 'create' } }))"
+                            class="flex items-center justify-center gap-2 w-full py-2 border-2 border-dashed border-blue-300 hover:border-blue-500 text-blue-600 hover:text-blue-700 rounded-xl text-sm font-medium transition-colors hover:bg-blue-50">
+                            <i class="fa-solid fa-camera"></i>
+                            Take Photo with Camera
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <x-admin-form-input name="description" label="Description" type="textarea"
