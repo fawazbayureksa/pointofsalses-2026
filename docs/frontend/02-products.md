@@ -26,14 +26,14 @@ Query Parameters:
 
 Tasks:
 
-1. Create `src/api/products.ts` with functions:
+1. Create `src/api/products.js` with functions:
    - `getProducts(params?: ProductQueryParams): Promise<PaginatedResponse<Product>>`
    - `getProduct(id: number): Promise<Product>`
    - `createProduct(data: CreateProductData): Promise<Product>`
    - `updateProduct(id: number, data: UpdateProductData): Promise<Product>`
    - `deleteProduct(id: number): Promise<void>`
 
-2. Create TypeScript interfaces in `src/types/product.ts`:
+2. Create TypeScript interfaces in `src/types/product.js`:
    ```ts
    interface Product {
      id: number;
@@ -54,7 +54,7 @@ Tasks:
    interface UpdateProductData extends Partial<CreateProductData> { is_active?: boolean; }
    ```
 
-3. Create `src/screens/products/ProductListScreen.tsx`:
+3. Create `src/screens/products/ProductListScreen.jsx`:
    - Searchable FlatList using `useInfiniteQuery` (load more on scroll)
    - Each row shows: product image (or placeholder icon), name, SKU, price, stock badge
    - Pull-to-refresh support
@@ -62,17 +62,17 @@ Tasks:
    - Swipe-to-delete with confirmation dialog
    - Filter bar: category dropdown (uses categories API with ?all=true)
 
-4. Create `src/screens/products/ProductDetailScreen.tsx`:
+4. Create `src/screens/products/ProductDetailScreen.jsx`:
    - Show all product fields
    - "Edit" button opens `ProductFormScreen` with pre-filled data
 
-5. Create `src/screens/products/ProductFormScreen.tsx`:
+5. Create `src/screens/products/ProductFormScreen.jsx`:
    - Form fields: name (required), SKU, barcode, price (required), cost_price, category picker, unit, track_stock toggle, is_active toggle
    - On save: call `createProduct` or `updateProduct`, then pop back to list
    - Show validation errors inline below each field (from API 422 response)
    - Barcode scanner button using `expo-barcode-scanner` that fills the barcode field
 
-6. Create `src/hooks/useProducts.ts`:
+6. Create `src/hooks/useProducts.js`:
    - `useProductList(params)` → useInfiniteQuery
    - `useProduct(id)` → useQuery
    - `useCreateProduct()` → useMutation with cache invalidation

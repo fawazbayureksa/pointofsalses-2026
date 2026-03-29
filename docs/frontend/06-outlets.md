@@ -20,11 +20,11 @@ API Endpoints:
 
 Tasks:
 
-1. Create `src/api/outlets.ts` with functions:
+1. Create `src/api/outlets.js` with functions:
    - `getOutlets(params?: { search?: string; all?: boolean }): Promise<PaginatedResponse<Outlet> | Outlet[]>`
    - `getOutlet(id: number): Promise<OutletDetail>`
 
-2. Create TypeScript interfaces in `src/types/outlet.ts`:
+2. Create TypeScript interfaces in `src/types/outlet.js`:
    ```ts
    interface Outlet {
      id: number;
@@ -45,18 +45,18 @@ Tasks:
    }
    ```
 
-3. Create `src/store/outletStore.ts` (Zustand):
+3. Create `src/store/outletStore.js` (Zustand):
    - State: `currentOutlet: Outlet | null`, `outlets: Outlet[]`
    - Actions: `setCurrentOutlet(outlet)`, `setOutlets(outlets)`
    - Persist `currentOutlet` to AsyncStorage
 
-4. Create `src/screens/outlets/OutletSelectorScreen.tsx`:
+4. Create `src/screens/outlets/OutletSelectorScreen.jsx`:
    - Shown at startup (after login) if no outlet is selected yet
    - FlatList of available outlets
    - Tap to select → saves to outletStore, then navigates to AppTabs
    - Show currently active outlet with a checkmark
 
-5. Create `src/components/OutletSwitcher.tsx`:
+5. Create `src/components/OutletSwitcher.jsx`:
    - A compact header component showing the current outlet name
    - Tapping it opens a bottom sheet with the outlet list to switch
 
@@ -67,7 +67,7 @@ Tasks:
    - Store the selected outlet in `outletStore`
    - Pass `currentOutlet.id` as `outlet_id` when creating orders
 
-7. Create `src/hooks/useOutlets.ts`:
+7. Create `src/hooks/useOutlets.js`:
    - `useAllOutlets()` → useQuery with `?all=true`, staleTime 30 min
    - `useOutlet(id)` → useQuery
 ```

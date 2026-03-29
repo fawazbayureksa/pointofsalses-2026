@@ -19,13 +19,13 @@ payment method breakdown, low-stock alerts, and recent orders.
 
 Tasks:
 
-1. Create `src/api/dashboard.ts`:
+1. Create `src/api/dashboard.js`:
    ```ts
    import { apiClient } from './client';
    export const getDashboard = () => apiClient.get('/dashboard').then(r => r.data);
    ```
 
-2. Create TypeScript interfaces in `src/types/dashboard.ts`:
+2. Create TypeScript interfaces in `src/types/dashboard.js`:
    ```ts
    interface DailySales { date: string; label: string; total: number; }
    interface TopProduct { product_id: number; product_name: string; sold: number; revenue: string; }
@@ -44,7 +44,7 @@ Tasks:
    }
    ```
 
-3. Create `src/screens/dashboard/DashboardScreen.tsx`:
+3. Create `src/screens/dashboard/DashboardScreen.jsx`:
    - Use `useQuery` to fetch dashboard data, refetch every 5 minutes
    - Pull-to-refresh to force reload
    - ScrollView layout with the following sections:
@@ -80,7 +80,7 @@ Tasks:
    - Red colour when stock = 0, orange when stock > 0 but ≤ threshold
    - Tap to navigate to ProductDetailScreen
 
-4. Create `src/hooks/useDashboard.ts`:
+4. Create `src/hooks/useDashboard.js`:
    - `useDashboard()` → useQuery with staleTime 2 min, refetchInterval 5 min
 
 Styling requirements:

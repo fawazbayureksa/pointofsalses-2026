@@ -23,14 +23,14 @@ Special query params:
 
 Tasks:
 
-1. Create `src/api/customers.ts` with functions:
+1. Create `src/api/customers.js` with functions:
    - `getCustomers(params?: CustomerQueryParams): Promise<PaginatedResponse<Customer> | Customer[]>`
    - `getCustomer(id: number): Promise<CustomerDetail>`
    - `createCustomer(data: CreateCustomerData): Promise<Customer>`
    - `updateCustomer(id: number, data: UpdateCustomerData): Promise<Customer>`
    - `deleteCustomer(id: number): Promise<void>`
 
-2. Create TypeScript interfaces in `src/types/customer.ts`:
+2. Create TypeScript interfaces in `src/types/customer.js`:
    ```ts
    interface Customer {
      id: number;
@@ -48,28 +48,28 @@ Tasks:
    type UpdateCustomerData = Partial<CreateCustomerData>;
    ```
 
-3. Create `src/screens/customers/CustomerListScreen.tsx`:
+3. Create `src/screens/customers/CustomerListScreen.jsx`:
    - Searchable FlatList using `useInfiniteQuery`
    - Each row: avatar (initials), name, phone, loyalty points badge
    - Pull-to-refresh
    - FAB to create a new customer
    - Tap a row to open CustomerDetailScreen
 
-4. Create `src/screens/customers/CustomerDetailScreen.tsx`:
+4. Create `src/screens/customers/CustomerDetailScreen.jsx`:
    - Show customer info and order history
    - "Edit" button opens the form
 
-5. Create `src/screens/customers/CustomerFormScreen.tsx`:
+5. Create `src/screens/customers/CustomerFormScreen.jsx`:
    - Fields: name (required), email, phone, address
    - Inline validation errors from API
 
-6. Create `src/components/CustomerSearchModal.tsx`:
+6. Create `src/components/CustomerSearchModal.jsx`:
    - Reusable modal/bottom sheet component used during checkout
    - Searchable text input with debounce (calls API with `?all=true&search=...`)
    - Returns selected customer to parent
    - "Create New" shortcut opens CustomerFormScreen inline (optional)
 
-7. Create `src/hooks/useCustomers.ts`:
+7. Create `src/hooks/useCustomers.js`:
    - `useCustomerList(params)` → useInfiniteQuery
    - `useCustomer(id)` → useQuery
    - `useCreateCustomer()` → useMutation

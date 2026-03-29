@@ -24,14 +24,14 @@ Special query params:
 
 Tasks:
 
-1. Create `src/api/categories.ts` with functions:
+1. Create `src/api/categories.js` with functions:
    - `getCategories(params?: CategoryQueryParams): Promise<PaginatedResponse<Category> | Category[]>`
    - `getCategory(id: number): Promise<Category>`
    - `createCategory(data: CreateCategoryData): Promise<Category>`
    - `updateCategory(id: number, data: UpdateCategoryData): Promise<Category>`
    - `deleteCategory(id: number): Promise<void>`
 
-2. Create TypeScript interfaces in `src/types/category.ts`:
+2. Create TypeScript interfaces in `src/types/category.js`:
    ```ts
    interface Category {
      id: number;
@@ -48,23 +48,23 @@ Tasks:
    type UpdateCategoryData = Partial<CreateCategoryData>;
    ```
 
-3. Create `src/screens/categories/CategoryListScreen.tsx`:
+3. Create `src/screens/categories/CategoryListScreen.jsx`:
    - FlatList showing category name, product count, parent name (if any)
    - Searchable with debounce
    - FAB to create a new category
    - Swipe-to-delete with confirmation
 
-4. Create `src/screens/categories/CategoryFormScreen.tsx`:
+4. Create `src/screens/categories/CategoryFormScreen.jsx`:
    - Fields: name (required), parent category picker (uses ?all=true&roots_only=true), sort_order, is_active toggle
    - On save: create or update, then pop back
 
-5. Create `src/components/CategoryPicker.tsx`:
+5. Create `src/components/CategoryPicker.jsx`:
    - Reusable picker component used in ProductFormScreen
    - Fetches all categories using `?all=true`
    - Renders as a bottom sheet or modal with a searchable list
    - Returns selected category id and name to parent
 
-6. Create `src/hooks/useCategories.ts`:
+6. Create `src/hooks/useCategories.js`:
    - `useCategoryList(params)` → useQuery with staleTime 5 min
    - `useAllCategories()` → useQuery with `?all=true`, staleTime 10 min (used for pickers)
    - `useCreateCategory()` → useMutation

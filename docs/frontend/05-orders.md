@@ -20,14 +20,14 @@ API Endpoints:
 
 Tasks:
 
-1. Create `src/api/orders.ts` with functions:
+1. Create `src/api/orders.js` with functions:
    - `getOrders(params?: OrderQueryParams): Promise<PaginatedResponse<Order>>`
    - `getOrder(id: number): Promise<OrderDetail>`
    - `createOrder(data: CreateOrderData): Promise<Order>`
    - `payOrder(id: number, data: PayOrderData): Promise<Payment>`
    - `cancelOrder(id: number, reason?: string): Promise<Order>`
 
-2. Create TypeScript interfaces in `src/types/order.ts`:
+2. Create TypeScript interfaces in `src/types/order.js`:
    ```ts
    interface OrderItem {
      id: number; product_id: number; product_name: string; product_sku: string;
@@ -54,7 +54,7 @@ Tasks:
    interface PayOrderData { payment_method: 'cash' | 'card' | 'qris' | 'transfer'; amount: number; reference_number?: string; }
    ```
 
-3. Create `src/store/cartStore.ts` (Zustand):
+3. Create `src/store/cartStore.js` (Zustand):
    State:
    - `items`: CartItem[] (product_id, name, price, quantity, discount_amount)
    - `outletId`: number | null
@@ -73,7 +73,7 @@ Tasks:
    - `subtotal`: sum of (price * qty - discount) for all items
    - `itemCount`: total quantity
 
-4. Create `src/screens/pos/PosScreen.tsx` (main POS screen):
+4. Create `src/screens/pos/PosScreen.jsx` (main POS screen):
    - Split view:
      - LEFT / TOP: Product grid with search and category filter tabs
        - Grid of product cards (image, name, price)
@@ -87,7 +87,7 @@ Tasks:
        - "Place Order" button → calls `createOrder`, then opens PaymentSheet
    - On tablet/large screen: side-by-side layout; on phone: tab/swipe between product grid and cart
 
-5. Create `src/screens/pos/PaymentSheet.tsx` (bottom sheet):
+5. Create `src/screens/pos/PaymentSheet.jsx` (bottom sheet):
    - Shows order total
    - Payment method selector: Cash, Card, QRIS, Transfer (chip buttons)
    - Amount input (for cash: auto-filled with total, shows change calculation)
@@ -95,25 +95,25 @@ Tasks:
    - "Confirm Payment" button → calls `payOrder`
    - On success: shows receipt preview, then clears cart
 
-6. Create `src/screens/pos/ReceiptScreen.tsx`:
+6. Create `src/screens/pos/ReceiptScreen.jsx`:
    - Shows order details, items, payment method, change
    - "Print Receipt" button (integration with react-native-print or expo-print)
    - "New Sale" button → clears cart and returns to PosScreen
    - "View Order" button → navigates to OrderDetailScreen
 
-7. Create `src/screens/orders/OrderListScreen.tsx`:
+7. Create `src/screens/orders/OrderListScreen.jsx`:
    - Searchable list with status filter tabs (All, Pending, Completed, Cancelled)
    - Date range picker for filtering
    - Each row: order number, customer name, total, status badge, time
    - Pull-to-refresh + infinite scroll
    - Tap to view OrderDetailScreen
 
-8. Create `src/screens/orders/OrderDetailScreen.tsx`:
+8. Create `src/screens/orders/OrderDetailScreen.jsx`:
    - All order details, items, payment info
    - If `status === 'pending'`: show "Pay Now" button (opens PaymentSheet) and "Cancel" button
    - Cancel requires a reason text input
 
-9. Create `src/hooks/useOrders.ts`:
+9. Create `src/hooks/useOrders.js`:
    - `useOrderList(params)` → useInfiniteQuery
    - `useOrder(id)` → useQuery
    - `useCreateOrder()` → useMutation

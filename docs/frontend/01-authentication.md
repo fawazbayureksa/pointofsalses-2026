@@ -20,14 +20,14 @@ API Endpoints:
 
 Tasks:
 
-1. Create `src/api/auth.ts` with functions:
+1. Create `src/api/auth.js` with functions:
    - `login(email: string, password: string): Promise<{ token: string; user: User }>`
    - `logout(): Promise<void>`
    - `getMe(): Promise<User>`
    - `updateProfile(data: Partial<ProfileData>): Promise<User>`
    - `changePassword(data: ChangePasswordData): Promise<void>`
 
-2. Create TypeScript interfaces in `src/types/auth.ts`:
+2. Create TypeScript interfaces in `src/types/auth.js`:
    ```ts
    interface User {
      id: number;
@@ -41,21 +41,21 @@ Tasks:
    interface ChangePasswordData { current_password: string; password: string; password_confirmation: string; }
    ```
 
-3. Create `src/screens/auth/LoginScreen.tsx`:
+3. Create `src/screens/auth/LoginScreen.jsx`:
    - Email and password text inputs
    - "Login" button that calls `login()`, saves token via `authStore.setAuth()`, then navigates to AppTabs
    - Show inline validation error when API returns 422 (display errors.email message)
    - Show loading spinner on button while request is in progress
    - Handle network errors gracefully with a toast/snackbar
 
-4. Create `src/screens/profile/ProfileScreen.tsx`:
+4. Create `src/screens/profile/ProfileScreen.jsx`:
    - Display current user info (name, email, phone, role badge)
    - "Edit Profile" button opens a modal or navigates to an edit form
    - "Change Password" button opens a modal with current/new/confirm password fields
    - "Logout" button calls `logout()`, clears authStore, navigates to LoginScreen
    - Use React Query `useQuery` to call `getMe()` on mount
 
-5. Create `src/hooks/useAuth.ts` hook:
+5. Create `src/hooks/useAuth.js` hook:
    - Returns { user, token, login, logout, isLoading }
    - Wraps the authStore and API calls
 

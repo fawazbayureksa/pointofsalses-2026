@@ -26,12 +26,12 @@ Default configuration keys:
 
 Tasks:
 
-1. Create `src/api/config.ts`:
+1. Create `src/api/config.js`:
    - `getAllConfig(): Promise<Record<string, unknown>>`
    - `getConfig(key: string): Promise<{ key: string; value: unknown }>`
    - `updateConfig(key: string, value: unknown, type?: 'string' | 'integer' | 'boolean' | 'json'): Promise<{ key: string; value: unknown }>`
 
-2. Create TypeScript interfaces in `src/types/config.ts`:
+2. Create TypeScript interfaces in `src/types/config.js`:
    ```ts
    interface AppConfig {
      currency: string;
@@ -43,12 +43,12 @@ Tasks:
    }
    ```
 
-3. Create `src/store/configStore.ts` (Zustand):
+3. Create `src/store/configStore.js` (Zustand):
    - State: `config: AppConfig | null`
    - Actions: `setConfig(config)`, `updateKey(key, value)`
    - Load config at app startup after login
 
-4. Create `src/screens/settings/SettingsScreen.tsx`:
+4. Create `src/screens/settings/SettingsScreen.jsx`:
    - Grouped settings list:
 
    Group 1 – Store Configuration (requires appropriate role):
@@ -73,12 +73,12 @@ Tasks:
    - Show success toast on save
    - Show error toast on failure
 
-5. Create `src/hooks/useConfig.ts`:
+5. Create `src/hooks/useConfig.js`:
    - `useAppConfig()` → useQuery, fetches all config at startup, staleTime 30 min
    - `useUpdateConfig()` → useMutation that updates configStore on success
 
 6. App startup integration:
-   After login (in `src/hooks/useAuth.ts` or app initialisation):
+   After login (in `src/hooks/useAuth.js` or app initialisation):
    - Call `getAllConfig()` and store in `configStore`
    - Apply `config.timezone` to date-fns globally
    - Pass `config.currency` to `formatCurrency()` throughout the app
