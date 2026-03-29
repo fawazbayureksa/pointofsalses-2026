@@ -149,7 +149,7 @@ class ReportController extends Controller
         $categoryId = $request->category_id;
 
         // Top products by revenue
-        $topByRevenue = OrderItem::selectRaw('product_id, product_name, SUM(quantity) as qty_sold, SUM(subtotal) as revenue, SUM(subtotal - (cost_price * quantity)) as profit')
+        $topByRevenue = OrderItem::selectRaw('product_id, product_name, SUM(quantity) as qty_sold, SUM(subtotal) as revenue, SUM(subtotal - (COALESCE(cost_price, 0) * quantity)) as profit')
             ->whereHas('order', function ($q) use ($dateFrom, $dateTo) {
                 $q->where('status', 'completed')->whereBetween('created_at', [$dateFrom, $dateTo]);
             })
@@ -242,8 +242,8 @@ class ReportController extends Controller
         $customersWithOrders  = Order::where('status', 'completed')
             ->whereBetween('created_at', [$dateFrom, $dateTo])
             ->whereNotNull('customer_id')
-            ->distinct('customer_id')
-            ->count();
+            ->distinct()
+            ->count('customer_id');
 
         $walkInOrders = Order::where('status', 'completed')
             ->whereBetween('created_at', [$dateFrom, $dateTo])
