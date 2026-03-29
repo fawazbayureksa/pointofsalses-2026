@@ -51,6 +51,33 @@
                     <dd class="mt-1 text-sm text-gray-900 capitalize">{{ $tenant->plan ?? '-' }}</dd>
                 </div>
                 <div>
+                    <dt class="text-xs font-medium text-gray-500 uppercase">Trial Ends At</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        @if ($tenant->trial_ends_at)
+                            {{ $tenant->trial_ends_at->format('d M Y, H:i') }}
+                            @if ($tenant->isOnTrial())
+                                <span class="ml-2 px-2 py-0.5 text-xs font-semibold bg-blue-100 text-blue-700 rounded-full">
+                                    {{ $tenant->trialDaysLeft() }} day(s) left
+                                </span>
+                            @else
+                                <span class="ml-2 px-2 py-0.5 text-xs font-semibold bg-red-100 text-red-700 rounded-full">Expired</span>
+                            @endif
+                        @else
+                            -
+                        @endif
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-medium text-gray-500 uppercase">Subscription Skip</dt>
+                    <dd class="mt-1">
+                        @if ($tenant->subscription_skipped)
+                            <span class="px-2 py-1 text-xs font-semibold bg-amber-100 text-amber-800 rounded-full">Skipped (free access)</span>
+                        @else
+                            <span class="px-2 py-1 text-xs font-semibold bg-gray-100 text-gray-600 rounded-full">Not skipped</span>
+                        @endif
+                    </dd>
+                </div>
+                <div>
                     <dt class="text-xs font-medium text-gray-500 uppercase">Email</dt>
                     <dd class="mt-1 text-sm text-gray-900">{{ $tenant->email ?? '-' }}</dd>
                 </div>
