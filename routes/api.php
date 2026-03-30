@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\CashierReportController;
+use App\Http\Controllers\Api\CashierShiftController;
 use App\Http\Controllers\Api\ConfigController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\OutletController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\SupervisorAuthController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,10 +28,12 @@ use Illuminate\Support\Facades\Route;
 // ── Public endpoints (no auth required) ─────────────────────────────────────
 Route::prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
+    Route::post('login-pin', [AuthController::class, 'loginWithPin']);
+    Route::post('switch-cashier', [AuthController::class, 'switchCashier']);
 });
 
 // ── Authenticated endpoints ──────────────────────────────────────────────────
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', \App\Http\Middleware\AutoLockInactivity::class])->group(function () {
 
     // Auth
     Route::prefix('auth')->group(function () {
@@ -36,6 +41,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('me', [AuthController::class, 'me']);
         Route::put('profile', [AuthController::class, 'updateProfile']);
         Route::put('password', [AuthController::class, 'changePassword']);
+        Route::post('set-pin', [AuthController::class, 'setPin']);
+        Route::get('cashiers', [AuthController::class, 'listCashiers']);
     });
 
     // Dashboard
@@ -58,6 +65,23 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('orders', OrderController::class)->except(['update']);
     Route::post('orders/{order}/pay', [OrderController::class, 'pay']);
     Route::post('orders/{order}/cancel', [OrderController::class, 'cancel']);
+
+    // Cashier Shifts
+    Route::prefix('shifts')->group(function () {
+        Route::get('/', [CashierShiftController::class, 'index']);
+        Route::get('current', [CashierShiftController::class, 'current']);
+        Route::post('start', [CashierShiftController::class, 'start']);
+        Route::post('end', [CashierShiftController::class, 'end']);
+    });
+
+    // Supervisor Authorization
+    Route::post('supervisor/authorize', [SupervisorAuthController::class, 'authorize']);
+
+    // Reports
+    Route::prefix('reports')->group(function () {
+        Route::get('sales-by-cashier', [CashierReportController::class, 'salesByCashier']);
+        Route::get('shift-summary', [CashierReportController::class, 'shiftSummary']);
+    });
 
     // Tenant Configuration
     Route::prefix('config')->group(function () {
