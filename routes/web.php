@@ -59,6 +59,8 @@ Route::middleware(['auth', 'tenant.active', 'subscription.check'])
         Route::post('products/{product}/adjust-stock', [\App\Http\Controllers\Admin\ProductController::class, 'adjustStock'])->name('products.adjust-stock');
         Route::post('products/transfer-stock', [\App\Http\Controllers\Admin\ProductController::class, 'transferStock'])->name('products.transfer-stock');
         Route::resource('customers', \App\Http\Controllers\Admin\CustomerController::class);
+        Route::post('customers/{customer}/enroll', [\App\Http\Controllers\Admin\CustomerController::class, 'enroll'])->name('customers.enroll');
+        Route::delete('customers/{customer}/unenroll', [\App\Http\Controllers\Admin\CustomerController::class, 'unenroll'])->name('customers.unenroll');
         Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class);
         Route::get('orders/{order}/print', [\App\Http\Controllers\Admin\OrderController::class, 'print'])->name('orders.print');
         Route::get('orders-payments', [\App\Http\Controllers\Admin\OrderController::class, 'payments'])->name('orders.payments');
