@@ -1,4 +1,5 @@
 <div x-data="{ open: false, currentId: null, record: {} }"
+    @barcode-scanned.window="if ($event.detail.target === 'edit' && open) { record.barcode = $event.detail.code; $nextTick(() => { const f = $el.querySelector('[name=barcode]'); if(f) f.value = $event.detail.code; }) }"
     @open-edit-modal.window="
         open = true;
         currentId = $event.detail.id;
@@ -23,6 +24,26 @@
                 <x-admin-form-input name="sku" label="SKU" required value="" />
                 <x-admin-form-input name="category_id" label="Category" type="select" :options="['' => 'Select Category'] + ($categories ?? collect())->pluck('name', 'id')->toArray()"
                     value="" />
+            </div>
+
+            {{-- Barcode field with scan button --}}
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Barcode</label>
+                <div class="flex items-center gap-2">
+                    <div class="relative flex-1">
+                        <i class="fa-solid fa-barcode absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" name="barcode" value="" placeholder="Scan or type barcode…"
+                            class="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <button type="button"
+                        @click="window.dispatchEvent(new CustomEvent('open-barcode-scanner', { detail: { target: 'edit' } }))"
+                        title="Scan with camera"
+                        class="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors shrink-0">
+                        <i class="fa-solid fa-camera"></i>
+                        <span>Scan</span>
+                    </button>
+                </div>
+                <p class="text-xs text-gray-400 mt-1">Use a USB barcode scanner or click Scan to use your camera.</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
