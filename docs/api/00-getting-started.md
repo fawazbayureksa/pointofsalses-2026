@@ -85,6 +85,8 @@ HTTP status codes follow REST conventions:
 | [06-outlets.md](./06-outlets.md) | Outlets (read-only) |
 | [07-dashboard.md](./07-dashboard.md) | Dashboard stats |
 | [08-config.md](./08-config.md) | Tenant configuration |
+| [09-offline-queue.md](./09-offline-queue.md) | Offline order queue & sync |
+| [10-shift-summary.md](./10-shift-summary.md) | Shift summary aggregations |
 
 ---
 
@@ -103,3 +105,7 @@ See the [`../frontend/`](../frontend/) folder for per-feature React Native imple
 | [06-outlets.md](../frontend/06-outlets.md) | Outlet selector |
 | [07-dashboard.md](../frontend/07-dashboard.md) | Dashboard screen |
 | [08-config.md](../frontend/08-config.md) | Settings screen |
+| [09-offline-mode.md](../frontend/09-offline-mode.md) | Offline mode & background sync |
+| [10-pos-enhancements.md](../frontend/10-pos-enhancements.md) | POS UX enhancements |
+| [11-shift-summary.md](../frontend/11-shift-summary.md) | Shift summary / end of day |
+| [12-stock-check.md](../frontend/12-stock-check.md) | Stock check (read-only) |
