@@ -46,6 +46,17 @@
                     ['label' => 'Name', 'key' => 'name'],
                     ['label' => 'SKU', 'key' => 'sku'],
                     [
+                        'label' => 'Barcode',
+                        'slot' => function ($product) {
+                            if (!$product->barcode) {
+                                return '<span class="text-gray-400 text-xs">—</span>';
+                            }
+                            return '<span class="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded">' .
+                                e($product->barcode) .
+                                '</span>';
+                        },
+                    ],
+                    [
                         'label' => 'Category',
                         'slot' => function ($product) {
                             return optional($product->category)->name ?? '-';
@@ -101,4 +112,5 @@
 
     @include('admin.products.create-modal')
     @include('admin.products.edit-modal')
+    @include('admin.products.barcode-scanner-modal')
 @endsection
