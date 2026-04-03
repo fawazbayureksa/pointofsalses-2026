@@ -17,9 +17,11 @@
                     placeholder="0.00" />
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <x-admin-form-input name="unit" label="Unit" placeholder="pcs, kg, etc." />
                 <x-admin-form-input name="is_active" label="Status" type="select" :options="[1 => 'Active', 0 => 'Inactive']" />
+                <x-admin-form-input name="track_stock" label="Track Stock" type="select" :options="[1 => 'Yes', 0 => 'No']"
+                    value="1" />
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

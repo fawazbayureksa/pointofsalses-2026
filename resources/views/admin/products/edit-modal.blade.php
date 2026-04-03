@@ -31,10 +31,12 @@
                 <x-admin-form-input name="cost_price" label="Cost Price" type="number" step="0.01" value="" />
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <x-admin-form-input name="unit" label="Unit" placeholder="pcs, kg, liter, box, etc."
                     value="" />
                 <x-admin-form-input name="is_active" label="Status" type="select" :options="[1 => 'Active', 0 => 'Inactive']" value="" />
+                <x-admin-form-input name="track_stock" label="Track Stock" type="select" :options="[1 => 'Yes', 0 => 'No']"
+                    value="" />
             </div>
 
             <x-admin-form-input name="description" label="Description" type="textarea" value="" />
