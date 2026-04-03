@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -29,6 +30,11 @@ class ProductController extends Controller
                 )
             )
             ->when($request->category_id, fn($q, $c) => $q->where('category_id', $c))
+            ->when(
+                $request->category,
+                fn($q, $name) =>
+                $q->whereHas('category', fn($q) => $q->where('name', 'like', "%{$name}%"))
+            )
             ->when(
                 $outletId,
                 fn($q, $id) =>
@@ -84,6 +90,7 @@ class ProductController extends Controller
             'sku'                 => ['nullable', 'string', 'unique:products'],
             'barcode'             => ['nullable', 'string'],
             'description'         => ['nullable', 'string'],
+            'category_id'         => ['nullable', 'exists:categories,id'],
             'category'            => ['nullable', 'string'],
             'price'               => ['required', 'numeric', 'min:0'],
             'cost_price'          => ['nullable', 'numeric', 'min:0'],
@@ -93,6 +100,14 @@ class ProductController extends Controller
             'outlet_id'           => ['nullable', 'exists:outlets,id'],
             'track_stock'         => ['boolean'],
         ]);
+
+        if (empty($data['category_id']) && !empty($data['category'])) {
+            $cat = Category::where('name', $data['category'])->first();
+            if ($cat) {
+                $data['category_id'] = $cat->id;
+            }
+        }
+        unset($data['category']);
 
         $product = Product::create($data);
 
@@ -112,9 +127,18 @@ class ProductController extends Controller
             'cost_price'          => ['sometimes', 'numeric', 'min:0'],
             'stock'               => ['sometimes', 'numeric', 'min:0'],
             'low_stock_threshold' => ['sometimes', 'numeric', 'min:0'],
+            'category_id'         => ['sometimes', 'exists:categories,id'],
             'category'            => ['sometimes', 'string'],
             'is_active'           => ['sometimes', 'boolean'],
         ]);
+
+        if (empty($data['category_id']) && !empty($data['category'])) {
+            $cat = Category::where('name', $data['category'])->first();
+            if ($cat) {
+                $data['category_id'] = $cat->id;
+            }
+        }
+        unset($data['category']);
 
         $product->update($data);
 
