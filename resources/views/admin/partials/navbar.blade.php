@@ -73,6 +73,15 @@
                             <div class="px-4 py-2 text-xs text-gray-500 border-t border-gray-100">
                                 <p class="font-medium">Tenant:</p>
                                 <p>{{ Auth::user()->tenant->name }}</p>
+                                @if (Auth::user()->tenant->isOnTrial())
+                                    <p class="mt-1 text-blue-600 font-semibold">
+                                        Trial: {{ Auth::user()->tenant->trialDaysLeft() }}d left
+                                    </p>
+                                @elseif (Auth::user()->tenant->subscription_skipped)
+                                    <p class="mt-1 text-amber-600 font-semibold">Free Access</p>
+                                @else
+                                    <p class="mt-1 text-gray-500 capitalize">Plan: {{ Auth::user()->tenant->plan }}</p>
+                                @endif
                             </div>
                         @endif
                         {{-- @endif --}}
@@ -88,6 +97,23 @@
                     </div>
                 </div>
             </div>
-        </div>
+        @if (Auth::user()->tenant && Auth::user()->tenant->isOnTrial())
+            @php $daysLeft = Auth::user()->tenant->trialDaysLeft(); @endphp
+            <div class="bg-blue-50 border-t border-blue-200 px-6 py-2 flex items-center justify-between text-sm">
+                <span class="text-blue-700">
+                    <i class="fa-solid fa-clock mr-1"></i>
+                    Free trial:
+                    @if ($daysLeft > 0)
+                        <strong>{{ $daysLeft }} day{{ $daysLeft === 1 ? '' : 's' }} remaining</strong>
+                    @else
+                        <strong>less than 1 day remaining</strong>
+                    @endif
+                </span>
+                <a href="{{ route('subscription.plans') }}"
+                   class="text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded-full transition">
+                    Upgrade
+                </a>
+            </div>
+        @endif
     </div>
 </header>

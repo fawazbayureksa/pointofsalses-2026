@@ -11,19 +11,30 @@
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
     <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
         <div class="text-center mb-6">
-            <h1 class="text-2xl font-bold text-gray-800">Admin Panel</h1>
-            <p class="text-gray-600 mt-2">Create a new account</p>
+            <h1 class="text-2xl font-bold text-gray-800">Start Your Free Trial</h1>
+            <p class="text-gray-600 mt-2">14 days free, no credit card required</p>
         </div>
 
         <form method="POST" action="{{ route('register') }}">
             @csrf
 
             <div class="mb-4">
+                <label for="business_name" class="block text-sm font-medium text-gray-700 mb-1">Business Name</label>
+                <input id="business_name" type="text" name="business_name"
+                       value="{{ old('business_name') }}"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                       required autofocus autocomplete="organization">
+                @error('business_name')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="mb-4">
                 <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
                 <input id="name" type="text" name="name" 
                        value="{{ old('name') }}" 
                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                       required autofocus autocomplete="name">
+                       required autocomplete="name">
                 @error('name')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror

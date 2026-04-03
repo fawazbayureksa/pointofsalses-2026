@@ -3,13 +3,16 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CashierReportController;
 use App\Http\Controllers\Api\CashierShiftController;
 use App\Http\Controllers\Api\ConfigController;
+use App\Http\Controllers\Api\CustomerController;
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\OutletController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\SupervisorAuthController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -36,12 +39,27 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\AutoLockInactivity::clas
     Route::prefix('auth')->group(function () {
         Route::post('logout', [AuthController::class, 'logout']);
         Route::get('me', [AuthController::class, 'me']);
+        Route::put('profile', [AuthController::class, 'updateProfile']);
+        Route::put('password', [AuthController::class, 'changePassword']);
         Route::post('set-pin', [AuthController::class, 'setPin']);
         Route::get('cashiers', [AuthController::class, 'listCashiers']);
     });
 
+    // Dashboard
+    Route::get('dashboard', [DashboardController::class, 'index']);
+
     // POS – Products
     Route::apiResource('products', ProductController::class);
+
+    // POS – Categories
+    Route::apiResource('categories', CategoryController::class);
+
+    // POS – Customers
+    Route::apiResource('customers', CustomerController::class);
+
+    // POS – Outlets (read-only for mobile clients)
+    Route::get('outlets', [OutletController::class, 'index']);
+    Route::get('outlets/{outlet}', [OutletController::class, 'show']);
 
     // POS – Orders
     Route::apiResource('orders', OrderController::class)->except(['update']);

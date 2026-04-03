@@ -15,7 +15,13 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::with(['roles', 'outlets'])->latest()->paginate(15);
+        $query = User::with(['roles', 'outlets'])->latest();
+
+        if (! Auth::user()->hasRole('super_admin')) {
+            $query->where('tenant_id', Auth::user()->tenant_id);
+        }
+
+        $users = $query->paginate(15);
         return view('admin.users.index', compact('users'));
     }
 
@@ -44,6 +50,7 @@ class UserController extends Controller
             'password'  => Hash::make($validated['password']),
             'phone'     => $validated['phone'] ?? null,
             'is_active' => $validated['is_active'] ?? true,
+            'tenant_id' => Auth::user()->tenant_id,
         ]);
 
         if (!empty($validated['outlet_id'])) {
@@ -71,6 +78,9 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
+        if (! Auth::user()->hasRole('super_admin') && $user->tenant_id !== Auth::user()->tenant_id) {
+            abort(403);
+        }
         $validated = $request->validate([
             'name'      => 'required|string|max:255',
             'email'     => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
@@ -104,6 +114,10 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
+        if (! Auth::user()->hasRole('super_admin') && $user->tenant_id !== Auth::user()->tenant_id) {
+            abort(403);
+        }
+
         $user->delete();
 
         return redirect()->route('admin.users.index')->with('success', 'User deleted successfully.');

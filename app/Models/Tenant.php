@@ -25,12 +25,14 @@ class Tenant extends Model
         'plan',
         'status',
         'trial_ends_at',
+        'subscription_skipped',
         'settings',
     ];
 
     protected $casts = [
-        'trial_ends_at' => 'datetime',
-        'settings'      => 'array',
+        'trial_ends_at'        => 'datetime',
+        'subscription_skipped' => 'boolean',
+        'settings'             => 'array',
     ];
 
     public function getActivitylogOptions(): LogOptions
@@ -59,6 +61,43 @@ class Tenant extends Model
     public function isSuspended(): bool
     {
         return $this->status === 'suspended';
+    }
+
+    /** Whether this tenant is currently within a free-trial window. */
+    public function isOnTrial(): bool
+    {
+        return $this->trial_ends_at !== null && $this->trial_ends_at->isFuture();
+    }
+
+    /** Remaining trial days (0 when trial has ended or was never set). */
+    public function trialDaysLeft(): int
+    {
+        if (! $this->isOnTrial()) {
+            return 0;
+        }
+
+        return (int) now()->diffInDays($this->trial_ends_at);
+    }
+
+    /**
+     * Whether the tenant may access the application.
+     *
+     * Access is granted when any of the following is true:
+     *  1. subscription_skipped flag is set (manual override by super-admin)
+     *  2. plan is "basic" (always-free starter tier)
+     *  3. trial has not yet expired
+     */
+    public function canAccessSystem(): bool
+    {
+        if ($this->subscription_skipped) {
+            return true;
+        }
+
+        if ($this->plan === 'basic') {
+            return true;
+        }
+
+        return $this->isOnTrial();
     }
 
     public function getSetting(string $key, mixed $default = null): mixed
