@@ -26,32 +26,36 @@ class TenantController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'                  => 'required|string|max:255',
-            'slug'                  => 'required|string|max:255|unique:tenants,slug',
-            'status'                => 'required|in:active,inactive,suspended',
-            'plan'                  => 'nullable|in:basic,professional,enterprise',
-            'business_type'         => 'nullable|string|max:100',
-            'email'                 => 'nullable|email|max:255',
-            'phone'                 => 'nullable|string|max:20',
-            'address'               => 'nullable|string|max:500',
-            'trial_ends_at'         => 'nullable|date',
-            'subscription_skipped'  => 'nullable|boolean',
-            'admin_name'            => 'required|string|max:255',
-            'admin_email'           => 'required|email|max:255|unique:users,email',
-            'admin_password'        => 'required|string|min:8|confirmed',
+            'name'                   => 'required|string|max:255',
+            'slug'                   => 'required|string|max:255|unique:tenants,slug',
+            'status'                 => 'required|in:active,inactive,suspended',
+            'plan'                   => 'nullable|in:basic,professional,enterprise',
+            'subscription_status'    => 'nullable|in:trial,active,expired,cancelled',
+            'trial_ends_at'          => 'nullable|date',
+            'subscription_ends_at'   => 'nullable|date',
+            'is_subscription_exempt' => 'nullable|boolean',
+            'business_type'          => 'nullable|string|max:100',
+            'email'                  => 'nullable|email|max:255',
+            'phone'                  => 'nullable|string|max:20',
+            'address'                => 'nullable|string|max:500',
+            'admin_name'             => 'required|string|max:255',
+            'admin_email'            => 'required|email|max:255|unique:users,email',
+            'admin_password'         => 'required|string|min:8|confirmed',
         ]);
 
         $tenant = Tenant::create([
-            'name'                 => $validated['name'],
-            'slug'                 => $validated['slug'],
-            'status'               => $validated['status'],
-            'plan'                 => $validated['plan'] ?? 'basic',
-            'business_type'        => $validated['business_type'] ?? null,
-            'email'                => $validated['email'] ?? null,
-            'phone'                => $validated['phone'] ?? null,
-            'address'              => $validated['address'] ?? null,
-            'trial_ends_at'        => $validated['trial_ends_at'] ?? null,
-            'subscription_skipped' => $validated['subscription_skipped'] ?? false,
+            'name'                   => $validated['name'],
+            'slug'                   => $validated['slug'],
+            'status'                 => $validated['status'],
+            'plan'                   => $validated['plan'] ?? 'basic',
+            'subscription_status'    => $validated['subscription_status'] ?? 'trial',
+            'trial_ends_at'          => $validated['trial_ends_at'] ?? now()->addDays(14),
+            'subscription_ends_at'   => $validated['subscription_ends_at'] ?? null,
+            'is_subscription_exempt' => $request->boolean('is_subscription_exempt'),
+            'business_type'          => $validated['business_type'] ?? null,
+            'email'                  => $validated['email'] ?? null,
+            'phone'                  => $validated['phone'] ?? null,
+            'address'                => $validated['address'] ?? null,
         ]);
 
         $adminRole = Role::firstOrCreate(['name' => 'tenant_admin', 'guard_name' => 'web']);
@@ -84,18 +88,22 @@ class TenantController extends Controller
     public function update(Request $request, Tenant $tenant)
     {
         $validated = $request->validate([
-            'name'                 => 'required|string|max:255',
-            'status'               => 'required|in:active,inactive,suspended',
-            'plan'                 => 'nullable|in:basic,professional,enterprise',
-            'business_type'        => 'nullable|string|max:100',
-            'email'                => 'nullable|email|max:255',
-            'phone'                => 'nullable|string|max:20',
-            'address'              => 'nullable|string|max:500',
-            'trial_ends_at'        => 'nullable|date',
-            'subscription_skipped' => 'nullable|boolean',
+            'name'                   => 'required|string|max:255',
+            'status'                 => 'required|in:active,inactive,suspended',
+            'plan'                   => 'nullable|in:basic,professional,enterprise',
+            'subscription_status'    => 'nullable|in:trial,active,expired,cancelled',
+            'trial_ends_at'          => 'nullable|date',
+            'subscription_ends_at'   => 'nullable|date',
+            'is_subscription_exempt' => 'nullable|boolean',
+            'business_type'          => 'nullable|string|max:100',
+            'email'                  => 'nullable|email|max:255',
+            'phone'                  => 'nullable|string|max:20',
+            'address'                => 'nullable|string|max:500',
         ]);
 
-        $tenant->update($validated);
+        $tenant->update(array_merge($validated, [
+            'is_subscription_exempt' => $request->boolean('is_subscription_exempt'),
+        ]));
 
         return redirect()->route('admin.tenants.index')
             ->with('success', 'Tenant updated successfully.');

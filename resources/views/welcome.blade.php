@@ -334,6 +334,10 @@
                         <i class="fas fa-cloud text-violet-400"></i>
                         <span>Cloud-based</span>
                     </div>
+                    <div class="flex items-center gap-2 text-slate-500 text-sm">
+                        <i class="fas fa-gift text-amber-400"></i>
+                        <span>14-day free trial</span>
+                    </div>
                 </div>
             </div>
 
@@ -984,6 +988,82 @@
 
 
 <!-- ============================
+     FREE TRIAL SECTION
+============================= -->
+<section class="py-20 bg-[#060b18]">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="reveal glass-dark rounded-3xl p-10 lg:p-14 overflow-hidden relative">
+            <div class="absolute inset-0 bg-gradient-to-br from-emerald-600/8 via-indigo-600/6 to-violet-600/5 rounded-3xl"></div>
+            <div class="absolute -top-16 -right-16 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-16 -left-16 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl"></div>
+
+            <div class="relative z-10 grid lg:grid-cols-2 gap-12 items-center">
+                <!-- Left -->
+                <div>
+                    <div class="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-4 py-2 mb-6">
+                        <i class="fas fa-gift text-emerald-400 text-sm"></i>
+                        <span class="text-xs font-semibold text-emerald-300 uppercase tracking-wider">Free Trial</span>
+                    </div>
+
+                    <h2 class="text-4xl lg:text-5xl font-black text-white mb-4 leading-tight">
+                        Try everything<br><span class="gradient-text">free for 14 days</span>
+                    </h2>
+                    <p class="text-slate-400 text-lg mb-8 leading-relaxed">
+                        Get full access to all Professional features the moment you sign up. No credit card. No commitment. Cancel anytime — your data stays safe.
+                    </p>
+
+                    @guest
+                        @if (Route::has('register'))
+                            <a href="{{ route('register') }}" class="btn-primary inline-flex items-center gap-2 text-white font-bold px-8 py-4 rounded-2xl text-base">
+                                <i class="fas fa-rocket"></i> Start Free Trial
+                            </a>
+                        @endif
+                    @endguest
+
+                    <p class="text-xs text-slate-600 mt-4 flex items-center gap-2">
+                        <i class="fas fa-lock text-slate-600"></i>
+                        No credit card required. Cancel before the trial ends and you won't be charged.
+                    </p>
+                </div>
+
+                <!-- Right: What you get -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="glass rounded-2xl p-5">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center mb-3">
+                            <i class="fas fa-cash-register text-indigo-400"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-white mb-1">Full POS Module</p>
+                        <p class="text-xs text-slate-500">Cashier, receipts, returns — all included</p>
+                    </div>
+                    <div class="glass rounded-2xl p-5">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center mb-3">
+                            <i class="fas fa-boxes text-emerald-400"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-white mb-1">Inventory Control</p>
+                        <p class="text-xs text-slate-500">Stock tracking across all outlets</p>
+                    </div>
+                    <div class="glass rounded-2xl p-5">
+                        <div class="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center mb-3">
+                            <i class="fas fa-chart-bar text-violet-400"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-white mb-1">Advanced Reports</p>
+                        <p class="text-xs text-slate-500">Revenue, profit & analytics</p>
+                    </div>
+                    <div class="glass rounded-2xl p-5">
+                        <div class="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center mb-3">
+                            <i class="fas fa-users text-amber-400"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-white mb-1">Team Management</p>
+                        <p class="text-xs text-slate-500">Unlimited users & roles</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================
      PRICING
 ============================= -->
 <section id="pricing" class="py-24 bg-[#060b18]">
@@ -993,6 +1073,9 @@
                 Simple, <span class="gradient-text">honest pricing</span>
             </h2>
             <p class="reveal text-slate-400 text-lg">No hidden fees. Cancel anytime. Scale as you grow.</p>
+            <p class="reveal text-sm text-emerald-400 mt-2 flex items-center justify-center gap-2">
+                <i class="fas fa-gift"></i> Every paid plan starts with a 14-day free trial
+            </p>
         </div>
 
         <div class="grid md:grid-cols-3 gap-6 items-start">
@@ -1031,6 +1114,10 @@
                         <span class="text-slate-400 text-sm mb-1">/mo</span>
                     </div>
                     <p class="text-xs text-slate-500">For growing businesses</p>
+                    <div class="flex items-center gap-1.5 mt-2">
+                        <i class="fas fa-gift text-emerald-400 text-xs"></i>
+                        <span class="text-xs text-emerald-400 font-medium">14-day free trial included</span>
+                    </div>
                 </div>
                 <div class="section-divider mb-6"></div>
                 <ul class="space-y-3 mb-8">

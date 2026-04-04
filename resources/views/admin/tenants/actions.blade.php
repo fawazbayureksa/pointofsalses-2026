@@ -13,6 +13,10 @@
         phone: @json($tenant->phone ?? ''),
         status: @json($tenant->status ?? 'active'),
         plan: @json($tenant->plan ?? 'basic'),
+        subscription_status: @json($tenant->subscription_status ?? 'trial'),
+        trial_ends_at: @json($tenant->trial_ends_at ? $tenant->trial_ends_at->format('Y-m-d\TH:i') : ''),
+        subscription_ends_at: @json($tenant->subscription_ends_at ? $tenant->subscription_ends_at->format('Y-m-d\TH:i') : ''),
+        is_subscription_exempt: @json((bool) $tenant->is_subscription_exempt),
         business_type: @json($tenant->business_type ?? ''),
         address: @json($tenant->address ?? '')
     })"

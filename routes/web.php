@@ -16,6 +16,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn() => view('welcome'));
 
+// Subscription expired page (auth required, no subscription check)
+Route::middleware('auth')->get('/subscription/expired', fn() => view('subscription.expired'))->name('subscription.expired');
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store']);
@@ -38,7 +41,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/subscription/select', [SubscriptionController::class, 'select'])->name('subscription.select');
 });
 
-Route::middleware(['auth', 'tenant.active', 'subscription.check'])
+Route::middleware(['auth', 'tenant.active', 'subscription.active'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
@@ -59,6 +62,8 @@ Route::middleware(['auth', 'tenant.active', 'subscription.check'])
         Route::post('products/{product}/adjust-stock', [\App\Http\Controllers\Admin\ProductController::class, 'adjustStock'])->name('products.adjust-stock');
         Route::post('products/transfer-stock', [\App\Http\Controllers\Admin\ProductController::class, 'transferStock'])->name('products.transfer-stock');
         Route::resource('customers', \App\Http\Controllers\Admin\CustomerController::class);
+        Route::post('customers/{customer}/enroll', [\App\Http\Controllers\Admin\CustomerController::class, 'enroll'])->name('customers.enroll');
+        Route::delete('customers/{customer}/unenroll', [\App\Http\Controllers\Admin\CustomerController::class, 'unenroll'])->name('customers.unenroll');
         Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class);
         Route::get('orders/{order}/print', [\App\Http\Controllers\Admin\OrderController::class, 'print'])->name('orders.print');
         Route::get('orders-payments', [\App\Http\Controllers\Admin\OrderController::class, 'payments'])->name('orders.payments');

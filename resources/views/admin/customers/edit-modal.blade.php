@@ -12,25 +12,44 @@
                 else el.value = v ?? '';
             });
         })">
-    <x-admin-modal id="edit-customer-modal" title="Edit Customer" size="lg">
+    <x-admin-modal id="edit-customer-modal" title="Edit Customer" size="xl">
         <form method="POST" :action="'{{ url('/admin/customers') }}/' + currentId">
             @csrf
             @method('PUT')
-            
-            <x-admin-form-input name="name" label="Customer Name" required value="" />
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <x-admin-form-input name="name" label="Customer Name" required value="" />
+                <x-admin-form-input name="customer_code" label="Member Code" value="" />
+            </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <x-admin-form-input name="email" label="Email" type="email" value="" />
                 <x-admin-form-input name="phone" label="Phone" type="tel" value="" />
             </div>
 
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <x-admin-form-input name="gender" label="Gender" type="select" :options="['' => 'Select', 'male' => 'Male', 'female' => 'Female']" value="" />
+                <x-admin-form-input name="date_of_birth" label="Date of Birth" type="date" value="" />
+            </div>
+
             <x-admin-form-input name="address" label="Address" type="textarea" value="" />
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <x-admin-form-input name="gender" label="Gender" type="select" :options="['' => 'Select', 'male' => 'Male', 'female' => 'Female']" value="" />
                 <x-admin-form-input name="status" label="Status" type="select" :options="['active' => 'Active', 'inactive' => 'Inactive']" value="" />
+                <x-admin-form-input name="notes" label="Notes" type="textarea" value="" />
             </div>
-            
+
+            <div class="border-t border-gray-200 pt-4 mt-2">
+                <p class="text-sm font-medium text-gray-700 mb-3">
+                    <i class="fa-solid fa-id-card mr-1 text-blue-500"></i>Membership
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <x-admin-form-input name="member_since" label="Member Since" type="date" value="" />
+                    <x-admin-form-input name="membership_tier" label="Membership Tier" type="select"
+                        :options="['' => 'Select tier', 'regular' => 'Regular', 'silver' => 'Silver', 'gold' => 'Gold', 'platinum' => 'Platinum']" value="" />
+                </div>
+            </div>
+
             <div class="flex items-center justify-end space-x-3 mt-6">
                 <button type="button" @click="open = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
                     Cancel
