@@ -69,6 +69,8 @@ class RegisteredUserController extends Controller
             return [$tenant, $user];
         });
 
+        $user->assignRole($adminRole);
+
         event(new Registered($user));
 
         Auth::login($user);

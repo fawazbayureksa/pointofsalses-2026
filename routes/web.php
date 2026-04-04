@@ -11,6 +11,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\SubscriptionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn() => view('welcome'));
@@ -34,6 +35,10 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+    // Subscription / plan selection (accessible even when trial has expired)
+    Route::get('/subscription/plans', [SubscriptionController::class, 'plans'])->name('subscription.plans');
+    Route::post('/subscription/select', [SubscriptionController::class, 'select'])->name('subscription.select');
 });
 
 Route::middleware(['auth', 'tenant.active', 'subscription.active'])
