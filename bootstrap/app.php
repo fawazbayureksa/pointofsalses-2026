@@ -13,10 +13,11 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'tenant.active'      => \App\Http\Middleware\EnsureTenantActive::class,
-            'permission'         => \App\Http\Middleware\CheckPermission::class,
-            'role'               => \Spatie\Permission\Middleware\RoleMiddleware::class,
-            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+            'tenant.active'        => \App\Http\Middleware\EnsureTenantActive::class,
+            'subscription.active'  => \App\Http\Middleware\EnsureSubscriptionActive::class,
+            'permission'           => \App\Http\Middleware\CheckPermission::class,
+            'role'                 => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'role_or_permission'   => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

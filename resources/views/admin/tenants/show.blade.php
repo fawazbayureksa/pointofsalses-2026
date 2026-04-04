@@ -75,6 +75,54 @@
             </dl>
         </x-admin-card>
 
+        {{-- Subscription Info --}}
+        <x-admin-card title="Subscription">
+            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+                <div>
+                    <dt class="text-xs font-medium text-gray-500 uppercase">Subscription Status</dt>
+                    <dd class="mt-1">
+                        @if ($tenant->subscription_status === 'active')
+                            <span class="px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-full">Active (Paid)</span>
+                        @elseif ($tenant->subscription_status === 'trial')
+                            @if ($tenant->isOnTrial())
+                                <span class="px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full">Trial Active</span>
+                            @else
+                                <span class="px-2 py-1 text-xs font-semibold bg-red-100 text-red-800 rounded-full">Trial Expired</span>
+                            @endif
+                        @elseif ($tenant->subscription_status === 'expired')
+                            <span class="px-2 py-1 text-xs font-semibold bg-red-100 text-red-800 rounded-full">Expired</span>
+                        @else
+                            <span class="px-2 py-1 text-xs font-semibold bg-gray-100 text-gray-800 rounded-full capitalize">{{ $tenant->subscription_status ?? '-' }}</span>
+                        @endif
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-medium text-gray-500 uppercase">Subscription Exempt</dt>
+                    <dd class="mt-1">
+                        @if ($tenant->is_subscription_exempt)
+                            <span class="px-2 py-1 text-xs font-semibold bg-amber-100 text-amber-800 rounded-full">
+                                <i class="fas fa-flag mr-1"></i> Exempt (Free / Testing)
+                            </span>
+                        @else
+                            <span class="text-sm text-gray-500">No</span>
+                        @endif
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-medium text-gray-500 uppercase">Trial Ends At</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {{ $tenant->trial_ends_at ? $tenant->trial_ends_at->format('d M Y, H:i') : '-' }}
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-medium text-gray-500 uppercase">Subscription Ends At</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {{ $tenant->subscription_ends_at ? $tenant->subscription_ends_at->format('d M Y, H:i') : '-' }}
+                    </dd>
+                </div>
+            </dl>
+        </x-admin-card>
+
         {{-- Outlets --}}
         <x-admin-card title="Outlets ({{ $tenant->outlets->count() }})">
             @if ($tenant->outlets->isEmpty())
