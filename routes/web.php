@@ -74,6 +74,15 @@ Route::middleware(['auth', 'tenant.active', 'subscription.active'])
 
         Route::get('pos', [\App\Http\Controllers\Admin\PosController::class, 'index'])->name('pos.index');
 
+        // Reports
+        Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('index');
+            Route::get('/sales', [\App\Http\Controllers\Admin\ReportController::class, 'sales'])->name('sales');
+            Route::get('/products', [\App\Http\Controllers\Admin\ReportController::class, 'products'])->name('products');
+            Route::get('/customers', [\App\Http\Controllers\Admin\ReportController::class, 'customers'])->name('customers');
+            Route::get('/inventory', [\App\Http\Controllers\Admin\ReportController::class, 'inventory'])->name('inventory');
+        });
+
         // Inventory
         Route::prefix('inventory')->name('inventory.')->group(function () {
             Route::get('/stock', [\App\Http\Controllers\Admin\ProductController::class, 'stock'])->name('stock');
