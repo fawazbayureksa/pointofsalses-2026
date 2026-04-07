@@ -75,6 +75,14 @@ class OrderService
             'completed_at' => now(),
         ]);
 
+        // Award loyalty points: 1 pt per Rp 1,000 spent
+        if ($order->customer_id) {
+            $points = (int) floor($order->total_amount / 1000);
+            if ($points > 0) {
+                $order->customer()->increment('loyalty_points', $points);
+            }
+        }
+
         return $order->refresh();
     }
 
