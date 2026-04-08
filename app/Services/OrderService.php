@@ -36,9 +36,12 @@ class OrderService
                 $payload['outlet_id']
             );
 
+            $cashier = \App\Models\User::find($userId);
+
             $order = Order::create([
                 'outlet_id'    => $payload['outlet_id'],
                 'user_id'      => $userId,
+                'cashier_name' => $cashier?->name,
                 'customer_id'  => $payload['customer_id'] ?? null,
                 'order_number' => $this->generateOrderNumber(),
                 'status'       => 'pending',

@@ -145,7 +145,7 @@
             </tr>
             <tr>
                 <td>Cashier</td>
-                <td class="right">{{ $order->cashier?->name ?? '-' }}</td>
+                <td class="right">{{ $order->cashier_name ?? $order->cashier?->name ?? '-' }}</td>
             </tr>
             @if ($order->customer)
                 <tr>

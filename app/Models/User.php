@@ -6,9 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\Traits\CausesActivity;
 use Spatie\Permission\Traits\HasRoles;
@@ -22,6 +24,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'pin',
         'phone',
         'avatar',
         'is_active',
@@ -29,6 +32,7 @@ class User extends Authenticatable
 
     protected $hidden = [
         'password',
+        'pin',
         'remember_token',
     ];
 
@@ -58,9 +62,38 @@ class User extends Authenticatable
         return $this->hasMany(Order::class);
     }
 
+    public function shifts(): HasMany
+    {
+        return $this->hasMany(CashierShift::class);
+    }
+
+    public function activeShift(): HasOne
+    {
+        return $this->hasOne(CashierShift::class)->whereNull('ended_at')->latestOfMany('started_at');
+    }
+
     public function isSuperAdmin(): bool
     {
         return $this->tenant_id === null;
+    }
+
+    public function setPin(string $pin): void
+    {
+        $this->update(['pin' => Hash::make($pin)]);
+    }
+
+    public function verifyPin(string $pin): bool
+    {
+        if ($this->pin === null) {
+            return false;
+        }
+
+        return Hash::check($pin, $this->pin);
+    }
+
+    public function hasPin(): bool
+    {
+        return $this->pin !== null;
     }
 
     public function scopeActive($query)
