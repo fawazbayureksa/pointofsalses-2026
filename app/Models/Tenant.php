@@ -25,14 +25,17 @@ class Tenant extends Model
         'plan',
         'status',
         'trial_ends_at',
-        'subscription_skipped',
+        'subscription_status',
+        'subscription_ends_at',
+        'is_subscription_exempt',
         'settings',
     ];
 
     protected $casts = [
-        'trial_ends_at'        => 'datetime',
-        'subscription_skipped' => 'boolean',
-        'settings'             => 'array',
+        'trial_ends_at'           => 'datetime',
+        'subscription_ends_at'    => 'datetime',
+        'is_subscription_exempt'  => 'boolean',
+        'settings'                => 'array',
     ];
 
     public function getActivitylogOptions(): LogOptions
@@ -63,41 +66,27 @@ class Tenant extends Model
         return $this->status === 'suspended';
     }
 
-    /** Whether this tenant is currently within a free-trial window. */
     public function isOnTrial(): bool
     {
-        return $this->trial_ends_at !== null && $this->trial_ends_at->isFuture();
+        return $this->subscription_status === 'trial'
+            && $this->trial_ends_at !== null
+            && $this->trial_ends_at->isFuture();
     }
 
-    /** Remaining trial days (0 when trial has ended or was never set). */
-    public function trialDaysLeft(): int
+    public function isSubscribed(): bool
     {
-        if (! $this->isOnTrial()) {
-            return 0;
-        }
-
-        return (int) now()->diffInDays($this->trial_ends_at);
+        return $this->subscription_status === 'active'
+            && ($this->subscription_ends_at === null || $this->subscription_ends_at->isFuture());
     }
 
-    /**
-     * Whether the tenant may access the application.
-     *
-     * Access is granted when any of the following is true:
-     *  1. subscription_skipped flag is set (manual override by super-admin)
-     *  2. plan is "basic" (always-free starter tier)
-     *  3. trial has not yet expired
-     */
-    public function canAccessSystem(): bool
+    public function isExempt(): bool
     {
-        if ($this->subscription_skipped) {
-            return true;
-        }
+        return (bool) $this->is_subscription_exempt;
+    }
 
-        if ($this->plan === 'basic') {
-            return true;
-        }
-
-        return $this->isOnTrial();
+    public function hasActiveAccess(): bool
+    {
+        return $this->isExempt() || $this->isOnTrial() || $this->isSubscribed();
     }
 
     public function getSetting(string $key, mixed $default = null): mixed
