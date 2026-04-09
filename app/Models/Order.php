@@ -20,6 +20,7 @@ class Order extends Model
         'tenant_id',
         'outlet_id',
         'user_id',
+        'cashier_name',
         'customer_id',
         'order_number',
         'status',
@@ -30,6 +31,7 @@ class Order extends Model
         'total_amount',
         'payment_status',
         'notes',
+        'authorized_by',
         'completed_at',
     ];
 
@@ -57,6 +59,11 @@ class Order extends Model
     public function cashier(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function authorizer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'authorized_by');
     }
 
     public function customer(): BelongsTo

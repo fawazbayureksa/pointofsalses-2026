@@ -23,6 +23,19 @@
 
             <x-admin-form-input name="address" label="Address" type="textarea" placeholder="Enter full address" />
 
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <x-admin-form-input name="trial_ends_at" label="Trial Ends At" type="datetime-local" />
+                <div class="flex flex-col justify-center">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Subscription Skip</label>
+                    <label class="inline-flex items-center gap-2 cursor-pointer">
+                        <input type="hidden" name="subscription_skipped" value="0">
+                        <input type="checkbox" name="subscription_skipped" value="1"
+                               class="w-4 h-4 text-blue-600 border-gray-300 rounded">
+                        <span class="text-sm text-gray-600">Skip subscription check for this tenant</span>
+                    </label>
+                </div>
+            </div>
+
             <hr class="my-4 border-gray-200">
             <p class="text-sm font-semibold text-gray-700 mb-3">Admin Account</p>
 

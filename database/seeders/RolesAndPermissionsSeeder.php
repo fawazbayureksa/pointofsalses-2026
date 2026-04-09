@@ -42,8 +42,13 @@ class RolesAndPermissionsSeeder extends Seeder
         'edit users',
         'delete users',
         'manage users',
-        // Other
+        // Supervisor authorizations
+        'authorize refund',
+        'authorize void',
+        // Reports
         'view reports',
+        'view cashier reports',
+        // Other
         'manage settings',
         'manage tenants',
         'view activity logs',
@@ -85,8 +90,13 @@ class RolesAndPermissionsSeeder extends Seeder
             'edit users',
             'delete users',
             'manage users',
-            // Other
+            // Supervisor authorizations
+            'authorize refund',
+            'authorize void',
+            // Reports
             'view reports',
+            'view cashier reports',
+            // Other
             'manage settings',
             'view activity logs',
         ],
@@ -104,7 +114,10 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage orders',
             'view orders',
             'view payments',
+            'authorize refund',
+            'authorize void',
             'view reports',
+            'view cashier reports',
             'view activity logs',
         ],
         'cashier' => [

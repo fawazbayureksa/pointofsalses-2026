@@ -25,12 +25,17 @@ class Tenant extends Model
         'plan',
         'status',
         'trial_ends_at',
+        'subscription_status',
+        'subscription_ends_at',
+        'is_subscription_exempt',
         'settings',
     ];
 
     protected $casts = [
-        'trial_ends_at' => 'datetime',
-        'settings'      => 'array',
+        'trial_ends_at'           => 'datetime',
+        'subscription_ends_at'    => 'datetime',
+        'is_subscription_exempt'  => 'boolean',
+        'settings'                => 'array',
     ];
 
     public function getActivitylogOptions(): LogOptions
@@ -59,6 +64,29 @@ class Tenant extends Model
     public function isSuspended(): bool
     {
         return $this->status === 'suspended';
+    }
+
+    public function isOnTrial(): bool
+    {
+        return $this->subscription_status === 'trial'
+            && $this->trial_ends_at !== null
+            && $this->trial_ends_at->isFuture();
+    }
+
+    public function isSubscribed(): bool
+    {
+        return $this->subscription_status === 'active'
+            && ($this->subscription_ends_at === null || $this->subscription_ends_at->isFuture());
+    }
+
+    public function isExempt(): bool
+    {
+        return (bool) $this->is_subscription_exempt;
+    }
+
+    public function hasActiveAccess(): bool
+    {
+        return $this->isExempt() || $this->isOnTrial() || $this->isSubscribed();
     }
 
     public function getSetting(string $key, mixed $default = null): mixed

@@ -11,9 +11,13 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\SubscriptionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn() => view('welcome'));
+
+// Subscription expired page (auth required, no subscription check)
+Route::middleware('auth')->get('/subscription/expired', fn() => view('subscription.expired'))->name('subscription.expired');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
@@ -31,9 +35,13 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+    // Subscription / plan selection (accessible even when trial has expired)
+    Route::get('/subscription/plans', [SubscriptionController::class, 'plans'])->name('subscription.plans');
+    Route::post('/subscription/select', [SubscriptionController::class, 'select'])->name('subscription.select');
 });
 
-Route::middleware(['auth'])
+Route::middleware(['auth', 'tenant.active', 'subscription.active'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
@@ -54,6 +62,8 @@ Route::middleware(['auth'])
         Route::post('products/{product}/adjust-stock', [\App\Http\Controllers\Admin\ProductController::class, 'adjustStock'])->name('products.adjust-stock');
         Route::post('products/transfer-stock', [\App\Http\Controllers\Admin\ProductController::class, 'transferStock'])->name('products.transfer-stock');
         Route::resource('customers', \App\Http\Controllers\Admin\CustomerController::class);
+        Route::post('customers/{customer}/enroll', [\App\Http\Controllers\Admin\CustomerController::class, 'enroll'])->name('customers.enroll');
+        Route::delete('customers/{customer}/unenroll', [\App\Http\Controllers\Admin\CustomerController::class, 'unenroll'])->name('customers.unenroll');
         Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class);
         Route::get('orders/{order}/print', [\App\Http\Controllers\Admin\OrderController::class, 'print'])->name('orders.print');
         Route::get('orders-payments', [\App\Http\Controllers\Admin\OrderController::class, 'payments'])->name('orders.payments');
@@ -63,6 +73,15 @@ Route::middleware(['auth'])
         Route::delete('orders/{order}/items/{item}', [\App\Http\Controllers\Admin\OrderController::class, 'removeItem'])->name('orders.items.destroy');
 
         Route::get('pos', [\App\Http\Controllers\Admin\PosController::class, 'index'])->name('pos.index');
+
+        // Reports
+        Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('index');
+            Route::get('/sales', [\App\Http\Controllers\Admin\ReportController::class, 'sales'])->name('sales');
+            Route::get('/products', [\App\Http\Controllers\Admin\ReportController::class, 'products'])->name('products');
+            Route::get('/customers', [\App\Http\Controllers\Admin\ReportController::class, 'customers'])->name('customers');
+            Route::get('/inventory', [\App\Http\Controllers\Admin\ReportController::class, 'inventory'])->name('inventory');
+        });
 
         // Inventory
         Route::prefix('inventory')->name('inventory.')->group(function () {

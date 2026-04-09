@@ -135,6 +135,49 @@
                     </a>
                 </li>
 
+                <li>
+                    <div class="pt-4 pb-2">
+                        <span x-show="sidebarOpen"
+                            class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Advanced
+                            Reports</span>
+                    </div>
+                    <a href="{{ route('admin.reports.index') }}"
+                        :class="currentPage.includes('reports') && !currentPage.includes('reports/sales') && !currentPage.includes('reports/products') && !currentPage.includes('reports/customers') && !currentPage.includes('reports/inventory') ? 'bg-slate-700 text-white' :
+                            'text-slate-300 hover:bg-slate-700 hover:text-white'"
+                        class="flex items-center px-3 py-2 rounded-lg transition-colors">
+                        <i class="fa-solid fa-chart-pie w-5 text-center"></i>
+                        <span x-show="sidebarOpen" x-transition class="ml-3">Overview</span>
+                    </a>
+                    <a href="{{ route('admin.reports.sales') }}"
+                        :class="currentPage.includes('reports/sales') ? 'bg-slate-700 text-white' :
+                            'text-slate-300 hover:bg-slate-700 hover:text-white'"
+                        class="flex items-center px-3 py-2 rounded-lg transition-colors">
+                        <i class="fa-solid fa-chart-line w-5 text-center"></i>
+                        <span x-show="sidebarOpen" x-transition class="ml-3">Sales</span>
+                    </a>
+                    <a href="{{ route('admin.reports.products') }}"
+                        :class="currentPage.includes('reports/products') ? 'bg-slate-700 text-white' :
+                            'text-slate-300 hover:bg-slate-700 hover:text-white'"
+                        class="flex items-center px-3 py-2 rounded-lg transition-colors">
+                        <i class="fa-solid fa-box w-5 text-center"></i>
+                        <span x-show="sidebarOpen" x-transition class="ml-3">Products</span>
+                    </a>
+                    <a href="{{ route('admin.reports.customers') }}"
+                        :class="currentPage.includes('reports/customers') ? 'bg-slate-700 text-white' :
+                            'text-slate-300 hover:bg-slate-700 hover:text-white'"
+                        class="flex items-center px-3 py-2 rounded-lg transition-colors">
+                        <i class="fa-solid fa-users w-5 text-center"></i>
+                        <span x-show="sidebarOpen" x-transition class="ml-3">Customers</span>
+                    </a>
+                    <a href="{{ route('admin.reports.inventory') }}"
+                        :class="currentPage.includes('reports/inventory') ? 'bg-slate-700 text-white' :
+                            'text-slate-300 hover:bg-slate-700 hover:text-white'"
+                        class="flex items-center px-3 py-2 rounded-lg transition-colors">
+                        <i class="fa-solid fa-warehouse w-5 text-center"></i>
+                        <span x-show="sidebarOpen" x-transition class="ml-3">Inventory</span>
+                    </a>
+                </li>
+
                 @can('manage users')
                     <li>
                         <div class="pt-4 pb-2">

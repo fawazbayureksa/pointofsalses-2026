@@ -29,7 +29,14 @@ class InventoryService
 
             if ($product->track_stock) {
                 $pivot = $product->outlets()->wherePivot('outlet_id', $outletId)->first();
-                $stock = $pivot ? (float) $pivot->pivot->stock : 0.0;
+
+                // If product is not assigned to this outlet, skip stock validation
+                // (product exists globally but outlet assignment wasn't set)
+                if (! $pivot) {
+                    continue;
+                }
+
+                $stock = (float) $pivot->pivot->stock;
 
                 if ($stock < $item['quantity']) {
                     $errors["items.{$item['product_id']}"] = "Insufficient stock for '{$product->name}'. Available: {$stock}";
