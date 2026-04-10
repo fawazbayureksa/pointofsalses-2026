@@ -79,6 +79,25 @@ class ProductController extends Controller
     }
 
     /**
+     * GET /api/products/barcode/{barcode}
+     *
+     * Exact-match barcode lookup for scanner hardware.
+     */
+    public function findByBarcode(string $barcode): JsonResponse
+    {
+        $product = Product::active()
+            ->where('barcode', $barcode)
+            ->with(['category', 'outlets'])
+            ->first();
+
+        if (! $product) {
+            return response()->json(['message' => 'Product not found.'], 404);
+        }
+
+        return response()->json($product);
+    }
+
+    /**
      * POST /api/products
      */
     public function store(Request $request): JsonResponse
