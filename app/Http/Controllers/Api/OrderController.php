@@ -28,8 +28,8 @@ class OrderController extends Controller
             ->when($request->outlet_id, fn($q, $id) => $q->where('outlet_id', $id))
             ->when($request->date_from, fn($q, $d) => $q->whereDate('created_at', '>=', $d))
             ->when($request->date_to, fn($q, $d) => $q->whereDate('created_at', '<=', $d))
-            ->when($request->search, fn($q, $s) => $q->where('order_number', 'like', "%{$s}%")
-                ->orWhere('notes', 'like', "%{$s}%"))
+            ->when($request->search, fn($q, $s) => $q->where(fn($sq) => $sq->where('order_number', 'like', "%{$s}%")
+                ->orWhere('notes', 'like', "%{$s}%")))
             ->latest()
             ->paginate($request->per_page ?? 20);
 
@@ -116,7 +116,7 @@ class OrderController extends Controller
             'supervisor_id' => ['nullable', 'integer', 'exists:users,id'],
         ]);
 
-        if ($order->status !== 'completed' && $order->payment_status !== 'paid') {
+        if ($order->status !== 'completed' || $order->payment_status !== 'paid') {
             throw ValidationException::withMessages([
                 'order' => 'Only completed and paid orders can be refunded.',
             ]);

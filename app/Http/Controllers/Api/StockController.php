@@ -68,7 +68,13 @@ class StockController extends Controller
 
         $before = (float) $pivot->pivot->stock;
         $change = (float) $data['quantity_change'];
-        $after  = max(0, $before + $change);
+        $after  = $before + $change;
+
+        if ($after < 0) {
+            throw ValidationException::withMessages([
+                'quantity_change' => "Adjustment would result in negative stock ({$after}). Current stock: {$before}.",
+            ]);
+        }
 
         $product->outlets()->updateExistingPivot($data['outlet_id'], ['stock' => $after]);
 

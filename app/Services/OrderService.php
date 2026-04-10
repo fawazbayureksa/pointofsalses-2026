@@ -168,14 +168,16 @@ class OrderService
 
         // Cap redemption at the order total
         $redemptionValue = min((float) $points, (float) $order->total_amount);
+        // Only deduct the points that were actually applied as a discount
+        $pointsDeducted = (int) ceil($redemptionValue);
 
         $order->update([
             'discount_amount' => $order->discount_amount + $redemptionValue,
             'total_amount'    => max(0, $order->total_amount - $redemptionValue),
-            'notes'           => trim(($order->notes ?? '') . " | Loyalty: {$points} pts redeemed"),
+            'notes'           => trim(($order->notes ?? '') . " | Loyalty: {$pointsDeducted} pts redeemed"),
         ]);
 
-        $customer->decrement('loyalty_points', $points);
+        $customer->decrement('loyalty_points', $pointsDeducted);
 
         return $order->refresh();
     }

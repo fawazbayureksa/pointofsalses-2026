@@ -12,7 +12,7 @@ class PaymentController extends Controller
     /**
      * GET /api/payments
      *
-     * List payments with optional filters.
+     * List payments with optional filters, scoped to the authenticated tenant.
      */
     public function index(Request $request): JsonResponse
     {
@@ -24,7 +24,10 @@ class PaymentController extends Controller
             'date_to'        => ['nullable', 'date'],
         ]);
 
-        $payments = Payment::with(['order:id,order_number,status,total_amount,outlet_id,user_id'])
+        $tenantId = $request->user()->tenant_id;
+
+        $payments = Payment::whereHas('order', fn($q) => $q->where('tenant_id', $tenantId))
+            ->with(['order:id,order_number,status,total_amount,outlet_id,user_id'])
             ->when($request->order_id, fn($q, $id) => $q->where('order_id', $id))
             ->when($request->payment_method, fn($q, $m) => $q->where('payment_method', $m))
             ->when($request->status, fn($q, $s) => $q->where('status', $s))
@@ -39,10 +42,16 @@ class PaymentController extends Controller
     /**
      * GET /api/payments/{payment}
      *
-     * Get a single payment with full order details.
+     * Get a single payment with full order details, scoped to the authenticated tenant.
      */
-    public function show(Payment $payment): JsonResponse
+    public function show(Request $request, Payment $payment): JsonResponse
     {
+        $tenantId = $request->user()->tenant_id;
+
+        if ($payment->order->tenant_id !== $tenantId) {
+            abort(403, 'This payment does not belong to your tenant.');
+        }
+
         return response()->json(
             $payment->load(['order.items.product', 'order.cashier', 'order.customer', 'order.outlet'])
         );
