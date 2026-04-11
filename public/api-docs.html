@@ -1,0 +1,1747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Point of Sales 2026 – API Reference</title>
+  <style>
+    /* ── Reset & base ──────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --sidebar-width: 260px;
+      --header-height: 56px;
+      --brand:       #2563eb;
+      --brand-light: #dbeafe;
+      --brand-dark:  #1d4ed8;
+      --green:       #16a34a;
+      --red:         #dc2626;
+      --orange:      #d97706;
+      --purple:      #7c3aed;
+      --teal:        #0891b2;
+      --bg:          #f8fafc;
+      --surface:     #ffffff;
+      --border:      #e2e8f0;
+      --text:        #1e293b;
+      --text-muted:  #64748b;
+      --code-bg:     #0f172a;
+      --code-text:   #e2e8f0;
+      --radius:      6px;
+      --shadow-sm:   0 1px 3px rgba(0,0,0,.08);
+      --shadow:      0 4px 12px rgba(0,0,0,.10);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    /* ── Top bar ───────────────────────────────────────────────────────── */
+    .topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--header-height);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 16px;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .topbar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 17px;
+      color: var(--brand);
+      text-decoration: none;
+    }
+
+    .topbar-logo svg { flex-shrink: 0; }
+
+    .topbar-badge {
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--brand-light);
+      color: var(--brand);
+      padding: 2px 8px;
+      border-radius: 99px;
+    }
+
+    .topbar-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topbar-right a {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color .15s;
+    }
+
+    .topbar-right a:hover { color: var(--brand); }
+
+    /* ── Layout ────────────────────────────────────────────────────────── */
+    .layout {
+      display: flex;
+      margin-top: var(--header-height);
+      min-height: calc(100vh - var(--header-height));
+    }
+
+    /* ── Sidebar ───────────────────────────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-width);
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      position: sticky;
+      top: var(--header-height);
+      height: calc(100vh - var(--header-height));
+      overflow-y: auto;
+      padding: 20px 0 40px;
+    }
+
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .sidebar-section-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 16px 20px 6px;
+    }
+
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 20px;
+      font-size: 13.5px;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: background .12s, color .12s;
+      border-left: 3px solid transparent;
+    }
+
+    .sidebar-link:hover {
+      background: var(--brand-light);
+      color: var(--brand);
+      border-left-color: var(--brand);
+    }
+
+    .sidebar-link.active {
+      background: var(--brand-light);
+      color: var(--brand);
+      font-weight: 600;
+      border-left-color: var(--brand);
+    }
+
+    .sidebar-link .method-pill {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    /* ── Main content ──────────────────────────────────────────────────── */
+    .main {
+      flex: 1;
+      min-width: 0;
+      padding: 40px 48px 80px;
+      max-width: 900px;
+    }
+
+    /* ── Section anchors ───────────────────────────────────────────────── */
+    section { margin-bottom: 56px; }
+    section:last-child { margin-bottom: 0; }
+
+    .anchor { scroll-margin-top: calc(var(--header-height) + 16px); }
+
+    /* ── Typography ────────────────────────────────────────────────────── */
+    h1 {
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+
+    h2 {
+      font-size: 21px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--brand-light);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h2 .section-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--brand-light);
+      color: var(--brand);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 28px 0 10px;
+    }
+
+    h4 {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin: 20px 0 8px;
+    }
+
+    p { margin-bottom: 12px; }
+    p:last-child { margin-bottom: 0; }
+
+    a { color: var(--brand); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    strong { font-weight: 600; }
+
+    /* ── Endpoint card ─────────────────────────────────────────────────── */
+    .endpoint-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 28px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .endpoint-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      background: #f1f5f9;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .endpoint-header:hover { background: #e8f0fe; }
+
+    .method-badge {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .method-get    { background: #dcfce7; color: var(--green); }
+    .method-post   { background: #dbeafe; color: var(--brand); }
+    .method-put    { background: #fef3c7; color: var(--orange); }
+    .method-patch  { background: #ede9fe; color: var(--purple); }
+    .method-delete { background: #fee2e2; color: var(--red); }
+
+    .endpoint-path {
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .endpoint-description {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-left: auto;
+    }
+
+    .endpoint-body { padding: 18px; }
+
+    .endpoint-toggle {
+      margin-left: auto;
+      color: var(--text-muted);
+      font-size: 18px;
+      transition: transform .2s;
+    }
+
+    .endpoint-card.collapsed .endpoint-body { display: none; }
+    .endpoint-card.collapsed .endpoint-toggle { transform: rotate(-90deg); }
+
+    /* ── Auth badge ────────────────────────────────────────────────────── */
+    .auth-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 99px;
+      margin-bottom: 14px;
+    }
+
+    .auth-required   { background: #fef3c7; color: #92400e; }
+    .auth-public     { background: #dcfce7; color: #166534; }
+
+    /* ── Tables ────────────────────────────────────────────────────────── */
+    .params-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+      margin-bottom: 16px;
+    }
+
+    .params-table th {
+      text-align: left;
+      padding: 8px 12px;
+      background: #f1f5f9;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .params-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .params-table tr:last-child td { border-bottom: none; }
+
+    .params-table code {
+      font-family: monospace;
+      font-size: 13px;
+      background: #f1f5f9;
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: var(--brand-dark);
+    }
+
+    .required-dot { color: var(--red); font-weight: 700; }
+    .optional-dot { color: var(--text-muted); }
+
+    /* ── Code blocks ───────────────────────────────────────────────────── */
+    .code-block {
+      background: var(--code-bg);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .code-block-header {
+      display: flex;
+      align-items: center;
+      padding: 8px 14px;
+      background: #1e293b;
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      gap: 8px;
+    }
+
+    .code-block-header .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #475569;
+    }
+
+    .code-block-header .lang-label { margin-right: auto; }
+
+    .copy-btn {
+      background: none;
+      border: 1px solid #475569;
+      color: #94a3b8;
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: border-color .15s, color .15s;
+    }
+
+    .copy-btn:hover { border-color: #94a3b8; color: #e2e8f0; }
+
+    .code-block pre {
+      padding: 16px;
+      overflow-x: auto;
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 13px;
+      line-height: 1.65;
+      color: var(--code-text);
+    }
+
+    .code-block pre .hl-key   { color: #7dd3fc; }
+    .code-block pre .hl-str   { color: #86efac; }
+    .code-block pre .hl-num   { color: #fca5a5; }
+    .code-block pre .hl-bool  { color: #fdba74; }
+    .code-block pre .hl-null  { color: #c4b5fd; }
+    .code-block pre .hl-cmt   { color: #64748b; }
+    .code-block pre .hl-url   { color: #a78bfa; }
+
+    /* ── Status chips ──────────────────────────────────────────────────── */
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .status-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 13.5px;
+    }
+
+    .status-code {
+      font-family: monospace;
+      font-size: 14px;
+      font-weight: 800;
+      min-width: 36px;
+    }
+
+    .s200, .s201, .s204 { color: var(--green); }
+    .s401, .s403, .s404 { color: var(--orange); }
+    .s422, .s429, .s500 { color: var(--red); }
+
+    /* ── Info / note boxes ─────────────────────────────────────────────── */
+    .note-box {
+      border-left: 4px solid var(--brand);
+      background: var(--brand-light);
+      padding: 12px 16px;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      font-size: 13.5px;
+      margin-bottom: 16px;
+      color: #1e40af;
+    }
+
+    .note-box.warn {
+      border-color: var(--orange);
+      background: #fef3c7;
+      color: #78350f;
+    }
+
+    .note-box.success {
+      border-color: var(--green);
+      background: #f0fdf4;
+      color: #14532d;
+    }
+
+    /* ── Base URL bar ──────────────────────────────────────────────────── */
+    .base-url-bar {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: var(--code-bg);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .base-url-bar .label {
+      background: var(--brand);
+      color: #fff;
+      padding: 10px 16px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .base-url-bar .url {
+      font-family: monospace;
+      color: var(--code-text);
+      padding: 10px 16px;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    /* ── Steps list ────────────────────────────────────────────────────── */
+    .steps { list-style: none; counter-reset: step-counter; }
+
+    .steps li {
+      counter-increment: step-counter;
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .steps li::before {
+      content: counter(step-counter);
+      min-width: 28px;
+      height: 28px;
+      background: var(--brand);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .steps li .step-content strong { display: block; margin-bottom: 4px; }
+
+    /* ── Rate limit bar ────────────────────────────────────────────────── */
+    .rate-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .rate-table th {
+      background: #f1f5f9;
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--text-muted);
+    }
+
+    .rate-table td {
+      padding: 10px 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── TOC / quick nav ───────────────────────────────────────────────── */
+    .toc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .toc-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      text-decoration: none;
+      color: var(--text);
+      font-size: 13.5px;
+      transition: border-color .15s, background .15s;
+    }
+
+    .toc-item:hover {
+      border-color: var(--brand);
+      background: var(--brand-light);
+      color: var(--brand);
+      text-decoration: none;
+    }
+
+    .toc-item .toc-num {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--brand);
+      background: var(--brand-light);
+      padding: 1px 6px;
+      border-radius: 99px;
+      flex-shrink: 0;
+    }
+
+    /* ── Security checklist ────────────────────────────────────────────── */
+    .security-list { list-style: none; }
+
+    .security-list li {
+      display: flex;
+      gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    .security-list li:last-child { border-bottom: none; }
+
+    .security-list li::before {
+      content: '✓';
+      color: var(--green);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* ── Mobile nav toggle ─────────────────────────────────────────────── */
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text);
+      padding: 4px;
+    }
+
+    @media (max-width: 768px) {
+      .menu-toggle { display: flex; align-items: center; }
+      .sidebar {
+        position: fixed;
+        left: -100%;
+        top: var(--header-height);
+        z-index: 99;
+        transition: left .25s;
+        border-right: 1px solid var(--border);
+        box-shadow: var(--shadow);
+      }
+      .sidebar.open { left: 0; }
+      .main { padding: 24px 20px 60px; }
+      h1 { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Top Bar ──────────────────────────────────────────────────────────── -->
+<header class="topbar">
+  <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <line x1="3" y1="6"  x2="21" y2="6"/>
+      <line x1="3" y1="12" x2="21" y2="12"/>
+      <line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
+  <a href="#overview" class="topbar-logo">
+    <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <rect x="2" y="3" width="20" height="14" rx="2"/>
+      <path d="M8 21h8M12 17v4"/>
+    </svg>
+    Point of Sales 2026
+  </a>
+  <span class="topbar-badge">API v1.0</span>
+  <nav class="topbar-right">
+    <a href="https://github.com/fawazbayureksa/pointofsalses-2026" target="_blank" rel="noopener">GitHub</a>
+    <a href="mailto:support@example.com">Support</a>
+  </nav>
+</header>
+
+<!-- ── Layout ──────────────────────────────────────────────────────────── -->
+<div class="layout">
+
+  <!-- ── Sidebar ───────────────────────────────────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-section-title">Getting Started</div>
+    <a class="sidebar-link active" href="#overview">Overview</a>
+    <a class="sidebar-link" href="#authentication">Authentication</a>
+    <a class="sidebar-link" href="#response-format">Response Format</a>
+    <a class="sidebar-link" href="#error-handling">Error Handling</a>
+    <a class="sidebar-link" href="#rate-limiting">Rate Limiting</a>
+    <a class="sidebar-link" href="#security">Security Notes</a>
+
+    <div class="sidebar-section-title">Endpoints</div>
+    <a class="sidebar-link" href="#auth-endpoints">
+      <span class="method-pill method-post">Auth</span> Auth
+    </a>
+    <a class="sidebar-link" href="#dashboard-endpoints">
+      <span class="method-pill method-get">GET</span> Dashboard
+    </a>
+    <a class="sidebar-link" href="#products-endpoints">
+      <span class="method-pill method-get">CRUD</span> Products
+    </a>
+    <a class="sidebar-link" href="#categories-endpoints">
+      <span class="method-pill method-get">CRUD</span> Categories
+    </a>
+    <a class="sidebar-link" href="#customers-endpoints">
+      <span class="method-pill method-get">CRUD</span> Customers
+    </a>
+    <a class="sidebar-link" href="#outlets-endpoints">
+      <span class="method-pill method-get">GET</span> Outlets
+    </a>
+    <a class="sidebar-link" href="#orders-endpoints">
+      <span class="method-pill method-post">POST</span> Orders
+    </a>
+    <a class="sidebar-link" href="#payments-endpoints">
+      <span class="method-pill method-get">GET</span> Payments
+    </a>
+    <a class="sidebar-link" href="#shifts-endpoints">
+      <span class="method-pill method-post">Shift</span> Shifts
+    </a>
+    <a class="sidebar-link" href="#supervisor-endpoints">
+      <span class="method-pill method-post">POST</span> Supervisor
+    </a>
+    <a class="sidebar-link" href="#reports-endpoints">
+      <span class="method-pill method-get">GET</span> Reports
+    </a>
+    <a class="sidebar-link" href="#stock-endpoints">
+      <span class="method-pill method-post">Stock</span> Stock
+    </a>
+    <a class="sidebar-link" href="#config-endpoints">
+      <span class="method-pill method-put">PUT</span> Config
+    </a>
+
+    <div class="sidebar-section-title">Integration</div>
+    <a class="sidebar-link" href="#integration-guide">Integration Guide</a>
+
+  </aside>
+
+  <!-- ── Main Content ───────────────────────────────────────────────────── -->
+  <main class="main">
+
+    <!-- ── Hero ────────────────────────────────────────────────────────── -->
+    <section id="overview" class="anchor">
+      <h1>Point of Sales 2026 API</h1>
+      <p class="subtitle">Complete REST API reference for mobile POS apps &amp; external integrations.</p>
+
+      <p>
+        <strong>Point of Sales 2026</strong> is a multi-tenant, cloud-based POS backend built with
+        <strong>Laravel 11</strong> and <strong>Laravel Sanctum</strong>. It powers the React Native
+        cashier app and provides programmatic access to sales, inventory, shift, and reporting data
+        for third-party integrations.
+      </p>
+
+      <br/>
+
+      <h3>Base URL</h3>
+      <div class="base-url-bar">
+        <span class="label">Base URL</span>
+        <span class="url">https://&lt;your-tenant&gt;.yourdomain.com/api</span>
+      </div>
+
+      <div class="note-box">
+        Replace <code>&lt;your-tenant&gt;</code> with your organisation's subdomain slug.
+        All routes are tenant-scoped — you will never receive data from another tenant.
+      </div>
+
+      <h3>Quick Navigation</h3>
+      <div class="toc-grid">
+        <a class="toc-item" href="#authentication"><span class="toc-num">2</span> Authentication</a>
+        <a class="toc-item" href="#response-format"><span class="toc-num">3</span> Response Format</a>
+        <a class="toc-item" href="#error-handling"><span class="toc-num">4</span> Error Handling</a>
+        <a class="toc-item" href="#rate-limiting"><span class="toc-num">5</span> Rate Limiting</a>
+        <a class="toc-item" href="#auth-endpoints"><span class="toc-num">7.1</span> Auth Endpoints</a>
+        <a class="toc-item" href="#orders-endpoints"><span class="toc-num">7.7</span> Orders</a>
+        <a class="toc-item" href="#shifts-endpoints"><span class="toc-num">7.9</span> Shifts</a>
+        <a class="toc-item" href="#integration-guide"><span class="toc-num">8</span> Integration Guide</a>
+      </div>
+    </section>
+
+    <!-- ── Authentication ──────────────────────────────────────────────── -->
+    <section id="authentication" class="anchor">
+      <h2><span class="section-icon">🔑</span> Authentication</h2>
+
+      <p>
+        The API uses <strong>Laravel Sanctum Bearer Tokens</strong>. Two flows are available.
+      </p>
+
+      <h4>Required headers (all authenticated requests)</h4>
+      <div class="code-block">
+        <div class="code-block-header">
+          <span class="dot"></span>
+          <span class="lang-label">HTTP Headers</span>
+        </div>
+        <pre>Authorization: Bearer &lt;token&gt;
+Accept: application/json
+Content-Type: application/json</pre>
+      </div>
+
+      <div class="note-box">
+        <strong>Public endpoints</strong> — <code>POST /auth/login</code>, <code>POST /auth/login-pin</code>,
+        and <code>POST /auth/switch-cashier</code> do <em>not</em> require the
+        <code>Authorization</code> header.
+      </div>
+
+      <h4>Token storage (mobile)</h4>
+      <p>
+        Store tokens using <code>expo-secure-store</code> on React Native / Expo or
+        <code>EncryptedSharedPreferences</code> on Android. On web, use <code>httpOnly</code> cookies.
+        Never store tokens in <code>localStorage</code>.
+      </p>
+    </section>
+
+    <!-- ── Response Format ─────────────────────────────────────────────── -->
+    <section id="response-format" class="anchor">
+      <h2><span class="section-icon">📦</span> Response Format</h2>
+
+      <h4>Success – single resource</h4>
+      <div class="code-block">
+        <div class="code-block-header">
+          <span class="dot"></span>
+          <span class="lang-label">JSON Response</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre>{
+  <span class="hl-key">"id"</span>: <span class="hl-num">1</span>,
+  <span class="hl-key">"name"</span>: <span class="hl-str">"Example Resource"</span>,
+  <span class="hl-key">"created_at"</span>: <span class="hl-str">"2026-04-11T10:00:00.000000Z"</span>
+}</pre>
+      </div>
+
+      <h4>Success – paginated list</h4>
+      <div class="code-block">
+        <div class="code-block-header">
+          <span class="dot"></span>
+          <span class="lang-label">JSON Response</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre>{
+  <span class="hl-key">"current_page"</span>: <span class="hl-num">1</span>,
+  <span class="hl-key">"data"</span>: [ <span class="hl-cmt">/* array of objects */</span> ],
+  <span class="hl-key">"per_page"</span>: <span class="hl-num">20</span>,
+  <span class="hl-key">"total"</span>: <span class="hl-num">100</span>,
+  <span class="hl-key">"last_page"</span>: <span class="hl-num">5</span>,
+  <span class="hl-key">"next_page_url"</span>: <span class="hl-str">"https://example.com/api/resource?page=2"</span>,
+  <span class="hl-key">"prev_page_url"</span>: <span class="hl-null">null</span>
+}</pre>
+      </div>
+
+      <h4>Error</h4>
+      <div class="code-block">
+        <div class="code-block-header">
+          <span class="dot"></span>
+          <span class="lang-label">JSON Response</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre>{
+  <span class="hl-key">"message"</span>: <span class="hl-str">"The given data was invalid."</span>,
+  <span class="hl-key">"errors"</span>: {
+    <span class="hl-key">"field_name"</span>: [<span class="hl-str">"Validation error message."</span>]
+  }
+}</pre>
+      </div>
+    </section>
+
+    <!-- ── Error Handling ──────────────────────────────────────────────── -->
+    <section id="error-handling" class="anchor">
+      <h2><span class="section-icon">⚠️</span> Error Handling</h2>
+
+      <div class="status-grid">
+        <div class="status-card"><span class="status-code s200">200</span><span>OK</span></div>
+        <div class="status-card"><span class="status-code s200">201</span><span>Created</span></div>
+        <div class="status-card"><span class="status-code s200">204</span><span>No Content</span></div>
+        <div class="status-card"><span class="status-code s401">401</span><span>Unauthenticated</span></div>
+        <div class="status-card"><span class="status-code s401">403</span><span>Forbidden</span></div>
+        <div class="status-card"><span class="status-code s401">404</span><span>Not Found</span></div>
+        <div class="status-card"><span class="status-code s422">422</span><span>Validation Error</span></div>
+        <div class="status-card"><span class="status-code s422">429</span><span>Rate Limited</span></div>
+        <div class="status-card"><span class="status-code s422">500</span><span>Server Error</span></div>
+      </div>
+
+      <h4>Example – 422 Validation Error</h4>
+      <div class="code-block">
+        <div class="code-block-header"><span class="dot"></span><span class="lang-label">JSON 422</span></div>
+        <pre>{
+  <span class="hl-key">"message"</span>: <span class="hl-str">"The given data was invalid."</span>,
+  <span class="hl-key">"errors"</span>: {
+    <span class="hl-key">"email"</span>:    [<span class="hl-str">"The email field is required."</span>],
+    <span class="hl-key">"pin"</span>:      [<span class="hl-str">"The pin must be 6 digits."</span>]
+  }
+}</pre>
+      </div>
+    </section>
+
+    <!-- ── Rate Limiting ───────────────────────────────────────────────── -->
+    <section id="rate-limiting" class="anchor">
+      <h2><span class="section-icon">⏱</span> Rate Limiting</h2>
+
+      <table class="rate-table">
+        <thead>
+          <tr><th>Scope</th><th>Limit</th><th>Headers</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Global per IP</td>
+            <td><strong>60 req / min</strong></td>
+            <td><code>X-RateLimit-Limit</code>, <code>X-RateLimit-Remaining</code></td>
+          </tr>
+          <tr>
+            <td>Auth endpoints</td>
+            <td><strong>10 req / min</strong></td>
+            <td><code>Retry-After</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>
+        When the limit is exceeded the API returns <strong>HTTP 429</strong>.
+        Implement exponential back-off in your client using the <code>Retry-After</code> header.
+      </p>
+
+      <div class="note-box">
+        Rate limits can be raised for verified integrations. Contact your platform administrator.
+      </div>
+    </section>
+
+    <!-- ── Security ────────────────────────────────────────────────────── -->
+    <section id="security" class="anchor">
+      <h2><span class="section-icon">🛡</span> Security Notes</h2>
+
+      <ul class="security-list">
+        <li>Store tokens in <code>expo-secure-store</code> or Android <code>EncryptedSharedPreferences</code> — never in plain <code>AsyncStorage</code> or <code>localStorage</code>.</li>
+        <li>All traffic must go over <strong>TLS 1.2+</strong>. HTTP requests will be redirected or rejected.</li>
+        <li>Resources are silently scoped to the authenticated user's tenant.</li>
+        <li>Rotate tokens after privilege escalation (role change).</li>
+        <li>PINs are stored as bcrypt hashes server-side — never log or transmit PINs outside the designated login endpoints.</li>
+        <li>Supervisor actions (refund, void, discount override) require a short-lived action-scoped supervisor token from <code>POST /supervisor/authorize</code>.</li>
+        <li>Implement automatic logout on <code>401 Unauthenticated</code> responses.</li>
+      </ul>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         ENDPOINTS
+    ══════════════════════════════════════════════════════════════════ -->
+
+    <!-- ── 7.1 Auth ───────────────────────────────────────────────────── -->
+    <section id="auth-endpoints" class="anchor">
+      <h2><span class="section-icon">🔐</span> 7.1 Auth</h2>
+
+      <!-- Login -->
+      <div class="endpoint-card" id="ep-auth-login">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/auth/login</span>
+          <span class="endpoint-description">Standard login</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-public">🌐 Public</span>
+          <p>Authenticate with email and password. Returns a Sanctum Bearer token.</p>
+          <h4>Request Body</h4>
+          <table class="params-table">
+            <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code>email</code></td><td>string</td><td><span class="required-dot">✅</span></td><td>User email</td></tr>
+              <tr><td><code>password</code></td><td>string</td><td><span class="required-dot">✅</span></td><td>User password</td></tr>
+            </tbody>
+          </table>
+          <h4>Example Request</h4>
+          <div class="code-block">
+            <div class="code-block-header"><span class="dot"></span><span class="lang-label">JSON</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre>{
+  <span class="hl-key">"email"</span>: <span class="hl-str">"cashier@example.com"</span>,
+  <span class="hl-key">"password"</span>: <span class="hl-str">"secret123"</span>
+}</pre>
+          </div>
+          <h4>Response 200</h4>
+          <div class="code-block">
+            <div class="code-block-header"><span class="dot"></span><span class="lang-label">JSON</span></div>
+            <pre>{
+  <span class="hl-key">"token"</span>: <span class="hl-str">"1|abcdefghijklmnopqrstuvwxyz"</span>,
+  <span class="hl-key">"user"</span>: {
+    <span class="hl-key">"id"</span>: <span class="hl-num">1</span>,
+    <span class="hl-key">"name"</span>: <span class="hl-str">"John Cashier"</span>,
+    <span class="hl-key">"email"</span>: <span class="hl-str">"cashier@example.com"</span>,
+    <span class="hl-key">"roles"</span>: [<span class="hl-str">"cashier"</span>],
+    <span class="hl-key">"has_pin"</span>: <span class="hl-bool">true</span>
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Login PIN -->
+      <div class="endpoint-card collapsed" id="ep-auth-pin">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/auth/login-pin</span>
+          <span class="endpoint-description">Cashier PIN login</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-public">🌐 Public</span>
+          <p>Authenticate a cashier using email + 6-digit PIN for fast POS access.</p>
+          <h4>Request Body</h4>
+          <table class="params-table">
+            <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code>email</code></td><td>string</td><td><span class="required-dot">✅</span></td><td>Cashier email</td></tr>
+              <tr><td><code>pin</code></td><td>string</td><td><span class="required-dot">✅</span></td><td>6-digit numeric PIN</td></tr>
+            </tbody>
+          </table>
+          <h4>Example Request</h4>
+          <div class="code-block">
+            <div class="code-block-header"><span class="dot"></span><span class="lang-label">JSON</span></div>
+            <pre>{
+  <span class="hl-key">"email"</span>: <span class="hl-str">"cashier@example.com"</span>,
+  <span class="hl-key">"pin"</span>: <span class="hl-str">"123456"</span>
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Switch Cashier -->
+      <div class="endpoint-card collapsed">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/auth/switch-cashier</span>
+          <span class="endpoint-description">Switch active cashier on shared device</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-public">🌐 Public</span>
+          <table class="params-table">
+            <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code>user_id</code></td><td>integer</td><td><span class="required-dot">✅</span></td><td>ID of new cashier</td></tr>
+              <tr><td><code>pin</code></td><td>string</td><td><span class="required-dot">✅</span></td><td>6-digit PIN</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Logout -->
+      <div class="endpoint-card collapsed">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/auth/logout</span>
+          <span class="endpoint-description">Revoke current token</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-required">🔒 Requires Auth</span>
+          <div class="code-block"><div class="code-block-header"><span class="dot"></span><span class="lang-label">Response 200</span></div>
+            <pre>{ <span class="hl-key">"message"</span>: <span class="hl-str">"Logged out successfully."</span> }</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Me -->
+      <div class="endpoint-card collapsed">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/auth/me</span>
+          <span class="endpoint-description">Get current user</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-required">🔒 Requires Auth</span>
+          <div class="code-block"><div class="code-block-header"><span class="dot"></span><span class="lang-label">Response 200</span></div>
+            <pre>{
+  <span class="hl-key">"id"</span>: <span class="hl-num">1</span>,
+  <span class="hl-key">"name"</span>: <span class="hl-str">"John Cashier"</span>,
+  <span class="hl-key">"roles"</span>: [<span class="hl-str">"cashier"</span>],
+  <span class="hl-key">"permissions"</span>: [<span class="hl-str">"create_orders"</span>, <span class="hl-str">"view_products"</span>],
+  <span class="hl-key">"has_pin"</span>: <span class="hl-bool">true</span>
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- More auth endpoints condensed -->
+      <div class="endpoint-card collapsed">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-put">PUT</span>
+          <span class="endpoint-path">/auth/profile</span>
+          <span class="endpoint-description">Update profile (name, email, phone)</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-required">🔒 Requires Auth</span>
+          <p>All fields optional. Returns updated user object.</p>
+        </div>
+      </div>
+
+      <div class="endpoint-card collapsed">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-put">PUT</span>
+          <span class="endpoint-path">/auth/password</span>
+          <span class="endpoint-description">Change password</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-required">🔒 Requires Auth</span>
+          <table class="params-table">
+            <thead><tr><th>Field</th><th>Required</th></tr></thead>
+            <tbody>
+              <tr><td><code>current_password</code></td><td>✅</td></tr>
+              <tr><td><code>password</code></td><td>✅ min:8</td></tr>
+              <tr><td><code>password_confirmation</code></td><td>✅</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="endpoint-card collapsed">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/auth/set-pin</span>
+          <span class="endpoint-description">Set or update 6-digit PIN</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-required">🔒 Requires Auth</span>
+        </div>
+      </div>
+
+      <div class="endpoint-card collapsed">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/auth/cashiers</span>
+          <span class="endpoint-description">List available cashiers</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-required">🔒 Requires Auth</span>
+          <p>Returns active cashiers with PINs set — used for the cashier-switch UI.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 7.2 Dashboard ──────────────────────────────────────────────── -->
+    <section id="dashboard-endpoints" class="anchor">
+      <h2><span class="section-icon">📊</span> 7.2 Dashboard</h2>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/dashboard</span>
+          <span class="endpoint-description">Aggregated stats (today, month, 7 days)</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-required">🔒 Requires Auth</span>
+          <p>Returns today's sales, monthly revenue, top products, payment method breakdown, low-stock alerts, and recent orders.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 7.3 Products ───────────────────────────────────────────────── -->
+    <section id="products-endpoints" class="anchor">
+      <h2><span class="section-icon">🛍</span> 7.3 Products</h2>
+
+      <div class="endpoint-card collapsed">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/products</span>
+          <span class="endpoint-description">List products (paginated)</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-required">🔒 Requires Auth</span>
+          <h4>Query Parameters</h4>
+          <table class="params-table">
+            <thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code>search</code></td><td>string</td><td>Filter by name or SKU</td></tr>
+              <tr><td><code>category_id</code></td><td>int</td><td>Filter by category</td></tr>
+              <tr><td><code>outlet_id</code></td><td>int</td><td>Filter by outlet stock</td></tr>
+              <tr><td><code>is_active</code></td><td>boolean</td><td>Active/inactive filter</td></tr>
+              <tr><td><code>per_page</code></td><td>int</td><td>Default: 20</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="endpoint-card collapsed">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/products</span>
+          <span class="endpoint-description">Create product</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-required">🔒 Requires Auth</span>
+          <table class="params-table">
+            <thead><tr><th>Field</th><th>Type</th><th>Required</th></tr></thead>
+            <tbody>
+              <tr><td><code>name</code></td><td>string</td><td>✅</td></tr>
+              <tr><td><code>price</code></td><td>numeric</td><td>✅</td></tr>
+              <tr><td><code>sku</code></td><td>string</td><td>❌</td></tr>
+              <tr><td><code>barcode</code></td><td>string</td><td>❌</td></tr>
+              <tr><td><code>category_id</code></td><td>int</td><td>❌</td></tr>
+              <tr><td><code>track_stock</code></td><td>boolean</td><td>❌</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="endpoint-card collapsed">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/products/barcode/{barcode}</span>
+          <span class="endpoint-description">Look up by barcode</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-required">🔒 Requires Auth</span>
+          <p>Returns a single product matching the barcode. Use for scanner-based checkout.</p>
+        </div>
+      </div>
+
+      <div class="endpoint-card collapsed">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/products/{id}/image</span>
+          <span class="endpoint-description">Upload product image</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-required">🔒 Requires Auth</span>
+          <p>Send as <code>multipart/form-data</code>. Field name: <code>image</code>. Max 2 MB, JPEG / PNG / WebP.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 7.4–7.6 Condensed ──────────────────────────────────────────── -->
+    <section id="categories-endpoints" class="anchor">
+      <h2><span class="section-icon">🏷</span> 7.4 Categories</h2>
+      <p>Full CRUD via <code>/categories</code> resource. All endpoints require auth.</p>
+      <div class="endpoint-card collapsed">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/categories</span>
+          <span class="endpoint-description">List all categories</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-required">🔒 Requires Auth</span>
+          <div class="code-block"><div class="code-block-header"><span class="dot"></span><span class="lang-label">Response 200</span></div>
+            <pre>[
+  { <span class="hl-key">"id"</span>: <span class="hl-num">1</span>, <span class="hl-key">"name"</span>: <span class="hl-str">"Food"</span> },
+  { <span class="hl-key">"id"</span>: <span class="hl-num">2</span>, <span class="hl-key">"name"</span>: <span class="hl-str">"Beverages"</span> }
+]</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="customers-endpoints" class="anchor">
+      <h2><span class="section-icon">👥</span> 7.5 Customers</h2>
+      <p>Full CRUD via <code>/customers</code> resource. Supports <code>?search=</code> query param. All endpoints require auth.</p>
+    </section>
+
+    <section id="outlets-endpoints" class="anchor">
+      <h2><span class="section-icon">🏪</span> 7.6 Outlets</h2>
+      <p>Read-only. <code>GET /outlets</code> and <code>GET /outlets/{id}</code>. Requires auth.</p>
+    </section>
+
+    <!-- ── 7.7 Orders ─────────────────────────────────────────────────── -->
+    <section id="orders-endpoints" class="anchor">
+      <h2><span class="section-icon">🧾</span> 7.7 Orders</h2>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/orders</span>
+          <span class="endpoint-description">Create order (POS checkout)</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-required">🔒 Requires Auth</span>
+          <h4>Request Body</h4>
+          <table class="params-table">
+            <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code>outlet_id</code></td><td>int</td><td>✅</td><td>Outlet for the order</td></tr>
+              <tr><td><code>customer_id</code></td><td>int</td><td>❌</td><td>Linked customer</td></tr>
+              <tr><td><code>items</code></td><td>array</td><td>✅</td><td>Min 1 item required</td></tr>
+              <tr><td><code>items[].product_id</code></td><td>int</td><td>✅</td><td></td></tr>
+              <tr><td><code>items[].quantity</code></td><td>numeric</td><td>✅</td><td>Min 0.001</td></tr>
+              <tr><td><code>items[].discount_amount</code></td><td>numeric</td><td>❌</td><td>Per-item discount</td></tr>
+              <tr><td><code>discount_amount</code></td><td>numeric</td><td>❌</td><td>Order-level discount</td></tr>
+              <tr><td><code>discount_type</code></td><td>string</td><td>❌</td><td><code>fixed</code> or <code>percentage</code></td></tr>
+              <tr><td><code>loyalty_points_redeemed</code></td><td>int</td><td>❌</td><td>Points to redeem</td></tr>
+            </tbody>
+          </table>
+          <h4>Example Request</h4>
+          <div class="code-block">
+            <div class="code-block-header"><span class="dot"></span><span class="lang-label">JSON</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre>{
+  <span class="hl-key">"outlet_id"</span>: <span class="hl-num">1</span>,
+  <span class="hl-key">"customer_id"</span>: <span class="hl-num">5</span>,
+  <span class="hl-key">"items"</span>: [
+    { <span class="hl-key">"product_id"</span>: <span class="hl-num">1</span>, <span class="hl-key">"quantity"</span>: <span class="hl-num">2</span> },
+    { <span class="hl-key">"product_id"</span>: <span class="hl-num">3</span>, <span class="hl-key">"quantity"</span>: <span class="hl-num">1</span>, <span class="hl-key">"discount_amount"</span>: <span class="hl-num">5000</span> }
+  ],
+  <span class="hl-key">"discount_type"</span>: <span class="hl-str">"fixed"</span>,
+  <span class="hl-key">"discount_amount"</span>: <span class="hl-num">10000</span>
+}</pre>
+          </div>
+          <h4>Response 201</h4>
+          <p>Full order object with computed subtotal, tax, and total amounts.</p>
+        </div>
+      </div>
+
+      <div class="endpoint-card collapsed">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/orders/{id}/pay</span>
+          <span class="endpoint-description">Process payment</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-required">🔒 Requires Auth</span>
+          <table class="params-table">
+            <thead><tr><th>Field</th><th>Type</th><th>Required</th></tr></thead>
+            <tbody>
+              <tr><td><code>payment_method</code></td><td>string</td><td>✅ cash | card | qris | transfer</td></tr>
+              <tr><td><code>amount</code></td><td>numeric</td><td>✅</td></tr>
+              <tr><td><code>reference_number</code></td><td>string</td><td>❌</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="endpoint-card collapsed">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/orders/{id}/cancel</span>
+          <span class="endpoint-description">Cancel a pending order</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-required">🔒 Requires Auth</span>
+          <p>Body: <code>{ "reason": "..." }</code> (optional). Returns updated order.</p>
+        </div>
+      </div>
+
+      <div class="endpoint-card collapsed">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/orders/{id}/refund</span>
+          <span class="endpoint-description">Refund completed order</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-required">🔒 Requires Auth</span>
+          <div class="note-box warn">Requires supervisor authorisation for the <code>refund</code> action. Pass <code>supervisor_id</code> obtained from <code>POST /supervisor/authorize</code>.</div>
+        </div>
+      </div>
+
+      <div class="endpoint-card collapsed">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-patch">PATCH</span>
+          <span class="endpoint-path">/orders/{id}/discount</span>
+          <span class="endpoint-description">Apply order-level discount</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-required">🔒 Requires Auth</span>
+          <p>Only applicable to <strong>pending</strong> orders. Optionally pass <code>supervisor_id</code> for tracked discount overrides.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 7.8 Payments ───────────────────────────────────────────────── -->
+    <section id="payments-endpoints" class="anchor">
+      <h2><span class="section-icon">💳</span> 7.8 Payments</h2>
+      <p><code>GET /payments</code> (paginated) · <code>GET /payments/{id}</code>. Requires auth.</p>
+    </section>
+
+    <!-- ── 7.9 Shifts ─────────────────────────────────────────────────── -->
+    <section id="shifts-endpoints" class="anchor">
+      <h2><span class="section-icon">🕐</span> 7.9 Cashier Shifts</h2>
+
+      <div class="endpoint-card collapsed">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/shifts/current</span>
+          <span class="endpoint-description">Get active shift</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-required">🔒 Requires Auth</span>
+          <p>Returns the authenticated cashier's open shift, or <code>null</code> if none.</p>
+        </div>
+      </div>
+
+      <div class="endpoint-card collapsed">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/shifts/start</span>
+          <span class="endpoint-description">Open a new shift</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-required">🔒 Requires Auth</span>
+          <table class="params-table">
+            <thead><tr><th>Field</th><th>Required</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code>outlet_id</code></td><td>✅</td><td>Target outlet</td></tr>
+              <tr><td><code>starting_cash</code></td><td>✅</td><td>Opening float</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="endpoint-card collapsed">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/shifts/end</span>
+          <span class="endpoint-description">Close active shift</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-required">🔒 Requires Auth</span>
+          <table class="params-table">
+            <thead><tr><th>Field</th><th>Required</th></tr></thead>
+            <tbody>
+              <tr><td><code>ending_cash</code></td><td>✅</td></tr>
+              <tr><td><code>notes</code></td><td>❌</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 7.10 Supervisor ────────────────────────────────────────────── -->
+    <section id="supervisor-endpoints" class="anchor">
+      <h2><span class="section-icon">👔</span> 7.10 Supervisor Authorization</h2>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/supervisor/authorize</span>
+          <span class="endpoint-description">Validate supervisor PIN for restricted action</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-required">🔒 Requires Auth</span>
+          <table class="params-table">
+            <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code>action</code></td><td>string</td><td>✅</td><td><code>refund</code> | <code>void</code> | <code>discount_override</code></td></tr>
+              <tr><td><code>pin</code></td><td>string</td><td>✅</td><td>Supervisor's 6-digit PIN</td></tr>
+            </tbody>
+          </table>
+          <h4>Response 200</h4>
+          <div class="code-block"><div class="code-block-header"><span class="dot"></span><span class="lang-label">JSON</span></div>
+            <pre>{
+  <span class="hl-key">"authorized"</span>: <span class="hl-bool">true</span>,
+  <span class="hl-key">"supervisor_id"</span>: <span class="hl-num">10</span>,
+  <span class="hl-key">"supervisor_name"</span>: <span class="hl-str">"Manager Jane"</span>
+}</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 7.11 Reports ───────────────────────────────────────────────── -->
+    <section id="reports-endpoints" class="anchor">
+      <h2><span class="section-icon">📈</span> 7.11 Reports</h2>
+
+      <div class="endpoint-card collapsed">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/reports/sales-by-cashier</span>
+          <span class="endpoint-description">Sales grouped by cashier</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-required">🔒 Requires Auth</span>
+          <p>Query params: <code>date_from</code>, <code>date_to</code>, <code>outlet_id</code>.</p>
+        </div>
+      </div>
+
+      <div class="endpoint-card collapsed">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/reports/shift-summary</span>
+          <span class="endpoint-description">Shift summary with sales figures</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-required">🔒 Requires Auth</span>
+          <p>Query params: <code>date_from</code>, <code>date_to</code>, <code>user_id</code>, <code>outlet_id</code>, <code>per_page</code>.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 7.12 Stock ─────────────────────────────────────────────────── -->
+    <section id="stock-endpoints" class="anchor">
+      <h2><span class="section-icon">📦</span> 7.12 Stock</h2>
+
+      <div class="endpoint-card collapsed">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/stock/movements</span>
+          <span class="endpoint-description">Stock movement history</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-required">🔒 Requires Auth</span>
+        </div>
+      </div>
+
+      <div class="endpoint-card collapsed">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/stock/adjust</span>
+          <span class="endpoint-description">Manual stock adjustment</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-required">🔒 Requires Auth</span>
+          <table class="params-table">
+            <thead><tr><th>Field</th><th>Required</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code>product_id</code></td><td>✅</td><td></td></tr>
+              <tr><td><code>outlet_id</code></td><td>✅</td><td></td></tr>
+              <tr><td><code>quantity</code></td><td>✅</td><td>Positive = add, negative = remove</td></tr>
+              <tr><td><code>reason</code></td><td>❌</td><td>Max 255 chars</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 7.13 Config ────────────────────────────────────────────────── -->
+    <section id="config-endpoints" class="anchor">
+      <h2><span class="section-icon">⚙️</span> 7.13 Configuration</h2>
+
+      <div class="endpoint-card collapsed">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/config</span>
+          <span class="endpoint-description">All tenant config keys</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-required">🔒 Requires Auth</span>
+        </div>
+      </div>
+
+      <div class="endpoint-card collapsed">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge method-put">PUT</span>
+          <span class="endpoint-path">/config/{key}</span>
+          <span class="endpoint-description">Update a config value</span>
+          <span class="endpoint-toggle">›</span>
+        </div>
+        <div class="endpoint-body">
+          <span class="auth-badge auth-required">🔒 Requires Auth</span>
+          <table class="params-table">
+            <thead><tr><th>Field</th><th>Required</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code>value</code></td><td>✅</td><td>New value</td></tr>
+              <tr><td><code>type</code></td><td>❌</td><td><code>string</code> | <code>integer</code> | <code>boolean</code> | <code>json</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Integration Guide ──────────────────────────────────────────── -->
+    <section id="integration-guide" class="anchor">
+      <h2><span class="section-icon">🚀</span> 8. Integration Guide</h2>
+
+      <p>Follow these steps to integrate the API into your mobile or frontend application.</p>
+
+      <ol class="steps">
+        <li>
+          <div class="step-content">
+            <strong>Install an HTTP client</strong>
+            <div class="code-block">
+              <div class="code-block-header"><span class="dot"></span><span class="lang-label">Terminal</span></div>
+              <pre>npm install axios</pre>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <div class="step-content">
+            <strong>Configure the API client</strong>
+            <div class="code-block">
+              <div class="code-block-header"><span class="dot"></span><span class="lang-label">JavaScript – src/api/client.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+              <pre><span class="hl-cmt">// src/api/client.js</span>
+import axios from <span class="hl-str">'axios'</span>;
+
+const apiClient = axios.create({
+  baseURL: <span class="hl-str">'https://&lt;your-tenant&gt;.yourdomain.com/api'</span>,
+  headers: {
+    <span class="hl-str">'Accept'</span>: <span class="hl-str">'application/json'</span>,
+    <span class="hl-str">'Content-Type'</span>: <span class="hl-str">'application/json'</span>,
+  },
+});
+
+<span class="hl-cmt">// Attach stored token to every request</span>
+apiClient.interceptors.request.use(async (config) => {
+  const token = await SecureStore.getItemAsync(<span class="hl-str">'auth_token'</span>);
+  if (token) config.headers.Authorization = <span class="hl-str">`Bearer ${token}`</span>;
+  return config;
+});
+
+<span class="hl-cmt">// Handle 401 globally</span>
+apiClient.interceptors.response.use(
+  (res) => res,
+  async (err) => {
+    if (err.response?.status === <span class="hl-num">401</span>) {
+      await SecureStore.deleteItemAsync(<span class="hl-str">'auth_token'</span>);
+      <span class="hl-cmt">// Navigate to login</span>
+    }
+    return Promise.reject(err);
+  }
+);
+
+export default apiClient;</pre>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <div class="step-content">
+            <strong>Authenticate</strong>
+            <div class="code-block">
+              <div class="code-block-header"><span class="dot"></span><span class="lang-label">JavaScript (axios)</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+              <pre>async function login(email, password) {
+  const { data } = await apiClient.post(<span class="hl-str">'/auth/login'</span>, { email, password });
+  await SecureStore.setItemAsync(<span class="hl-str">'auth_token'</span>, data.token);
+  return data.user;
+}
+
+<span class="hl-cmt">// Or with native fetch:</span>
+async function loginWithFetch(email, password) {
+  const res = await fetch(<span class="hl-str">'https://&lt;your-tenant&gt;.yourdomain.com/api/auth/login'</span>, {
+    method: <span class="hl-str">'POST'</span>,
+    headers: { <span class="hl-str">'Accept'</span>: <span class="hl-str">'application/json'</span>, <span class="hl-str">'Content-Type'</span>: <span class="hl-str">'application/json'</span> },
+    body: JSON.stringify({ email, password }),
+  });
+  if (!res.ok) throw new Error(<span class="hl-str">'Login failed'</span>);
+  return res.json();
+}</pre>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <div class="step-content">
+            <strong>Make authenticated requests</strong>
+            <div class="code-block">
+              <div class="code-block-header"><span class="dot"></span><span class="lang-label">JavaScript</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+              <pre><span class="hl-cmt">// Fetch paginated products</span>
+const { data } = await apiClient.get(<span class="hl-str">'/products'</span>, {
+  params: { page: <span class="hl-num">1</span>, per_page: <span class="hl-num">20</span>, outlet_id: <span class="hl-num">1</span> }
+});
+
+<span class="hl-cmt">// Create an order</span>
+const { data: order } = await apiClient.post(<span class="hl-str">'/orders'</span>, {
+  outlet_id: <span class="hl-num">1</span>,
+  items: [{ product_id: <span class="hl-num">5</span>, quantity: <span class="hl-num">2</span> }],
+});
+
+<span class="hl-cmt">// Process payment</span>
+await apiClient.post(<span class="hl-str">`/orders/${order.id}/pay`</span>, {
+  payment_method: <span class="hl-str">'qris'</span>,
+  amount: order.total_amount,
+});</pre>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <div class="step-content">
+            <strong>Handle errors consistently</strong>
+            <div class="code-block">
+              <div class="code-block-header"><span class="dot"></span><span class="lang-label">JavaScript – error helper</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+              <pre>async function safeRequest(fn) {
+  try {
+    return await fn();
+  } catch (error) {
+    const status  = error.response?.status;
+    const message = error.response?.data?.message ?? <span class="hl-str">'Unexpected error.'</span>;
+    const errors  = error.response?.data?.errors ?? {};
+
+    if (status === <span class="hl-num">422</span>) {
+      throw new Error(Object.values(errors).flat().join(<span class="hl-str">'\n'</span>));
+    }
+    throw new Error(message);
+  }
+}</pre>
+            </div>
+          </div>
+        </li>
+      </ol>
+
+      <div class="note-box success">
+        <strong>Scalability tip:</strong> Cache product and category lists locally with a 10-minute TTL.
+        Use exponential back-off on <code>429 Too Many Requests</code> responses.
+        For offline support, queue failed order mutations and replay them on reconnect.
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  // ── Collapsible endpoint cards ──────────────────────────────────────────
+  function toggleCard(header) {
+    header.closest('.endpoint-card').classList.toggle('collapsed');
+  }
+
+  // ── Copy code blocks ────────────────────────────────────────────────────
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      const orig = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(() => (btn.textContent = orig), 1500);
+    });
+  }
+
+  // ── Mobile sidebar toggle ───────────────────────────────────────────────
+  document.getElementById('menuToggle').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('open');
+  });
+
+  // ── Active sidebar link on scroll ──────────────────────────────────────
+  const sections = document.querySelectorAll('section.anchor');
+  const links    = document.querySelectorAll('.sidebar-link');
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          links.forEach((l) => {
+            l.classList.toggle('active', l.getAttribute('href') === '#' + id);
+          });
+        }
+      });
+    },
+    { rootMargin: '-20% 0px -75% 0px' }
+  );
+
+  sections.forEach((s) => observer.observe(s));
+</script>
+</body>
+</html>
