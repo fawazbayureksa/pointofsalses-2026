@@ -49,7 +49,7 @@
 https://<your-tenant-subdomain>.yourdomain.com/api
 ```
 
-> Replace `<your-tenant-subdomain>` with the slug assigned to your organisation. All routes are tenant-scoped.
+> Replace `<your-tenant-subdomain>` with the slug assigned to your organization. All routes are tenant-scoped.
 
 ---
 
@@ -1092,7 +1092,7 @@ Close the current active shift.
 
 #### `POST /api/supervisor/authorize`
 
-Validate a supervisor's PIN and grant authorisation for a restricted action. Returns the supervisor's user ID on success, which must then be passed to the relevant endpoint (refund, cancel, discount).
+Validate a supervisor's PIN and grant authorization for a restricted action. Returns the supervisor's user ID on success, which must then be passed to the relevant endpoint (refund, cancel, discount).
 
 **Requires auth.**
 
