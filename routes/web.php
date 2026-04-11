@@ -15,6 +15,7 @@ use App\Http\Controllers\SubscriptionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn() => view('welcome'));
+Route::get('/docs', fn() => view('docs'))->name('docs');
 
 // Subscription expired page (auth required, no subscription check)
 Route::middleware('auth')->get('/subscription/expired', fn() => view('subscription.expired'))->name('subscription.expired');
