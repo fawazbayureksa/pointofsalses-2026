@@ -16,13 +16,26 @@
         </div>
 
         <x-admin-card :title="$product->name">
-            @if ($product->image)
-                <div class="mb-6">
-                    <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}"
-                        class="h-48 w-48 object-cover rounded-lg border border-gray-200">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {{-- Product Image --}}
+                <div class="lg:col-span-1">
+                    @if ($product->image)
+                        <div class="sticky top-6">
+                            <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}"
+                                class="w-full h-auto object-cover rounded-xl border border-gray-200 shadow-sm">
+                        </div>
+                    @else
+                        <div class="sticky top-6 w-full aspect-square bg-gray-100 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center">
+                            <div class="text-center">
+                                <i class="fa-solid fa-image text-4xl text-gray-300 mb-2"></i>
+                                <p class="text-sm text-gray-400">No image</p>
+                            </div>
+                        </div>
+                    @endif
                 </div>
-            @endif
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                {{-- Product Details --}}
+                <div class="lg:col-span-2 space-y-4">
                 <div class="space-y-4">
                     <div>
                         <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</span>
@@ -71,14 +84,14 @@
             </div>
 
             @if ($product->description)
-                <div class="mt-4 pt-4 border-t border-gray-200">
+                <div class="mt-6 pt-6 border-t border-gray-200">
                     <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Description</span>
-                    <p class="mt-1 text-sm text-gray-700">{{ $product->description }}</p>
+                    <p class="mt-2 text-sm text-gray-700 whitespace-pre-line">{{ $product->description }}</p>
                 </div>
             @endif
 
             @can('edit products')
-                <div class="mt-6 pt-4 border-t border-gray-200 flex justify-end">
+                <div class="mt-6 pt-6 border-t border-gray-200 flex justify-end">
                     <button type="button"
                         onclick="window.dispatchEvent(new CustomEvent('open-edit-modal', { detail: {
                             id: {{ $product->id }},
@@ -98,6 +111,7 @@
                     </button>
                 </div>
             @endcan
+            </div>
         </x-admin-card>
 
         {{-- Stock by outlet --}}
