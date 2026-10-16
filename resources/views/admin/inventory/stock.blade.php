@@ -44,9 +44,10 @@
                                     <td class="px-6 py-4 text-sm text-gray-600">{{ $outlet->name }}</td>
                                     <td
                                         class="px-6 py-4 text-sm font-semibold {{ $outlet->pivot->stock <= $outlet->pivot->low_stock_threshold ? 'text-red-600' : 'text-gray-900' }}">
-                                        {{ $outlet->pivot->stock }} {{ $product->unit }}
+                                        {{ (float) $outlet->pivot->stock }} {{ $product->unit }}
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-600">{{ $outlet->pivot->low_stock_threshold }}
+                                    <td class="px-6 py-4 text-sm text-gray-600">
+                                        {{ (float) $outlet->pivot->low_stock_threshold }}
                                         {{ $product->unit }}</td>
                                     <td class="px-6 py-4">
                                         @if ($outlet->pivot->stock <= $outlet->pivot->low_stock_threshold)
@@ -66,7 +67,7 @@
                                             name: {{ Js::from($product->name) }},
                                             outlet_id: {{ $outlet->id }},
                                             outlet_name: {{ Js::from($outlet->name) }},
-                                            stock: {{ $outlet->pivot->stock }},
+                                            stock: {{ (float) $outlet->pivot->stock }},
                                             unit: {{ Js::from($product->unit ?? 'pcs') }},
                                             url: '{{ route('admin.products.adjust-stock', $product->id) }}'
                                         }"

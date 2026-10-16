@@ -143,11 +143,11 @@
                                     <td class="px-4 py-3 text-right">
                                         <span
                                             class="{{ $product->pivot->stock <= $product->pivot->low_stock_threshold ? 'text-red-600 font-semibold' : 'text-gray-900' }}">
-                                            {{ $product->pivot->stock }}
+                                            {{ (float) $product->pivot->stock }}
                                         </span>
                                     </td>
                                     <td class="px-4 py-3 text-right text-gray-600">
-                                        {{ $product->pivot->low_stock_threshold }}</td>
+                                        {{ (float) $product->pivot->low_stock_threshold }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
