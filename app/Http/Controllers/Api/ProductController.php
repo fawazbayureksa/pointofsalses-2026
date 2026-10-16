@@ -7,6 +7,8 @@ use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -16,6 +18,7 @@ class ProductController extends Controller
     public function index(Request $request): JsonResponse
     {
         $outletId = $request->outlet_id;
+        Log::info('Product index requested', ['search' => $request->search, 'category_id' => $request->category_id, 'category' => $request->category, 'outlet_id' => $outletId]);
 
         $products = Product::active()
             ->with(['category', 'outlets'])
@@ -75,7 +78,10 @@ class ProductController extends Controller
      */
     public function show(Product $product): JsonResponse
     {
-        return response()->json($product);
+        $data = $product->toArray();
+        $data['image'] = $product->image ? Storage::url($product->image) : null;
+        Log::info('Showing product', ['id' => $product->id, 'data' => $data]);
+        return response()->json($data);
     }
 
     /**
@@ -103,22 +109,31 @@ class ProductController extends Controller
     public function store(Request $request): JsonResponse
     {
         // $this->authorize('manage_products');
+        Log::info('Creating product with data: ' . json_encode($request->all()));
+        try {
+            $data = $request->validate([
+                'name'                => ['required', 'string', 'max:255'],
+                'sku'                 => ['nullable', 'string', 'unique:products'],
+                'barcode'             => ['nullable', 'string'],
+                'description'         => ['nullable', 'string'],
+                'category_id'         => ['nullable', 'exists:categories,id'],
+                'category'            => ['nullable', 'string'],
+                'price'               => ['required', 'numeric', 'min:0'],
+                'cost_price'          => ['nullable', 'numeric', 'min:0'],
+                'stock'               => ['nullable', 'numeric', 'min:0'],
+                'low_stock_threshold' => ['nullable', 'numeric', 'min:0'],
+                'unit'                => ['nullable', 'string'],
+                'outlet_id'           => ['nullable', 'exists:outlets,id'],
+                'track_stock'         => ['string', 'in:true,false'],
+                'image'               => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:2048'],
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Validation failed for product creation', ['errors' => $e->getMessage()]);
+            return response()->json(['message' => 'Invalid data provided.', 'errors' => $e->getMessage()], 422);
+        }
 
-        $data = $request->validate([
-            'name'                => ['required', 'string', 'max:255'],
-            'sku'                 => ['nullable', 'string', 'unique:products'],
-            'barcode'             => ['nullable', 'string'],
-            'description'         => ['nullable', 'string'],
-            'category_id'         => ['nullable', 'exists:categories,id'],
-            'category'            => ['nullable', 'string'],
-            'price'               => ['required', 'numeric', 'min:0'],
-            'cost_price'          => ['nullable', 'numeric', 'min:0'],
-            'stock'               => ['nullable', 'numeric', 'min:0'],
-            'low_stock_threshold' => ['nullable', 'numeric', 'min:0'],
-            'unit'                => ['nullable', 'string'],
-            'outlet_id'           => ['nullable', 'exists:outlets,id'],
-            'track_stock'         => ['boolean'],
-        ]);
+        // convert track_stock from string to boolean
+        $data['track_stock'] = filter_var($data['track_stock'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
         if (empty($data['category_id']) && !empty($data['category'])) {
             $cat = Category::where('name', $data['category'])->first();
@@ -128,9 +143,47 @@ class ProductController extends Controller
         }
         unset($data['category']);
 
-        $product = Product::create($data);
+        if (empty($data['sku'])) {
+            $data['sku'] = 'PRD-' . strtoupper(substr(uniqid(), -6));
+        }
 
-        return response()->json($product, 201);
+        // Extract pivot fields – these belong to product_outlet, not products
+        $outletId           = $data['outlet_id'] ?? null;
+        $stock              = $data['stock'] ?? 0;
+        $lowStockThreshold  = $data['low_stock_threshold'] ?? 0;
+        unset($data['outlet_id'], $data['stock'], $data['low_stock_threshold']);
+
+        try {
+            if ($request->hasFile('image')) {
+                $data['image'] = $request->file('image')->store('products', 'public');
+            }
+
+            $product = Product::create($data);
+
+            if ($outletId) {
+                $product->outlets()->syncWithoutDetaching([
+                    $outletId => [
+                        'stock'               => $stock,
+                        'low_stock_threshold' => $lowStockThreshold,
+                    ],
+                ]);
+            }
+
+            $result = $product->toArray();
+            $result['image'] = $product->image ? Storage::url($product->image) : null;
+            $result['stock']               = $outletId ? (float) $stock : null;
+            $result['low_stock_threshold'] = $outletId ? (float) $lowStockThreshold : null;
+            $result['outlet_id']           = $outletId;
+
+            return response()->json($result, 201);
+        } catch (\Throwable $e) {
+            if (!empty($data['image'])) {
+                Storage::disk('public')->delete($data['image']);
+            }
+            Log::error('Product store failed', ['error' => $e->getMessage()]);
+
+            return response()->json(['message' => 'Failed to create product.'], 500);
+        }
     }
 
     /**
@@ -139,17 +192,30 @@ class ProductController extends Controller
     public function update(Request $request, Product $product): JsonResponse
     {
         // $this->authorize('manage_products');
-
-        $data = $request->validate([
-            'name'                => ['sometimes', 'string', 'max:255'],
-            'price'               => ['sometimes', 'numeric', 'min:0'],
-            'cost_price'          => ['sometimes', 'numeric', 'min:0'],
-            'stock'               => ['sometimes', 'numeric', 'min:0'],
-            'low_stock_threshold' => ['sometimes', 'numeric', 'min:0'],
-            'category_id'         => ['sometimes', 'exists:categories,id'],
-            'category'            => ['sometimes', 'string'],
-            'is_active'           => ['sometimes', 'boolean'],
-        ]);
+        Log::info('Updating product', ['id' => $product->id, 'data' => $request->all()]);
+        try {
+            $data = $request->validate([
+                'name'                => ['sometimes', 'string', 'max:255'],
+                'price'               => ['sometimes', 'numeric', 'min:0'],
+                'cost_price'          => ['sometimes', 'numeric', 'min:0'],
+                'stock'               => ['sometimes', 'numeric', 'min:0'],
+                'low_stock_threshold' => ['sometimes', 'numeric', 'min:0'],
+                'outlet_id'           => [
+                    'sometimes',
+                    'exists:outlets,id',
+                    \Illuminate\Validation\Rule::requiredIf(
+                        $request->has('stock') || $request->has('low_stock_threshold')
+                    ),
+                ],
+                'category_id'         => ['sometimes', 'exists:categories,id'],
+                'category'            => ['sometimes', 'string'],
+                'is_active'           => ['sometimes'],
+                'image'               => ['sometimes', 'nullable', 'image', 'mimes:jpeg,png,webp', 'max:2048'],
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Validation failed for product update', ['id' => $product->id, 'errors' => $e->getMessage()]);
+            return response()->json(['message' => 'Invalid data provided.', 'errors' => $e->getMessage()], 422);
+        }
 
         if (empty($data['category_id']) && !empty($data['category'])) {
             $cat = Category::where('name', $data['category'])->first();
@@ -159,9 +225,62 @@ class ProductController extends Controller
         }
         unset($data['category']);
 
-        $product->update($data);
+        // Extract pivot fields
+        $outletId          = $data['outlet_id'] ?? null;
+        $hasStock          = array_key_exists('stock', $data);
+        $hasThreshold      = array_key_exists('low_stock_threshold', $data);
+        $stock             = $data['stock'] ?? null;
+        $lowStockThreshold = $data['low_stock_threshold'] ?? null;
+        unset($data['outlet_id'], $data['stock'], $data['low_stock_threshold']);
 
-        return response()->json($product->refresh());
+        try {
+            if ($request->hasFile('image')) {
+                $oldImage = $product->image;
+                $data['image'] = $request->file('image')->store('products', 'public');
+            }
+
+            if (isset($data['is_active'])) {
+                $data['is_active'] = filter_var($data['is_active'], FILTER_VALIDATE_BOOLEAN);
+            }
+
+            $product->update($data);
+            $product->refresh();
+
+            if (isset($oldImage) && $oldImage) {
+                Storage::disk('public')->delete($oldImage);
+            }
+
+            // Update pivot stock values when outlet is specified
+            if ($outletId && ($hasStock || $hasThreshold)) {
+                $pivotData = [];
+                if ($hasStock) {
+                    $pivotData['stock'] = $stock;
+                }
+                if ($hasThreshold) {
+                    $pivotData['low_stock_threshold'] = $lowStockThreshold;
+                }
+                $product->outlets()->syncWithoutDetaching([$outletId => $pivotData]);
+            }
+
+            $result = $product->toArray();
+            $result['image'] = $product->image ? Storage::url($product->image) : null;
+
+            if ($outletId) {
+                $pivot = $product->outlets()->where('outlets.id', $outletId)->first();
+                $result['stock']               = $pivot ? (float) $pivot->pivot->stock : null;
+                $result['low_stock_threshold'] = $pivot ? (float) $pivot->pivot->low_stock_threshold : null;
+                $result['outlet_id']           = $outletId;
+            }
+
+            return response()->json($result);
+        } catch (\Throwable $e) {
+            if (!empty($data['image'])) {
+                Storage::disk('public')->delete($data['image']);
+            }
+            Log::error('Product update failed', ['id' => $product->id, 'error' => $e->getMessage()]);
+
+            return response()->json(['message' => 'Failed to update product.'], 500);
+        }
     }
 
     /**
@@ -171,8 +290,55 @@ class ProductController extends Controller
     {
         // $this->authorize('manage_products');
 
-        $product->delete();
+        try {
+            if ($product->image) {
+                Storage::disk('public')->delete($product->image);
+            }
 
-        return response()->json(null, 204);
+            $product->delete();
+
+            return response()->json(null, 204);
+        } catch (\Throwable $e) {
+            Log::error('Product delete failed', ['id' => $product->id, 'error' => $e->getMessage()]);
+
+            return response()->json(['message' => 'Failed to delete product.'], 500);
+        }
+    }
+
+    /**
+     * POST /api/products/{product}/image
+     *
+     * Dedicated endpoint for uploading or replacing a product image.
+     * Accepts multipart/form-data with an `image` file field.
+     */
+    public function uploadImage(Request $request, Product $product): JsonResponse
+    {
+        // $this->authorize('manage_products');
+
+        $request->validate([
+            'image' => ['required', 'image', 'mimes:jpeg,png,webp', 'max:2048'],
+        ]);
+
+        try {
+            $oldImage = $product->image;
+            $path = $request->file('image')->store('products', 'public');
+
+            $product->update(['image' => $path]);
+
+            if ($oldImage) {
+                Storage::disk('public')->delete($oldImage);
+            }
+
+            return response()->json([
+                'image' => Storage::url($path),
+            ]);
+        } catch (\Throwable $e) {
+            if (!empty($path)) {
+                Storage::disk('public')->delete($path);
+            }
+            Log::error('Product image upload failed', ['id' => $product->id, 'error' => $e->getMessage()]);
+
+            return response()->json(['message' => 'Failed to upload image.'], 500);
+        }
     }
 }
