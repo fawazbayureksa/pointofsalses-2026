@@ -6,14 +6,11 @@ use App\Models\Setting;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Services\ConfigService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class ConfigServiceTest extends TestCase
 {
-    use RefreshDatabase;
-
     private ConfigService $service;
     private Tenant $tenant;
     private User $user;

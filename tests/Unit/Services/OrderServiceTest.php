@@ -8,14 +8,11 @@ use App\Models\Product;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Services\OrderService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 class OrderServiceTest extends TestCase
 {
-    use RefreshDatabase;
-
     private OrderService $service;
     private Tenant $tenant;
     private User $user;

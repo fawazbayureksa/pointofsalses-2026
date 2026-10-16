@@ -8,14 +8,11 @@ use App\Models\Payment;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Services\PaymentService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 class PaymentServiceTest extends TestCase
 {
-    use RefreshDatabase;
-
     private PaymentService $service;
     private Tenant $tenant;
     private User $user;

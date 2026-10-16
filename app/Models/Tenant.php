@@ -73,6 +73,15 @@ class Tenant extends Model
             && $this->trial_ends_at->isFuture();
     }
 
+    public function trialDaysLeft(): int
+    {
+        if (! $this->isOnTrial()) {
+            return 0;
+        }
+
+        return (int) max(0, ceil(now()->floatDiffInDays($this->trial_ends_at, false)));
+    }
+
     public function isSubscribed(): bool
     {
         return $this->subscription_status === 'active'
@@ -87,6 +96,11 @@ class Tenant extends Model
     public function hasActiveAccess(): bool
     {
         return $this->isExempt() || $this->isOnTrial() || $this->isSubscribed();
+    }
+
+    public function canAccessSystem(): bool
+    {
+        return $this->hasActiveAccess();
     }
 
     public function getSetting(string $key, mixed $default = null): mixed

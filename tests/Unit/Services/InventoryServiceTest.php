@@ -7,14 +7,11 @@ use App\Models\Product;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Services\InventoryService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 class InventoryServiceTest extends TestCase
 {
-    use RefreshDatabase;
-
     private InventoryService $service;
     private Tenant $tenant;
     private User $user;

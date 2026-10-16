@@ -5,14 +5,11 @@ namespace Tests\Feature\Api;
 use App\Models\Setting;
 use App\Models\Tenant;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class ConfigTest extends TestCase
 {
-    use RefreshDatabase;
-
     private Tenant $tenant;
     private User $user;
 

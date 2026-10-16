@@ -7,7 +7,6 @@ use App\Models\Order;
 use App\Models\Outlet;
 use App\Models\Tenant;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -15,8 +14,6 @@ use Tests\TestCase;
 
 class CashierAuthTest extends TestCase
 {
-    use RefreshDatabase;
-
     private Tenant $tenant;
     private Outlet $outlet;
     private User $cashier;

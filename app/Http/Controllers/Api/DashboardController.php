@@ -92,9 +92,10 @@ class DashboardController extends Controller
             ->get()
             ->flatMap(function ($product) {
                 return $product->outlets
-                    ->filter(fn($outlet) =>
+                    ->filter(
+                        fn($outlet) =>
                         $outlet->pivot->low_stock_threshold > 0 &&
-                        $outlet->pivot->stock <= $outlet->pivot->low_stock_threshold
+                            $outlet->pivot->stock <= $outlet->pivot->low_stock_threshold
                     )
                     ->map(fn($outlet) => [
                         'product_id'  => $product->id,

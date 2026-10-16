@@ -7,13 +7,10 @@ use App\Models\OrderItem;
 use App\Models\Outlet;
 use App\Models\Tenant;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class OrderTest extends TestCase
 {
-    use RefreshDatabase;
-
     public function test_is_paid_returns_true_when_payment_status_is_paid(): void
     {
         $order                 = new Order();
