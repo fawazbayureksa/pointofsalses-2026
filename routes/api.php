@@ -54,6 +54,7 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\AutoLockInactivity::clas
     // Barcode lookup must be registered before apiResource to avoid being
     // captured by the {product} wildcard route.
     Route::get('products/barcode/{barcode}', [ProductController::class, 'findByBarcode']);
+    Route::post('products/{product}/image', [ProductController::class, 'uploadImage']);
     Route::apiResource('products', ProductController::class);
 
     // POS – Categories
@@ -108,4 +109,3 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\AutoLockInactivity::clas
         Route::put('{key}', [ConfigController::class, 'update']);
     });
 });
-
