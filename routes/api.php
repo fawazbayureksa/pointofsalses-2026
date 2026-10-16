@@ -11,7 +11,9 @@ use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\OutletController;
+use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\StockController;
 use App\Http\Controllers\Api\SupervisorAuthController;
 use Illuminate\Support\Facades\Route;
 
@@ -49,6 +51,9 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\AutoLockInactivity::clas
     Route::get('dashboard', [DashboardController::class, 'index']);
 
     // POS – Products
+    // Barcode lookup must be registered before apiResource to avoid being
+    // captured by the {product} wildcard route.
+    Route::get('products/barcode/{barcode}', [ProductController::class, 'findByBarcode']);
     Route::apiResource('products', ProductController::class);
 
     // POS – Categories
@@ -62,9 +67,16 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\AutoLockInactivity::clas
     Route::get('outlets/{outlet}', [OutletController::class, 'show']);
 
     // POS – Orders
-    Route::apiResource('orders', OrderController::class)->except(['update']);
+    // `destroy` is excluded because cancellation is handled by POST .../cancel.
+    Route::apiResource('orders', OrderController::class)->only(['index', 'store', 'show']);
     Route::post('orders/{order}/pay', [OrderController::class, 'pay']);
     Route::post('orders/{order}/cancel', [OrderController::class, 'cancel']);
+    Route::post('orders/{order}/refund', [OrderController::class, 'refund']);
+    Route::patch('orders/{order}/discount', [OrderController::class, 'applyDiscount']);
+
+    // Payments
+    Route::get('payments', [PaymentController::class, 'index']);
+    Route::get('payments/{payment}', [PaymentController::class, 'show']);
 
     // Cashier Shifts
     Route::prefix('shifts')->group(function () {
@@ -83,6 +95,12 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\AutoLockInactivity::clas
         Route::get('shift-summary', [CashierReportController::class, 'shiftSummary']);
     });
 
+    // Stock – movements history & manual adjustment
+    Route::prefix('stock')->group(function () {
+        Route::get('movements', [StockController::class, 'movements']);
+        Route::post('adjust', [StockController::class, 'adjust']);
+    });
+
     // Tenant Configuration
     Route::prefix('config')->group(function () {
         Route::get('/', [ConfigController::class, 'index']);
@@ -90,3 +108,4 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\AutoLockInactivity::clas
         Route::put('{key}', [ConfigController::class, 'update']);
     });
 });
+

@@ -41,10 +41,15 @@ class CustomerController extends Controller
     public function store(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'name'    => ['required', 'string', 'max:255'],
-            'email'   => ['nullable', 'email', 'max:255', 'unique:customers'],
-            'phone'   => ['nullable', 'string', 'max:20'],
-            'address' => ['nullable', 'string'],
+            'name'             => ['required', 'string', 'max:255'],
+            'email'            => ['nullable', 'email', 'max:255', 'unique:customers'],
+            'phone'            => ['nullable', 'string', 'max:20'],
+            'address'          => ['nullable', 'string'],
+            'gender'           => ['nullable', 'string', 'in:male,female'],
+            'date_of_birth'    => ['nullable', 'date'],
+            'notes'            => ['nullable', 'string'],
+            'membership_tier'  => ['nullable', 'string', 'in:regular,silver,gold,platinum'],
+            'member_since'     => ['nullable', 'date'],
         ]);
 
         $customer = Customer::create($data);
@@ -58,10 +63,16 @@ class CustomerController extends Controller
     public function update(Request $request, Customer $customer): JsonResponse
     {
         $data = $request->validate([
-            'name'    => ['sometimes', 'string', 'max:255'],
-            'email'   => ['sometimes', 'nullable', 'email', 'max:255', 'unique:customers,email,' . $customer->id],
-            'phone'   => ['sometimes', 'nullable', 'string', 'max:20'],
-            'address' => ['sometimes', 'nullable', 'string'],
+            'name'             => ['sometimes', 'string', 'max:255'],
+            'email'            => ['sometimes', 'nullable', 'email', 'max:255', 'unique:customers,email,' . $customer->id],
+            'phone'            => ['sometimes', 'nullable', 'string', 'max:20'],
+            'address'          => ['sometimes', 'nullable', 'string'],
+            'gender'           => ['sometimes', 'nullable', 'string', 'in:male,female'],
+            'date_of_birth'    => ['sometimes', 'nullable', 'date'],
+            'notes'            => ['sometimes', 'nullable', 'string'],
+            'membership_tier'  => ['sometimes', 'nullable', 'string', 'in:regular,silver,gold,platinum'],
+            'member_since'     => ['sometimes', 'nullable', 'date'],
+            'is_active'        => ['sometimes', 'boolean'],
         ]);
 
         $customer->update($data);
