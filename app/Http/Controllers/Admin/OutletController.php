@@ -14,6 +14,7 @@ class OutletController extends Controller
     {
         $outlets = Outlet::latest()->paginate(15);
         $users = User::orderBy('name')->get();
+
         return view('admin.outlets.index', compact('outlets', 'users'));
     }
 
@@ -27,25 +28,26 @@ class OutletController extends Controller
         $tenant = auth()->user()?->tenant;
         if ($tenant && ! $tenant->canCreateOutlet()) {
             $max = $tenant->maxOutlets();
+
             return redirect()->route('admin.outlets.index')
                 ->withErrors(['plan' => "Your current {$tenant->planDetails()['name']} plan allows up to {$max} outlet(s). Please upgrade your subscription plan to add more outlets."]);
         }
 
         $validated = $request->validate([
-            'name'       => 'required|string|max:255',
-            'code'       => 'nullable|string|max:50',
-            'phone'      => 'nullable|string|max:20',
-            'email'      => 'nullable|email|max:255',
-            'address'    => 'nullable|string',
-            'city'       => 'nullable|string|max:100',
-            'is_active'  => 'boolean',
+            'name' => 'required|string|max:255',
+            'code' => 'nullable|string|max:50',
+            'phone' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'address' => 'nullable|string',
+            'city' => 'nullable|string|max:100',
+            'is_active' => 'boolean',
             'manager_id' => 'nullable|exists:users,id',
         ]);
 
         // Auto-generate code if not provided
         if (empty($validated['code'])) {
             $base = strtoupper(substr(preg_replace('/[^a-zA-Z0-9]/', '', $validated['name']), 0, 4));
-            $validated['code'] = $base . '-' . strtoupper(Str::random(4));
+            $validated['code'] = $base.'-'.strtoupper(Str::random(4));
         }
 
         unset($validated['manager_id']);
@@ -61,6 +63,7 @@ class OutletController extends Controller
     public function show(Outlet $outlet)
     {
         $outlet->load(['users.roles', 'products']);
+
         return view('admin.outlets.show', compact('outlet'));
     }
 
@@ -72,12 +75,12 @@ class OutletController extends Controller
     public function update(Request $request, Outlet $outlet)
     {
         $validated = $request->validate([
-            'name'      => 'required|string|max:255',
-            'code'      => 'nullable|string|max:50',
-            'phone'     => 'nullable|string|max:20',
-            'email'     => 'nullable|email|max:255',
-            'address'   => 'nullable|string',
-            'city'      => 'nullable|string|max:100',
+            'name' => 'required|string|max:255',
+            'code' => 'nullable|string|max:50',
+            'phone' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'address' => 'nullable|string',
+            'city' => 'nullable|string|max:100',
             'is_active' => 'boolean',
         ]);
 

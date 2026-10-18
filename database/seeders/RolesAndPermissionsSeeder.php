@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
@@ -48,6 +49,14 @@ class RolesAndPermissionsSeeder extends Seeder
         // Reports
         'view reports',
         'view cashier reports',
+        // Suppliers & Procurement
+        'view suppliers',
+        'manage suppliers',
+        'manage purchase orders',
+        'approve purchase orders',
+        'receive goods',
+        'manage supplier invoices',
+        'manage supplier payments',
         // Other
         'manage settings',
         'manage tenants',
@@ -55,7 +64,7 @@ class RolesAndPermissionsSeeder extends Seeder
     ];
 
     private array $roles = [
-        'super_admin'  => [],  // gets all permissions via Gate::before
+        'super_admin' => [],  // gets all permissions via Gate::before
         'tenant_admin' => [
             // Outlets
             'create outlets',
@@ -96,6 +105,14 @@ class RolesAndPermissionsSeeder extends Seeder
             // Reports
             'view reports',
             'view cashier reports',
+            // Suppliers & Procurement
+            'view suppliers',
+            'manage suppliers',
+            'manage purchase orders',
+            'approve purchase orders',
+            'receive goods',
+            'manage supplier invoices',
+            'manage supplier payments',
             // Other
             'manage settings',
             'view activity logs',
@@ -118,6 +135,13 @@ class RolesAndPermissionsSeeder extends Seeder
             'authorize void',
             'view reports',
             'view cashier reports',
+            'view suppliers',
+            'manage suppliers',
+            'manage purchase orders',
+            'approve purchase orders',
+            'receive goods',
+            'manage supplier invoices',
+            'manage supplier payments',
             'view activity logs',
         ],
         'cashier' => [
@@ -132,7 +156,7 @@ class RolesAndPermissionsSeeder extends Seeder
     public function run(): void
     {
         // Reset cached roles and permissions
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         foreach ($this->permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);

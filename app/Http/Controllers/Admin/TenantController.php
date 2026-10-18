@@ -7,7 +7,6 @@ use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
 class TenantController extends Controller
@@ -15,6 +14,7 @@ class TenantController extends Controller
     public function index()
     {
         $tenants = Tenant::latest()->paginate(15);
+
         return view('admin.tenants.index', compact('tenants'));
     }
 
@@ -26,45 +26,51 @@ class TenantController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'                   => 'required|string|max:255',
-            'slug'                   => 'required|string|max:255|unique:tenants,slug',
-            'status'                 => 'required|in:active,inactive,suspended',
-            'plan'                   => 'nullable|in:basic,professional,enterprise',
-            'subscription_status'    => 'nullable|in:trial,active,expired,cancelled',
-            'trial_ends_at'          => 'nullable|date',
-            'subscription_ends_at'   => 'nullable|date',
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:tenants,slug',
+            'status' => 'required|in:active,inactive,suspended',
+            'plan' => 'nullable|in:basic,professional,enterprise',
+            'subscription_status' => 'nullable|in:trial,active,expired,cancelled',
+            'trial_ends_at' => 'nullable|date',
+            'subscription_ends_at' => 'nullable|date',
             'is_subscription_exempt' => 'nullable|boolean',
-            'business_type'          => 'nullable|string|max:100',
-            'email'                  => 'nullable|email|max:255',
-            'phone'                  => 'nullable|string|max:20',
-            'address'                => 'nullable|string|max:500',
-            'admin_name'             => 'required|string|max:255',
-            'admin_email'            => 'required|email|max:255|unique:users,email',
-            'admin_password'         => 'required|string|min:8|confirmed',
+            'business_type' => 'nullable|string|max:100',
+            'supplier_management_override' => 'nullable|in:auto,enabled,disabled',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:500',
+            'admin_name' => 'required|string|max:255',
+            'admin_email' => 'required|email|max:255|unique:users,email',
+            'admin_password' => 'required|string|min:8|confirmed',
         ]);
 
+        $override = $validated['supplier_management_override'] ?? 'auto';
+
         $tenant = Tenant::create([
-            'name'                   => $validated['name'],
-            'slug'                   => $validated['slug'],
-            'status'                 => $validated['status'],
-            'plan'                   => $validated['plan'] ?? 'basic',
-            'subscription_status'    => $validated['subscription_status'] ?? 'trial',
-            'trial_ends_at'          => $validated['trial_ends_at'] ?? now()->addDays(14),
-            'subscription_ends_at'   => $validated['subscription_ends_at'] ?? null,
+            'name' => $validated['name'],
+            'slug' => $validated['slug'],
+            'status' => $validated['status'],
+            'plan' => $validated['plan'] ?? 'basic',
+            'subscription_status' => $validated['subscription_status'] ?? 'trial',
+            'trial_ends_at' => $validated['trial_ends_at'] ?? now()->addDays(14),
+            'subscription_ends_at' => $validated['subscription_ends_at'] ?? null,
             'is_subscription_exempt' => $request->boolean('is_subscription_exempt'),
-            'business_type'          => $validated['business_type'] ?? null,
-            'email'                  => $validated['email'] ?? null,
-            'phone'                  => $validated['phone'] ?? null,
-            'address'                => $validated['address'] ?? null,
+            'business_type' => $validated['business_type'] ?? null,
+            'email' => $validated['email'] ?? null,
+            'phone' => $validated['phone'] ?? null,
+            'address' => $validated['address'] ?? null,
+            'settings' => [
+                'supplier_management_override' => $override,
+            ],
         ]);
 
         $adminRole = Role::firstOrCreate(['name' => 'tenant_admin', 'guard_name' => 'web']);
 
         $user = User::create([
             'tenant_id' => $tenant->id,
-            'name'      => $validated['admin_name'],
-            'email'     => $validated['admin_email'],
-            'password'  => Hash::make($validated['admin_password']),
+            'name' => $validated['admin_name'],
+            'email' => $validated['admin_email'],
+            'password' => Hash::make($validated['admin_password']),
             'is_active' => true,
         ]);
 
@@ -77,6 +83,7 @@ class TenantController extends Controller
     public function show(Tenant $tenant)
     {
         $tenant->load(['users.roles', 'outlets']);
+
         return view('admin.tenants.show', compact('tenant'));
     }
 
@@ -88,22 +95,28 @@ class TenantController extends Controller
     public function update(Request $request, Tenant $tenant)
     {
         $validated = $request->validate([
-            'name'                   => 'required|string|max:255',
-            'status'                 => 'required|in:active,inactive,suspended',
-            'plan'                   => 'nullable|in:basic,professional,enterprise',
-            'subscription_status'    => 'nullable|in:trial,active,expired,cancelled',
-            'trial_ends_at'          => 'nullable|date',
-            'subscription_ends_at'   => 'nullable|date',
+            'name' => 'required|string|max:255',
+            'status' => 'required|in:active,inactive,suspended',
+            'plan' => 'nullable|in:basic,professional,enterprise',
+            'subscription_status' => 'nullable|in:trial,active,expired,cancelled',
+            'trial_ends_at' => 'nullable|date',
+            'subscription_ends_at' => 'nullable|date',
             'is_subscription_exempt' => 'nullable|boolean',
-            'business_type'          => 'nullable|string|max:100',
-            'email'                  => 'nullable|email|max:255',
-            'phone'                  => 'nullable|string|max:20',
-            'address'                => 'nullable|string|max:500',
+            'business_type' => 'nullable|string|max:100',
+            'supplier_management_override' => 'nullable|in:auto,enabled,disabled',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:500',
         ]);
+
+        $override = $validated['supplier_management_override'] ?? $tenant->supplierManagementOverride();
+        unset($validated['supplier_management_override']);
 
         $tenant->update(array_merge($validated, [
             'is_subscription_exempt' => $request->boolean('is_subscription_exempt'),
         ]));
+
+        $tenant->setSetting('supplier_management_override', $override);
 
         return redirect()->route('admin.tenants.index')
             ->with('success', 'Tenant updated successfully.');

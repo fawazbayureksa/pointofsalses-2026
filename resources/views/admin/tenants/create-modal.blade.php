@@ -16,9 +16,11 @@
                 <x-admin-form-input name="status" label="Status" type="select" :options="['active' => 'Active', 'inactive' => 'Inactive', 'suspended' => 'Suspended']" />
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <x-admin-form-input name="phone" label="Phone" type="tel" placeholder="+1234567890" />
-                <x-admin-form-input name="business_type" label="Business Type" placeholder="e.g. Restaurant" />
+                <x-admin-form-input name="business_type" label="Business Type" placeholder="e.g. Retail, Restaurant, Barbershop" />
+                <x-admin-form-input name="supplier_management_override" label="Supplier Management Module" type="select"
+                    :options="['auto' => 'Auto (Follow Business Type / Tenant Setting)', 'enabled' => 'Force Enabled', 'disabled' => 'Force Disabled']" />
             </div>
 
             <x-admin-form-input name="address" label="Address" type="textarea" placeholder="Enter full address" />

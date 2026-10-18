@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\Setting;
 use App\Services\ConfigService;
+use Illuminate\Support\Facades\Auth;
 
 if (! function_exists('configService')) {
     /**
@@ -43,5 +44,29 @@ if (! function_exists('setting')) {
         }
 
         return $record->getTypedValue() ?? $default;
+    }
+}
+
+if (! function_exists('supplier_management_enabled')) {
+    /**
+     * Determine whether the optional Supplier Management module is enabled for the current user/tenant.
+     */
+    function supplier_management_enabled(): bool
+    {
+        if (! Auth::check()) {
+            return false;
+        }
+
+        $user = Auth::user();
+
+        if ($user->hasRole('super_admin') && ! $user->tenant_id) {
+            return true;
+        }
+
+        if ($user->tenant) {
+            return $user->tenant->isSupplierManagementEnabled();
+        }
+
+        return (bool) setting('supplier_management_enabled', true);
     }
 }

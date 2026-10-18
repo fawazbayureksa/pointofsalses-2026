@@ -29,7 +29,7 @@ class StockMovement extends Model
     protected $casts = [
         'quantity_before' => 'float',
         'quantity_change' => 'float',
-        'quantity_after'  => 'float',
+        'quantity_after' => 'float',
     ];
 
     // ── Relationships ──────────────────────────────────────────────────────────
@@ -67,16 +67,16 @@ class StockMovement extends Model
         ?Model $reference = null,
     ): self {
         return static::create([
-            'product_id'      => $product->id,
-            'outlet_id'       => $outletId,
-            'type'            => $type,
+            'product_id' => $product->id,
+            'outlet_id' => $outletId,
+            'type' => $type,
             'quantity_before' => $before,
             'quantity_change' => $change,
-            'quantity_after'  => $after,
-            'reason'          => $reason,
-            'reference_type'  => $reference ? get_class($reference) : null,
-            'reference_id'    => $reference?->id,
-            'user_id'         => Auth::user()?->id,
+            'quantity_after' => $after,
+            'reason' => $reason,
+            'reference_type' => $reference ? get_class($reference) : null,
+            'reference_id' => $reference?->id,
+            'user_id' => Auth::user()?->id,
         ]);
     }
 
@@ -85,20 +85,22 @@ class StockMovement extends Model
     public function getTypeLabelAttribute(): string
     {
         return match ($this->type) {
-            'adjustment'    => 'Adjustment',
-            'sale'          => 'Sale',
-            'return'        => 'Return',
-            'transfer_in'   => 'Transfer In',
-            'transfer_out'  => 'Transfer Out',
-            default         => ucfirst($this->type),
+            'adjustment' => 'Adjustment',
+            'sale' => 'Sale',
+            'return' => 'Return',
+            'transfer_in' => 'Transfer In',
+            'transfer_out' => 'Transfer Out',
+            'goods_receipt' => 'Goods Receipt (PO)',
+            'supplier_return' => 'Supplier Return',
+            default => ucfirst(str_replace('_', ' ', $this->type)),
         };
     }
 
     public function getTypeBadgeClassAttribute(): string
     {
         return match ($this->type) {
-            'sale', 'transfer_out' => 'bg-red-100 text-red-800',
-            'return', 'transfer_in' => 'bg-green-100 text-green-800',
+            'sale', 'transfer_out', 'supplier_return' => 'bg-red-100 text-red-800',
+            'return', 'transfer_in', 'goods_receipt' => 'bg-green-100 text-green-800',
             default => 'bg-blue-100 text-blue-800',
         };
     }

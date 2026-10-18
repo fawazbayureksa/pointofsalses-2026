@@ -9,7 +9,6 @@ use Tests\TestCase;
 
 class SubscriptionManagementTest extends TestCase
 {
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -21,13 +20,13 @@ class SubscriptionManagementTest extends TestCase
     public function test_tenant_admin_can_view_subscription_management_portal(): void
     {
         $tenant = Tenant::create([
-            'name'                => 'Kopi Nusantara',
-            'slug'                => 'kopi-nusantara',
-            'email'               => 'owner@kopinusantara.id',
-            'plan'                => 'professional',
-            'status'              => 'active',
+            'name' => 'Kopi Nusantara',
+            'slug' => 'kopi-nusantara',
+            'email' => 'owner@kopinusantara.id',
+            'plan' => 'professional',
+            'status' => 'active',
             'subscription_status' => 'trial',
-            'trial_ends_at'       => now()->addDays(10),
+            'trial_ends_at' => now()->addDays(10),
         ]);
 
         $user = User::factory()->create([
@@ -48,13 +47,13 @@ class SubscriptionManagementTest extends TestCase
     public function test_tenant_can_upgrade_plan_and_generate_invoice(): void
     {
         $tenant = Tenant::create([
-            'name'                => 'Bistro Jaya',
-            'slug'                => 'bistro-jaya',
-            'email'               => 'billing@bistrojaya.id',
-            'plan'                => 'basic',
-            'status'              => 'active',
+            'name' => 'Bistro Jaya',
+            'slug' => 'bistro-jaya',
+            'email' => 'billing@bistrojaya.id',
+            'plan' => 'basic',
+            'status' => 'active',
             'subscription_status' => 'trial',
-            'trial_ends_at'       => now()->addDays(5),
+            'trial_ends_at' => now()->addDays(5),
         ]);
 
         $user = User::factory()->create([
@@ -64,10 +63,10 @@ class SubscriptionManagementTest extends TestCase
         $user->assignRole('tenant_admin');
 
         $response = $this->actingAs($user)->post(route('admin.subscription.plan.change'), [
-            'plan'           => 'professional',
-            'billing_cycle'  => 'annual',
+            'plan' => 'professional',
+            'billing_cycle' => 'annual',
             'payment_method' => 'qris',
-            'coupon_code'    => 'POSPRO20',
+            'coupon_code' => 'POSPRO20',
         ]);
 
         $response->assertRedirect(route('admin.subscription.index'));
@@ -84,10 +83,10 @@ class SubscriptionManagementTest extends TestCase
     public function test_tenant_can_update_billing_profile(): void
     {
         $tenant = Tenant::create([
-            'name'                => 'Martabak Sultan',
-            'slug'                => 'martabak-sultan',
-            'plan'                => 'professional',
-            'status'              => 'active',
+            'name' => 'Martabak Sultan',
+            'slug' => 'martabak-sultan',
+            'plan' => 'professional',
+            'status' => 'active',
             'subscription_status' => 'active',
             'subscription_ends_at' => now()->addMonth(),
         ]);
@@ -99,13 +98,13 @@ class SubscriptionManagementTest extends TestCase
         $user->assignRole('tenant_admin');
 
         $response = $this->actingAs($user)->put(route('admin.subscription.billing.update'), [
-            'billing_name'           => 'PT Martabak Sultan Indonesia',
-            'billing_email'          => 'finance@martabaksultan.co.id',
-            'billing_phone'          => '+62811998877',
-            'tax_id'                 => '12.345.678.9-012.000',
-            'billing_address'        => 'Jl. Sudirman No. 88, Jakarta',
+            'billing_name' => 'PT Martabak Sultan Indonesia',
+            'billing_email' => 'finance@martabaksultan.co.id',
+            'billing_phone' => '+62811998877',
+            'tax_id' => '12.345.678.9-012.000',
+            'billing_address' => 'Jl. Sudirman No. 88, Jakarta',
             'default_payment_method' => 'virtual_account',
-            'auto_renew'             => '1',
+            'auto_renew' => '1',
         ]);
 
         $response->assertRedirect(route('admin.subscription.index'));
@@ -125,10 +124,10 @@ class SubscriptionManagementTest extends TestCase
         $superAdmin->assignRole('super_admin');
 
         $tenant = Tenant::create([
-            'name'                => 'Retail Maju',
-            'slug'                => 'retail-maju',
-            'plan'                => 'basic',
-            'status'              => 'active',
+            'name' => 'Retail Maju',
+            'slug' => 'retail-maju',
+            'plan' => 'basic',
+            'status' => 'active',
             'subscription_status' => 'expired',
         ]);
 
@@ -136,7 +135,7 @@ class SubscriptionManagementTest extends TestCase
             route('admin.subscription.admin-action', $tenant->id),
             [
                 'action' => 'activate_paid',
-                'plan'   => 'enterprise',
+                'plan' => 'enterprise',
                 'months' => 6,
             ]
         );

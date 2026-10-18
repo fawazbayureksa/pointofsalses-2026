@@ -12,6 +12,7 @@ class SettingController extends Controller
     public function index()
     {
         $settings = Setting::all()->keyBy('key');
+
         return view('admin.settings.index', compact('settings'));
     }
 
@@ -30,13 +31,13 @@ class SettingController extends Controller
     public function updateEmail(Request $request)
     {
         $request->validate([
-            'mail_driver'     => 'required|string',
-            'mail_host'       => 'nullable|string',
-            'mail_port'       => 'nullable|integer',
-            'mail_username'   => 'nullable|string',
-            'mail_password'   => 'nullable|string',
+            'mail_driver' => 'required|string',
+            'mail_host' => 'nullable|string',
+            'mail_port' => 'nullable|integer',
+            'mail_username' => 'nullable|string',
+            'mail_password' => 'nullable|string',
             'mail_encryption' => 'nullable|string',
-            'mail_from'       => 'nullable|email',
+            'mail_from' => 'nullable|email',
         ]);
 
         foreach ($request->except(['_token', '_method']) as $key => $value) {
@@ -54,9 +55,10 @@ class SettingController extends Controller
             Mail::raw('This is a test email from your POS system.', function ($message) use ($request) {
                 $message->to($request->email)->subject('Test Email');
             });
+
             return redirect()->back()->with('success', 'Test email sent successfully.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to send test email: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to send test email: '.$e->getMessage());
         }
     }
 
@@ -76,16 +78,17 @@ class SettingController extends Controller
 
     public function downloadBackup($file)
     {
-        $path = storage_path('app/backups/' . $file);
-        if (!file_exists($path)) {
+        $path = storage_path('app/backups/'.$file);
+        if (! file_exists($path)) {
             abort(404);
         }
+
         return response()->download($path);
     }
 
     public function deleteBackup($file)
     {
-        $path = storage_path('app/backups/' . $file);
+        $path = storage_path('app/backups/'.$file);
         if (file_exists($path)) {
             unlink($path);
         }
@@ -96,13 +99,14 @@ class SettingController extends Controller
     public function tax()
     {
         $settings = Setting::all()->keyBy('key');
+
         return view('admin.settings.tax', compact('settings'));
     }
 
     public function updateTax(Request $request)
     {
         $request->validate([
-            'tax_rate'    => 'required|numeric|min:0|max:100',
+            'tax_rate' => 'required|numeric|min:0|max:100',
             'tax_enabled' => 'nullable|boolean',
         ]);
 
@@ -116,13 +120,14 @@ class SettingController extends Controller
     public function currency()
     {
         $settings = Setting::all()->keyBy('key');
+
         return view('admin.settings.currency', compact('settings'));
     }
 
     public function updateCurrency(Request $request)
     {
         $request->validate([
-            'currency_code'   => 'required|string|max:3',
+            'currency_code' => 'required|string|max:3',
             'currency_symbol' => 'required|string|max:5',
         ]);
 
@@ -131,5 +136,40 @@ class SettingController extends Controller
         }
 
         return redirect()->back()->with('success', 'Currency settings updated.');
+    }
+
+    public function updateModules(Request $request)
+    {
+        $request->validate([
+            'supplier_management_enabled' => 'nullable|boolean',
+            'po_approval_threshold' => 'nullable|numeric|min:0',
+        ]);
+
+        $tenant = $request->user()?->tenant;
+        if ($tenant && $tenant->supplierManagementOverride() !== 'auto') {
+            return redirect()->route('admin.settings.index')
+                ->with('error', 'Pengaturan modul Supplier Management saat ini dikunci oleh Super Admin.');
+        }
+
+        $enabled = $request->boolean('supplier_management_enabled') ? 'true' : 'false';
+
+        Setting::updateOrCreate(
+            ['key' => 'supplier_management_enabled'],
+            ['value' => $enabled, 'type' => 'boolean', 'group' => 'modules']
+        );
+
+        if ($request->filled('po_approval_threshold')) {
+            Setting::updateOrCreate(
+                ['key' => 'po_approval_threshold'],
+                ['value' => (string) $request->input('po_approval_threshold'), 'type' => 'float', 'group' => 'modules']
+            );
+        }
+
+        if ($tenant) {
+            $tenant->setSetting('supplier_management_enabled', $request->boolean('supplier_management_enabled'));
+        }
+
+        return redirect()->route('admin.settings.index')
+            ->with('success', 'Pengaturan modul opsional (Supplier Management) berhasil diperbarui.');
     }
 }

@@ -18,6 +18,7 @@
         subscription_ends_at: @json($tenant->subscription_ends_at ? $tenant->subscription_ends_at->format('Y-m-d\TH:i') : ''),
         is_subscription_exempt: @json((bool) $tenant->is_subscription_exempt),
         business_type: @json($tenant->business_type ?? ''),
+        supplier_management_override: @json($tenant->supplierManagementOverride()),
         address: @json($tenant->address ?? '')
     })"
         class="text-green-600 hover:text-green-900">

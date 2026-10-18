@@ -202,6 +202,65 @@
                     </a>
                 </li>
 
+                @if (supplier_management_enabled())
+                    <li>
+                        <div class="pt-4 pb-2 flex items-center justify-between">
+                            <span x-show="sidebarOpen"
+                                class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Supplier
+                                Management</span>
+                        </div>
+                        <a href="{{ route('admin.suppliers.index') }}"
+                            :class="currentPage.includes('admin/suppliers') ? 'bg-slate-700 text-white' :
+                                'text-slate-300 hover:bg-slate-700 hover:text-white'"
+                            class="flex items-center px-3 py-2 rounded-lg transition-colors">
+                            <i class="fa-solid fa-truck-field w-5 text-center"></i>
+                            <span x-show="sidebarOpen" x-transition class="ml-3">Suppliers</span>
+                        </a>
+                        <a href="{{ route('admin.supplier-products.index') }}"
+                            :class="currentPage.includes('supplier-products') ? 'bg-slate-700 text-white' :
+                                'text-slate-300 hover:bg-slate-700 hover:text-white'"
+                            class="flex items-center px-3 py-2 rounded-lg transition-colors">
+                            <i class="fa-solid fa-boxes-packing w-5 text-center"></i>
+                            <span x-show="sidebarOpen" x-transition class="ml-3">Supplier Products</span>
+                        </a>
+                        <a href="{{ route('admin.purchase-orders.index') }}"
+                            :class="currentPage.includes('purchase-orders') ? 'bg-slate-700 text-white' :
+                                'text-slate-300 hover:bg-slate-700 hover:text-white'"
+                            class="flex items-center px-3 py-2 rounded-lg transition-colors">
+                            <i class="fa-solid fa-file-signature w-5 text-center"></i>
+                            <span x-show="sidebarOpen" x-transition class="ml-3">Purchase Orders</span>
+                        </a>
+                        <a href="{{ route('admin.goods-receipts.index') }}"
+                            :class="currentPage.includes('goods-receipts') ? 'bg-slate-700 text-white' :
+                                'text-slate-300 hover:bg-slate-700 hover:text-white'"
+                            class="flex items-center px-3 py-2 rounded-lg transition-colors">
+                            <i class="fa-solid fa-dolly w-5 text-center"></i>
+                            <span x-show="sidebarOpen" x-transition class="ml-3">Goods Receiving</span>
+                        </a>
+                        <a href="{{ route('admin.supplier-invoices.index') }}"
+                            :class="currentPage.includes('supplier-invoices') ? 'bg-slate-700 text-white' :
+                                'text-slate-300 hover:bg-slate-700 hover:text-white'"
+                            class="flex items-center px-3 py-2 rounded-lg transition-colors">
+                            <i class="fa-solid fa-file-invoice w-5 text-center"></i>
+                            <span x-show="sidebarOpen" x-transition class="ml-3">Supplier Invoices</span>
+                        </a>
+                        <a href="{{ route('admin.supplier-payments.index') }}"
+                            :class="currentPage.includes('supplier-payments') ? 'bg-slate-700 text-white' :
+                                'text-slate-300 hover:bg-slate-700 hover:text-white'"
+                            class="flex items-center px-3 py-2 rounded-lg transition-colors">
+                            <i class="fa-solid fa-money-check-dollar w-5 text-center"></i>
+                            <span x-show="sidebarOpen" x-transition class="ml-3">Supplier Payments</span>
+                        </a>
+                        <a href="{{ route('admin.supplier-reports.index') }}"
+                            :class="currentPage.includes('supplier-reports') ? 'bg-slate-700 text-white' :
+                                'text-slate-300 hover:bg-slate-700 hover:text-white'"
+                            class="flex items-center px-3 py-2 rounded-lg transition-colors">
+                            <i class="fa-solid fa-chart-column w-5 text-center"></i>
+                            <span x-show="sidebarOpen" x-transition class="ml-3">Supplier Reports</span>
+                        </a>
+                    </li>
+                @endif
+
                 <li>
                     <div class="pt-4 pb-2">
                         <span x-show="sidebarOpen"

@@ -39,6 +39,86 @@
         </div>
     @endif
 
+    @if(session('error'))
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-amber-800">{{ session('error') }}</p>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @php
+        $currentTenant = auth()->user()?->tenant;
+        $supplierOverride = $currentTenant ? $currentTenant->supplierManagementOverride() : 'auto';
+        $isSupplierEnabled = supplier_management_enabled();
+    @endphp
+
+    <x-admin-card title="Optional Business Modules (Per-Tenant)">
+        <form method="POST" action="{{ route('admin.settings.modules.update') }}">
+            @csrf
+            @method('PUT')
+
+            <div class="p-4 rounded-xl border {{ $isSupplierEnabled ? 'bg-emerald-50/50 border-emerald-200' : 'bg-gray-50 border-gray-200' }} mb-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-lg {{ $isSupplierEnabled ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-600' }} flex items-center justify-center shrink-0 mt-0.5">
+                            <i class="fa-solid fa-truck-field"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h4 class="text-sm font-bold text-gray-900">Supplier Management, Procurement &amp; Accounts Payable</h4>
+                                <span class="px-2 py-0.5 text-xs font-semibold rounded-full {{ $isSupplierEnabled ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-200 text-gray-700' }}">
+                                    {{ $isSupplierEnabled ? 'Active' : 'Disabled (Optional)' }}
+                                </span>
+                                @if($supplierOverride !== 'auto')
+                                    <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800">
+                                        Managed by Super Admin ({{ ucfirst($supplierOverride) }})
+                                    </span>
+                                @endif
+                            </div>
+                            <p class="text-xs text-gray-600 mt-1">
+                                Aktifkan fitur ini jika bisnis Anda membutuhkan pengelolaan pemasok (Supplier Directory), Katalog Harga Supplier, Purchase Order (PO), Penerimaan Barang (Goods Receiving), Hutang &amp; Tagihan Supplier (Payables), serta Laporan Performa Supplier. Nonaktifkan untuk tipe bisnis jasa (seperti Barbershop, Laundry, Klinik, dll.) agar menu tetap ringkas.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 shrink-0">
+                        <input type="hidden" name="supplier_management_enabled" value="0">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" name="supplier_management_enabled" value="1"
+                                {{ $isSupplierEnabled ? 'checked' : '' }}
+                                {{ $supplierOverride !== 'auto' ? 'disabled' : '' }}
+                                class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                            <span class="ml-2 text-sm font-medium text-gray-800">Enable Module</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-gray-200/80 grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+                            Purchase Approval Threshold (Nominal Wajib Approval PO)
+                        </label>
+                        <input type="number" name="po_approval_threshold" min="0" step="1000"
+                            value="{{ old('po_approval_threshold', setting('po_approval_threshold', 5000000)) }}"
+                            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <p class="text-xs text-gray-500 mt-1">PO di atas nominal ini otomatis membutuhkan persetujuan (Pending Approval) jika dibuat oleh staf tanpa hak approve langsung.</p>
+                    </div>
+                    <div class="flex justify-end items-end h-full">
+                        <x-admin-button type="submit" variant="primary" icon="fa-solid fa-sliders">
+                            Save Module Preferences
+                        </x-admin-button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </x-admin-card>
+
     <x-admin-card title="General Settings">
         <form method="POST" action="{{ route('admin.settings.update') }}">
             @csrf

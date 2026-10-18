@@ -12,7 +12,7 @@ class SubscriptionController extends Controller
     public function plans()
     {
         $tenant = Auth::user()?->tenant;
-        $plans  = Tenant::availablePlans();
+        $plans = Tenant::availablePlans();
 
         return view('subscription.plans', compact('tenant', 'plans'));
     }
@@ -24,12 +24,12 @@ class SubscriptionController extends Controller
     public function select(Request $request)
     {
         $validated = $request->validate([
-            'plan'           => ['required', 'in:basic,professional,enterprise'],
-            'billing_cycle'  => ['nullable', 'in:monthly,annual'],
+            'plan' => ['required', 'in:basic,professional,enterprise'],
+            'billing_cycle' => ['nullable', 'in:monthly,annual'],
             'payment_method' => ['nullable', 'string', 'max:50'],
         ]);
 
-        $user   = Auth::user();
+        $user = Auth::user();
         $tenant = $user?->tenant;
 
         if (! $tenant) {
@@ -37,28 +37,28 @@ class SubscriptionController extends Controller
                 ->with('warning', 'No tenant associated with your account.');
         }
 
-        $plans        = Tenant::availablePlans();
+        $plans = Tenant::availablePlans();
         $selectedPlan = $plans[$validated['plan']];
         $billingCycle = $validated['billing_cycle'] ?? 'monthly';
 
         if ($validated['plan'] === 'basic') {
             $tenant->update([
-                'plan'                 => 'basic',
-                'subscription_status'  => 'active',
-                'trial_ends_at'        => null,
+                'plan' => 'basic',
+                'subscription_status' => 'active',
+                'trial_ends_at' => null,
                 'subscription_ends_at' => null,
             ]);
 
             $tenant->recordBillingEvent([
-                'plan'           => 'basic',
-                'plan_name'      => 'Starter (Free)',
-                'billing_cycle'  => 'forever',
-                'amount'         => 0,
+                'plan' => 'basic',
+                'plan_name' => 'Starter (Free)',
+                'billing_cycle' => 'forever',
+                'amount' => 0,
                 'payment_method' => 'Free Tier',
-                'status'         => 'active',
-                'description'    => 'Selected Starter (Free Forever) Plan',
-                'period_start'   => now()->format('d M Y'),
-                'period_end'     => 'Forever',
+                'status' => 'active',
+                'description' => 'Selected Starter (Free Forever) Plan',
+                'period_start' => now()->format('d M Y'),
+                'period_end' => 'Forever',
             ]);
 
             return redirect()->route('admin.subscription.index')
@@ -78,21 +78,21 @@ class SubscriptionController extends Controller
             : $startFrom->copy()->addMonth();
 
         $tenant->update([
-            'plan'                 => $validated['plan'],
-            'subscription_status'  => 'active',
+            'plan' => $validated['plan'],
+            'subscription_status' => 'active',
             'subscription_ends_at' => $endsAt,
         ]);
 
         $invoice = $tenant->recordBillingEvent([
-            'plan'           => $validated['plan'],
-            'plan_name'      => $selectedPlan['name'],
-            'billing_cycle'  => $billingCycle,
-            'amount'         => $amount,
+            'plan' => $validated['plan'],
+            'plan_name' => $selectedPlan['name'],
+            'billing_cycle' => $billingCycle,
+            'amount' => $amount,
             'payment_method' => strtoupper($validated['payment_method'] ?? 'QRIS'),
-            'status'         => 'paid',
-            'description'    => "{$selectedPlan['name']} Plan (" . ucfirst($billingCycle) . ")",
-            'period_start'   => $startFrom->format('d M Y'),
-            'period_end'     => $endsAt->format('d M Y'),
+            'status' => 'paid',
+            'description' => "{$selectedPlan['name']} Plan (".ucfirst($billingCycle).')',
+            'period_start' => $startFrom->format('d M Y'),
+            'period_end' => $endsAt->format('d M Y'),
         ]);
 
         return redirect()->route('admin.subscription.index')

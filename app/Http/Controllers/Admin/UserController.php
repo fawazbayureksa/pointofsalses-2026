@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Outlet;
+use App\Models\Tenant;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
-use App\Models\Tenant;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
@@ -28,38 +28,38 @@ class UserController extends Controller
 
         // Summary statistics before search/filter
         $stats = [
-            'total'      => (clone $baseQuery)->count(),
-            'active'     => (clone $baseQuery)->where('is_active', true)->count(),
-            'on_trial'   => (clone $baseQuery)->whereHas('tenant', function ($q) {
+            'total' => (clone $baseQuery)->count(),
+            'active' => (clone $baseQuery)->where('is_active', true)->count(),
+            'on_trial' => (clone $baseQuery)->whereHas('tenant', function ($q) {
                 $q->where('subscription_status', 'trial')
-                  ->whereNotNull('trial_ends_at')
-                  ->where('trial_ends_at', '>', now());
+                    ->whereNotNull('trial_ends_at')
+                    ->where('trial_ends_at', '>', now());
             })->count(),
             'subscribed' => (clone $baseQuery)->whereHas('tenant', function ($q) {
                 $q->where('subscription_status', 'active')
-                  ->where(function ($q2) {
-                      $q2->whereNull('subscription_ends_at')
-                         ->orWhere('subscription_ends_at', '>', now());
-                  });
+                    ->where(function ($q2) {
+                        $q2->whereNull('subscription_ends_at')
+                            ->orWhere('subscription_ends_at', '>', now());
+                    });
             })->count(),
-            'expired'    => (clone $baseQuery)->whereHas('tenant', function ($q) {
+            'expired' => (clone $baseQuery)->whereHas('tenant', function ($q) {
                 $q->where('is_subscription_exempt', false)
-                  ->where(function ($q2) {
-                      $q2->where('subscription_status', 'expired')
-                         ->orWhere('subscription_status', 'cancelled')
-                         ->orWhere(function ($q3) {
-                             $q3->where('subscription_status', 'trial')
-                                ->where(function ($q4) {
-                                    $q4->whereNull('trial_ends_at')
-                                       ->orWhere('trial_ends_at', '<=', now());
-                                });
-                         })
-                         ->orWhere(function ($q3) {
-                             $q3->where('subscription_status', 'active')
-                                ->whereNotNull('subscription_ends_at')
-                                ->where('subscription_ends_at', '<=', now());
-                         });
-                  });
+                    ->where(function ($q2) {
+                        $q2->where('subscription_status', 'expired')
+                            ->orWhere('subscription_status', 'cancelled')
+                            ->orWhere(function ($q3) {
+                                $q3->where('subscription_status', 'trial')
+                                    ->where(function ($q4) {
+                                        $q4->whereNull('trial_ends_at')
+                                            ->orWhere('trial_ends_at', '<=', now());
+                                    });
+                            })
+                            ->orWhere(function ($q3) {
+                                $q3->where('subscription_status', 'active')
+                                    ->whereNotNull('subscription_ends_at')
+                                    ->where('subscription_ends_at', '<=', now());
+                            });
+                    });
             })->count(),
         ];
 
@@ -73,17 +73,17 @@ class UserController extends Controller
             $search = trim($request->search);
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%")
-                  ->orWhereHas('tenant', function ($tq) use ($search) {
-                      $tq->where('name', 'like', "%{$search}%")
-                         ->orWhere('slug', 'like', "%{$search}%");
-                  });
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhereHas('tenant', function ($tq) use ($search) {
+                        $tq->where('name', 'like', "%{$search}%")
+                            ->orWhere('slug', 'like', "%{$search}%");
+                    });
             });
         }
 
         if ($request->filled('role')) {
-            $query->whereHas('roles', fn($q) => $q->where('name', $request->role));
+            $query->whereHas('roles', fn ($q) => $q->where('name', $request->role));
         }
 
         if ($request->filled('status')) {
@@ -99,21 +99,21 @@ class UserController extends Controller
             if ($subStatus === 'trial_active') {
                 $query->whereHas('tenant', function ($q) {
                     $q->where('subscription_status', 'trial')
-                      ->whereNotNull('trial_ends_at')
-                      ->where('trial_ends_at', '>', now());
+                        ->whereNotNull('trial_ends_at')
+                        ->where('trial_ends_at', '>', now());
                 });
             } elseif ($subStatus === 'trial_expired') {
                 $query->whereHas('tenant', function ($q) {
                     $q->where('subscription_status', 'trial')
-                      ->where(function ($q2) {
-                          $q2->whereNull('trial_ends_at')
-                             ->orWhere('trial_ends_at', '<=', now());
-                      });
+                        ->where(function ($q2) {
+                            $q2->whereNull('trial_ends_at')
+                                ->orWhere('trial_ends_at', '<=', now());
+                        });
                 });
             } elseif ($subStatus === 'exempt') {
-                $query->whereHas('tenant', fn($q) => $q->where('is_subscription_exempt', true));
+                $query->whereHas('tenant', fn ($q) => $q->where('is_subscription_exempt', true));
             } else {
-                $query->whereHas('tenant', fn($q) => $q->where('subscription_status', $subStatus));
+                $query->whereHas('tenant', fn ($q) => $q->where('subscription_status', $subStatus));
             }
         }
 
@@ -141,22 +141,22 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'                   => 'required|string|max:255',
-            'email'                  => 'required|email|unique:users,email',
-            'password'               => 'required|string|min:8',
-            'phone'                  => 'nullable|string|max:20',
-            'outlet_id'              => 'nullable|exists:outlets,id',
-            'is_active'              => 'nullable|boolean',
-            'status'                 => 'nullable|in:active,inactive',
-            'role'                   => 'nullable|string|exists:roles,name',
-            'tenant_id'              => 'nullable|exists:tenants,id',
-            'business_name'          => 'nullable|string|max:255',
-            'plan'                   => 'nullable|in:basic,professional,enterprise',
-            'subscription_status'    => 'nullable|in:trial,active,expired,cancelled',
-            'trial_ends_at'          => 'nullable|date',
-            'subscription_ends_at'   => 'nullable|date',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8',
+            'phone' => 'nullable|string|max:20',
+            'outlet_id' => 'nullable|exists:outlets,id',
+            'is_active' => 'nullable|boolean',
+            'status' => 'nullable|in:active,inactive',
+            'role' => 'nullable|string|exists:roles,name',
+            'tenant_id' => 'nullable|exists:tenants,id',
+            'business_name' => 'nullable|string|max:255',
+            'plan' => 'nullable|in:basic,professional,enterprise',
+            'subscription_status' => 'nullable|in:trial,active,expired,cancelled',
+            'trial_ends_at' => 'nullable|date',
+            'subscription_ends_at' => 'nullable|date',
             'is_subscription_exempt' => 'nullable|boolean',
-            'avatar'                 => 'nullable|image|max:2048',
+            'avatar' => 'nullable|image|max:2048',
         ]);
 
         $authUser = Auth::user();
@@ -205,13 +205,13 @@ class UserController extends Controller
                 // Provision a new Tenant with trial/subscription settings (like RegisteredUserController)
                 $businessName = ! empty($validated['business_name'])
                     ? $validated['business_name']
-                    : $validated['name'] . "'s Business";
+                    : $validated['name']."'s Business";
 
                 $baseSlug = Str::slug($businessName) ?: 'business';
                 $slug = $baseSlug;
                 $counter = 1;
                 while (Tenant::where('slug', $slug)->lockForUpdate()->exists()) {
-                    $slug = $baseSlug . '-' . $counter++;
+                    $slug = $baseSlug.'-'.$counter++;
                 }
 
                 $subStatus = $validated['subscription_status'] ?? 'trial';
@@ -220,15 +220,15 @@ class UserController extends Controller
                     : ($subStatus === 'trial' ? now()->addDays(14) : null);
 
                 $tenant = Tenant::create([
-                    'name'                   => $businessName,
-                    'slug'                   => $slug,
-                    'email'                  => $validated['email'],
-                    'phone'                  => $validated['phone'] ?? null,
-                    'plan'                   => $validated['plan'] ?? 'professional',
-                    'status'                 => 'active',
-                    'subscription_status'    => $subStatus,
-                    'trial_ends_at'          => $trialEndsAt,
-                    'subscription_ends_at'   => $validated['subscription_ends_at'] ?? null,
+                    'name' => $businessName,
+                    'slug' => $slug,
+                    'email' => $validated['email'],
+                    'phone' => $validated['phone'] ?? null,
+                    'plan' => $validated['plan'] ?? 'professional',
+                    'status' => 'active',
+                    'subscription_status' => $subStatus,
+                    'trial_ends_at' => $trialEndsAt,
+                    'subscription_ends_at' => $validated['subscription_ends_at'] ?? null,
                     'is_subscription_exempt' => $request->boolean('is_subscription_exempt'),
                 ]);
 
@@ -236,11 +236,11 @@ class UserController extends Controller
             }
 
             $user = User::create([
-                'name'      => $validated['name'],
-                'email'     => $validated['email'],
-                'password'  => Hash::make($validated['password']),
-                'phone'     => $validated['phone'] ?? null,
-                'avatar'    => $avatarPath,
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'phone' => $validated['phone'] ?? null,
+                'avatar' => $avatarPath,
                 'is_active' => $isActive,
                 'tenant_id' => $tenantId,
             ]);
@@ -278,27 +278,27 @@ class UserController extends Controller
         }
 
         $validated = $request->validate([
-            'name'                   => 'required|string|max:255',
-            'email'                  => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
-            'phone'                  => 'nullable|string|max:20',
-            'password'               => 'nullable|string|min:8',
-            'outlet_id'              => 'nullable|exists:outlets,id',
-            'is_active'              => 'nullable|boolean',
-            'role'                   => 'nullable|string|exists:roles,name',
-            'business_name'          => 'nullable|string|max:255',
-            'plan'                   => 'nullable|in:basic,professional,enterprise',
-            'subscription_status'    => 'nullable|in:trial,active,expired,cancelled',
-            'trial_ends_at'          => 'nullable|date',
-            'subscription_ends_at'   => 'nullable|date',
+            'name' => 'required|string|max:255',
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
+            'phone' => 'nullable|string|max:20',
+            'password' => 'nullable|string|min:8',
+            'outlet_id' => 'nullable|exists:outlets,id',
+            'is_active' => 'nullable|boolean',
+            'role' => 'nullable|string|exists:roles,name',
+            'business_name' => 'nullable|string|max:255',
+            'plan' => 'nullable|in:basic,professional,enterprise',
+            'subscription_status' => 'nullable|in:trial,active,expired,cancelled',
+            'trial_ends_at' => 'nullable|date',
+            'subscription_ends_at' => 'nullable|date',
             'is_subscription_exempt' => 'nullable|boolean',
-            'avatar'                 => 'nullable|image|max:2048',
+            'avatar' => 'nullable|image|max:2048',
         ]);
 
-        DB::transaction(function () use ($request, $validated, $user, $isSuperAdmin) {
+        DB::transaction(function () use ($request, $validated, $user) {
             $userUpdates = [
-                'name'      => $validated['name'],
-                'email'     => $validated['email'],
-                'phone'     => $validated['phone'] ?? null,
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone'] ?? null,
                 'is_active' => isset($validated['is_active']) ? (bool) $validated['is_active'] : $user->is_active,
             ];
 
@@ -344,25 +344,25 @@ class UserController extends Controller
                 if (! $tenant && ! $user->hasRole('super_admin')) {
                     $businessName = ! empty($validated['business_name'])
                         ? $validated['business_name']
-                        : $user->name . "'s Business";
+                        : $user->name."'s Business";
 
                     $baseSlug = Str::slug($businessName) ?: 'business';
                     $slug = $baseSlug;
                     $counter = 1;
                     while (Tenant::where('slug', $slug)->lockForUpdate()->exists()) {
-                        $slug = $baseSlug . '-' . $counter++;
+                        $slug = $baseSlug.'-'.$counter++;
                     }
 
                     $tenant = Tenant::create([
-                        'name'                   => $businessName,
-                        'slug'                   => $slug,
-                        'email'                  => $user->email,
-                        'phone'                  => $user->phone,
-                        'plan'                   => $validated['plan'] ?? 'professional',
-                        'status'                 => 'active',
-                        'subscription_status'    => $validated['subscription_status'] ?? 'trial',
-                        'trial_ends_at'          => $validated['trial_ends_at'] ?? now()->addDays(14),
-                        'subscription_ends_at'   => $validated['subscription_ends_at'] ?? null,
+                        'name' => $businessName,
+                        'slug' => $slug,
+                        'email' => $user->email,
+                        'phone' => $user->phone,
+                        'plan' => $validated['plan'] ?? 'professional',
+                        'status' => 'active',
+                        'subscription_status' => $validated['subscription_status'] ?? 'trial',
+                        'trial_ends_at' => $validated['trial_ends_at'] ?? now()->addDays(14),
+                        'subscription_ends_at' => $validated['subscription_ends_at'] ?? null,
                         'is_subscription_exempt' => $request->boolean('is_subscription_exempt'),
                     ]);
 
@@ -417,6 +417,7 @@ class UserController extends Controller
     public function profile()
     {
         $user = Auth::user();
+
         return view('admin.users.profile', compact('user'));
     }
 
@@ -425,9 +426,9 @@ class UserController extends Controller
         $user = Auth::user();
 
         $validated = $request->validate([
-            'name'   => 'required|string|max:255',
-            'email'  => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
-            'phone'  => 'nullable|string|max:20',
+            'name' => 'required|string|max:255',
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
+            'phone' => 'nullable|string|max:20',
             'avatar' => 'nullable|image|max:2048',
         ]);
 
@@ -444,7 +445,7 @@ class UserController extends Controller
     {
         $request->validate([
             'current_password' => 'required|current_password',
-            'password'         => 'required|string|min:8|confirmed',
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
         Auth::user()->update(['password' => Hash::make($request->password)]);
