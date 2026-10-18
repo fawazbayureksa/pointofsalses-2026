@@ -24,6 +24,13 @@ class OutletController extends Controller
 
     public function store(Request $request)
     {
+        $tenant = auth()->user()?->tenant;
+        if ($tenant && ! $tenant->canCreateOutlet()) {
+            $max = $tenant->maxOutlets();
+            return redirect()->route('admin.outlets.index')
+                ->withErrors(['plan' => "Your current {$tenant->planDetails()['name']} plan allows up to {$max} outlet(s). Please upgrade your subscription plan to add more outlets."]);
+        }
+
         $validated = $request->validate([
             'name'       => 'required|string|max:255',
             'code'       => 'nullable|string|max:50',

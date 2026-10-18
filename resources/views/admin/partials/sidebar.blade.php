@@ -19,6 +19,18 @@
                         <span x-show="sidebarOpen" x-transition class="ml-3">Dashboard</span>
                     </a>
                 </li>
+                <li>
+                    <a href="{{ route('admin.guide') }}"
+                        :class="currentPage.includes('guide') ? 'bg-slate-700 text-white' :
+                            'text-slate-300 hover:bg-slate-700 hover:text-white'"
+                        class="flex items-center px-3 py-2 rounded-lg transition-colors">
+                        <i class="fa-solid fa-book-open w-5 text-center text-emerald-400"></i>
+                        <span x-show="sidebarOpen" x-transition class="ml-3 flex items-center justify-between flex-1">
+                            <span>Guide Manual</span>
+                            <span class="text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.5 rounded">ID</span>
+                        </span>
+                    </a>
+                </li>
                 @role('super_admin')
                     <li>
                         <div class="pt-4 pb-2">
@@ -33,8 +45,63 @@
                             <i class="fa-solid fa-building w-5 text-center"></i>
                             <span x-show="sidebarOpen" x-transition class="ml-3">Tenants</span>
                         </a>
+                        <a href="{{ route('admin.subscription.index') }}"
+                            :class="currentPage.includes('subscription') ? 'bg-slate-700 text-white' :
+                                'text-slate-300 hover:bg-slate-700 hover:text-white'"
+                            class="flex items-center px-3 py-2 rounded-lg transition-colors">
+                            <i class="fa-solid fa-crown w-5 text-center text-amber-400"></i>
+                            <span x-show="sidebarOpen" x-transition class="ml-3 flex items-center justify-between flex-1">
+                                <span>Subscriptions</span>
+                                <span class="text-[10px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded">PRO</span>
+                            </span>
+                        </a>
                     </li>
                 @endrole
+
+                @if (Auth::user()->tenant)
+                    @php
+                        $sidebarTenant = Auth::user()->tenant;
+                    @endphp
+                    <li>
+                        <div class="pt-4 pb-2">
+                            <span x-show="sidebarOpen"
+                                class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Subscription
+                                &amp; Plan</span>
+                        </div>
+                        <a href="{{ route('admin.subscription.index') }}"
+                            :class="currentPage.includes('subscription') ? 'bg-slate-700 text-white' :
+                                'text-slate-300 hover:bg-slate-700 hover:text-white'"
+                            class="flex items-center px-3 py-2 rounded-lg transition-colors">
+                            <i class="fa-solid fa-crown w-5 text-center text-amber-400"></i>
+                            <span x-show="sidebarOpen" x-transition class="ml-3 flex items-center justify-between flex-1">
+                                <span>Subscription</span>
+                                @if ($sidebarTenant->isOnTrial())
+                                    <span class="text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-1.5 py-0.5 rounded">
+                                        {{ $sidebarTenant->trialDaysLeft() }}d Trial
+                                    </span>
+                                @elseif ($sidebarTenant->isExempt())
+                                    <span class="text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.5 rounded">
+                                        VIP
+                                    </span>
+                                @else
+                                    <span class="text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded uppercase">
+                                        {{ $sidebarTenant->plan === 'basic' ? 'Free' : ($sidebarTenant->plan === 'professional' ? 'Pro' : 'Ent') }}
+                                    </span>
+                                @endif
+                            </span>
+                        </a>
+                        <a href="{{ route('admin.subscription.index') }}#plans"
+                            class="flex items-center px-3 py-2 rounded-lg transition-colors text-slate-300 hover:bg-slate-700 hover:text-white">
+                            <i class="fa-solid fa-rocket w-5 text-center text-indigo-400"></i>
+                            <span x-show="sidebarOpen" x-transition class="ml-3">Upgrade &amp; Plans</span>
+                        </a>
+                        <a href="{{ route('admin.subscription.index') }}#billing"
+                            class="flex items-center px-3 py-2 rounded-lg transition-colors text-slate-300 hover:bg-slate-700 hover:text-white">
+                            <i class="fa-solid fa-file-invoice-dollar w-5 text-center text-slate-400"></i>
+                            <span x-show="sidebarOpen" x-transition class="ml-3">Billing &amp; Invoices</span>
+                        </a>
+                    </li>
+                @endif
 
                 <li>
                     <div class="pt-4 pb-2">

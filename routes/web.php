@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\SubscriptionManagementController;
 use App\Http\Controllers\Admin\TenantController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -47,10 +48,25 @@ Route::middleware(['auth', 'tenant.active', 'subscription.active'])
     ->group(function () {
 
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/guide', fn() => view('admin.guide.index'))->name('guide');
 
         Route::get('/profile', [UserController::class, 'profile'])->name('profile');
         Route::put('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
         Route::put('/password', [UserController::class, 'updatePassword'])->name('password.change');
+
+        // Tenant & Super-Admin Subscription Management (accessible even if subscription expired so tenant can renew)
+        Route::withoutMiddleware('subscription.active')
+            ->prefix('subscription')
+            ->name('subscription.')
+            ->group(function () {
+                Route::get('/', [SubscriptionManagementController::class, 'index'])->name('index');
+                Route::post('/plan', [SubscriptionManagementController::class, 'changePlan'])->name('plan.change');
+                Route::put('/billing', [SubscriptionManagementController::class, 'updateBilling'])->name('billing.update');
+                Route::post('/cancel', [SubscriptionManagementController::class, 'cancel'])->name('cancel');
+                Route::post('/tenants/{tenant}/action', [SubscriptionManagementController::class, 'adminAction'])
+                    ->middleware('role:super_admin')
+                    ->name('admin-action');
+            });
 
         Route::middleware('role:super_admin')->group(function () {
             Route::resource('tenants', TenantController::class);

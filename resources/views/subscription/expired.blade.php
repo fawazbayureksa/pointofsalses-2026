@@ -55,15 +55,30 @@
                 @endif
             </h1>
 
-            <p class="text-slate-400 text-sm leading-relaxed mb-8">
+            <p class="text-slate-400 text-sm leading-relaxed mb-4">
                 @if(auth()->user()?->tenant?->subscription_status === 'trial')
-                    Your 14-day free trial has ended. Upgrade to a paid plan to continue using
+                    Your free trial has ended. Upgrade to a paid plan to continue using
                     {{ config('app.name') }} and keep all your data.
                 @else
                     Your subscription has expired. Renew your plan to restore full access to
                     {{ config('app.name') }} and continue managing your business.
                 @endif
             </p>
+
+            @php
+                $expTenant = auth()->user()?->tenant;
+                $expDate = $expTenant?->subscription_status === 'active'
+                    ? $expTenant?->subscription_ends_at
+                    : $expTenant?->trial_ends_at;
+            @endphp
+            @if($expDate)
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-300 text-xs font-medium mb-6">
+                    <i class="fas fa-calendar-xmark"></i>
+                    <span>Expired on {{ $expDate->format('d M Y, H:i') }} ({{ $expDate->diffForHumans() }})</span>
+                </div>
+            @else
+                <div class="mb-4"></div>
+            @endif
 
             <!-- Plan options -->
             <div class="grid grid-cols-2 gap-4 mb-8">
@@ -87,10 +102,17 @@
                 </div>
             </div>
 
-            <a href="mailto:hello@posnerp.com?subject=Subscription%20Upgrade%20Request"
-               class="btn-primary w-full py-4 rounded-2xl text-white font-bold flex items-center justify-center gap-2 text-sm">
-                <i class="fas fa-credit-card"></i> Contact Us to Subscribe
-            </a>
+            <div class="space-y-3">
+                <a href="{{ route('admin.subscription.index') }}"
+                   class="btn-primary w-full py-4 rounded-2xl text-white font-bold flex items-center justify-center gap-2 text-sm">
+                    <i class="fas fa-crown"></i> Open Subscription &amp; Billing Portal
+                </a>
+
+                <a href="{{ route('subscription.plans') }}"
+                   class="w-full py-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/20 font-semibold flex items-center justify-center gap-2 text-sm transition-colors">
+                    <i class="fas fa-layer-group"></i> Compare Plans &amp; Instant Upgrade
+                </a>
+            </div>
 
             <div class="flex gap-3 mt-4">
                 <a href="/" class="flex-1 py-3 rounded-2xl bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 text-sm font-medium transition-colors text-center">
