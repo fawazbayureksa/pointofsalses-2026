@@ -29,6 +29,7 @@ use Illuminate\Support\Facades\Route;
 
 // ── Public endpoints (no auth required) ─────────────────────────────────────
 Route::prefix('auth')->group(function () {
+    Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
     Route::post('login-pin', [AuthController::class, 'loginWithPin']);
     Route::post('switch-cashier', [AuthController::class, 'switchCashier']);

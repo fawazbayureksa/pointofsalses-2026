@@ -12,6 +12,7 @@ Use this prompt after completing `00-setup.md`.
 Implement the Authentication feature for the POS 2026 React Native (Expo + TypeScript) app.
 
 API Endpoints:
+- POST   /api/auth/register    → register tenant { name, business_name?, email, password, password_confirmation, phone? }
 - POST   /api/auth/login       → returns { token, user }
 - POST   /api/auth/logout      → revokes token
 - GET    /api/auth/me          → returns { id, name, email, roles, permissions }
@@ -21,6 +22,7 @@ API Endpoints:
 Tasks:
 
 1. Create `src/api/auth.js` with functions:
+   - `register(data: RegisterData): Promise<{ token: string; user: User; tenant: Tenant; outlet: Outlet }>`
    - `login(email: string, password: string): Promise<{ token: string; user: User }>`
    - `logout(): Promise<void>`
    - `getMe(): Promise<User>`
@@ -29,6 +31,14 @@ Tasks:
 
 2. Create TypeScript interfaces in `src/types/auth.js`:
    ```ts
+   interface RegisterData {
+     name: string;
+     business_name?: string;
+     email: string;
+     password: string;
+     password_confirmation: string;
+     phone?: string;
+   }
    interface User {
      id: number;
      name: string;
@@ -36,6 +46,21 @@ Tasks:
      phone?: string;
      roles: string[];
      permissions: string[];
+   }
+   interface Tenant {
+     id: number;
+     name: string;
+     slug: string;
+     email: string;
+     plan: string;
+     status: string;
+     trial_ends_at?: string;
+   }
+   interface Outlet {
+     id: number;
+     name: string;
+     code: string;
+     is_active: boolean;
    }
    interface ProfileData { name: string; email: string; phone: string; }
    interface ChangePasswordData { current_password: string; password: string; password_confirmation: string; }

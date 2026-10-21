@@ -3,18 +3,127 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Outlet;
+use App\Models\Tenant;
 use App\Models\User;
 use App\Services\CashierService;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Models\Role;
 
 class AuthController extends Controller
 {
     public function __construct(
         private CashierService $cashierService,
     ) {}
+
+    /**
+     * POST /api/auth/register
+     *
+     * Register a new Tenant, admin user, and default outlet for mobile apps.
+     */
+    public function register(Request $request): JsonResponse
+    {
+        $request->validate([
+            'name'                  => ['required', 'string', 'max:255'],
+            'business_name'         => ['nullable', 'string', 'max:255'],
+            'email'                 => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'password'              => ['required', 'string', 'confirmed', 'min:8'],
+            'password_confirmation' => ['required', 'string'],
+            'phone'                 => ['nullable', 'string', 'max:20'],
+        ]);
+
+        $businessName = $request->filled('business_name')
+            ? trim((string) $request->business_name)
+            : trim((string) $request->name) . "'s Business";
+
+        $baseSlug = Str::slug($businessName) ?: 'business';
+
+        [$tenant, $user, $outlet] = DB::transaction(function () use ($request, $businessName, $baseSlug) {
+            // Reserve a unique slug inside the transaction to prevent race conditions
+            $slug = $baseSlug;
+            $counter = 1;
+            while (Tenant::where('slug', $slug)->lockForUpdate()->exists()) {
+                $slug = $baseSlug . '-' . $counter++;
+            }
+
+            $tenant = Tenant::create([
+                'name'                   => $businessName,
+                'slug'                   => $slug,
+                'email'                  => $request->email,
+                'phone'                  => $request->phone,
+                'plan'                   => 'professional',
+                'status'                 => 'active',
+                'subscription_status'    => 'trial',
+                'trial_ends_at'          => now()->addDays(14),
+                'is_subscription_exempt' => false,
+            ]);
+
+            $adminRole = Role::firstOrCreate(['name' => 'tenant_admin', 'guard_name' => 'web']);
+
+            $user = User::create([
+                'tenant_id' => $tenant->id,
+                'name'      => $request->name,
+                'email'     => $request->email,
+                'phone'     => $request->phone,
+                'password'  => Hash::make($request->password),
+                'is_active' => true,
+            ]);
+
+            $user->assignRole($adminRole);
+
+            $outlet = Outlet::create([
+                'tenant_id' => $tenant->id,
+                'name'      => 'Main Outlet',
+                'code'      => 'MAIN',
+                'phone'     => $request->phone,
+                'is_active' => true,
+            ]);
+
+            $user->outlets()->attach($outlet->id, ['is_default' => true]);
+
+            return [$tenant, $user, $outlet];
+        });
+
+        event(new Registered($user));
+
+        $token = $user->createToken('pos-token', $user->getPermissionsViaRoles()->pluck('name')->toArray())->plainTextToken;
+
+        return response()->json([
+            'message' => 'Tenant registered successfully.',
+            'token'   => $token,
+            'user'    => [
+                'id'      => $user->id,
+                'name'    => $user->name,
+                'email'   => $user->email,
+                'phone'   => $user->phone,
+                'roles'   => $user->getRoleNames(),
+                'has_pin' => $user->hasPin(),
+            ],
+            'tenant'  => [
+                'id'                  => $tenant->id,
+                'name'                => $tenant->name,
+                'slug'                => $tenant->slug,
+                'email'               => $tenant->email,
+                'plan'                => $tenant->plan,
+                'status'              => $tenant->status,
+                'subscription_status' => $tenant->subscription_status,
+                'trial_ends_at'       => $tenant->trial_ends_at?->toISOString(),
+            ],
+            'outlet'  => [
+                'id'        => $outlet->id,
+                'name'      => $outlet->name,
+                'code'      => $outlet->code,
+                'is_active' => $outlet->is_active,
+            ],
+        ], 201);
+    }
 
     /**
      * POST /api/auth/login
@@ -133,7 +242,7 @@ class AuthController extends Controller
      */
     public function logout(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()->delete();
+        $request->user()->currentAccessToken()?->delete();
 
         return response()->json(['message' => 'Logged out successfully.']);
     }

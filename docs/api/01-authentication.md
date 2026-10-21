@@ -4,6 +4,78 @@ All endpoints under `/api/auth`.
 
 ---
 
+## POST /api/auth/register
+
+Register a new Tenant, admin user, and default outlet for mobile apps (14-day free trial).
+
+**Public** – No `Authorization` header required.
+
+### Request Body
+```json
+{
+  "name": "Budi Santoso",
+  "business_name": "Kopi Nusantara",
+  "email": "budi@kopinusantara.id",
+  "password": "password123",
+  "password_confirmation": "password123",
+  "phone": "081234567890"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string (max:255) | Yes | Full name of the user |
+| `business_name` | string (max:255) | No | Business/store name (defaults to `{name}'s Business`) |
+| `email` | string (email, max:255) | Yes | Work email (unique in system) |
+| `password` | string (min:8) | Yes | Account password |
+| `password_confirmation` | string | Yes | Password confirmation (must match `password`) |
+| `phone` | string (max:20) | No | Contact phone number |
+
+### Response `201`
+```json
+{
+  "message": "Tenant registered successfully.",
+  "token": "1|abcdefghijk...",
+  "user": {
+    "id": 1,
+    "name": "Budi Santoso",
+    "email": "budi@kopinusantara.id",
+    "phone": "081234567890",
+    "roles": ["tenant_admin"],
+    "has_pin": false
+  },
+  "tenant": {
+    "id": 1,
+    "name": "Kopi Nusantara",
+    "slug": "kopi-nusantara",
+    "email": "budi@kopinusantara.id",
+    "plan": "professional",
+    "status": "active",
+    "subscription_status": "trial",
+    "trial_ends_at": "2026-11-04T01:53:05.000000Z"
+  },
+  "outlet": {
+    "id": 1,
+    "name": "Main Outlet",
+    "code": "MAIN",
+    "is_active": true
+  }
+}
+```
+
+### Error `422`
+```json
+{
+  "message": "The email has already been taken.",
+  "errors": {
+    "email": ["The email has already been taken."],
+    "password": ["The password field confirmation does not match."]
+  }
+}
+```
+
+---
+
 ## POST /api/auth/login
 
 Authenticate a user and receive a Sanctum token.
