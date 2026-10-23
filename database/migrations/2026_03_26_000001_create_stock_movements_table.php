@@ -13,7 +13,7 @@ return new class extends Migration
             $table->unsignedBigInteger('tenant_id')->nullable()->index();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->foreignId('outlet_id')->constrained()->cascadeOnDelete();
-            $table->enum('type', ['adjustment', 'sale', 'return', 'transfer_in', 'transfer_out'])->default('adjustment');
+            $table->string('type', 40)->default('adjustment');
             $table->decimal('quantity_before', 15, 3)->default(0);
             $table->decimal('quantity_change', 15, 3)->default(0);
             $table->decimal('quantity_after', 15, 3)->default(0);

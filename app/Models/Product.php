@@ -14,7 +14,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Product extends Model
 {
-    use BelongsToTenant, HasFactory, SoftDeletes, LogsActivity;
+    use BelongsToTenant, HasFactory, LogsActivity, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -32,9 +32,9 @@ class Product extends Model
     ];
 
     protected $casts = [
-        'price'       => 'decimal:2',
-        'cost_price'  => 'decimal:2',
-        'is_active'   => 'boolean',
+        'price' => 'decimal:2',
+        'cost_price' => 'decimal:2',
+        'is_active' => 'boolean',
         'track_stock' => 'boolean',
     ];
 
@@ -43,7 +43,7 @@ class Product extends Model
         return LogOptions::defaults()
             ->logFillable()
             ->logOnlyDirty()
-            ->setDescriptionForEvent(fn(string $e) => "Product {$this->name} was {$e}");
+            ->setDescriptionForEvent(fn (string $e) => "Product {$this->name} was {$e}");
     }
 
     public function category(): BelongsTo
@@ -54,13 +54,35 @@ class Product extends Model
     public function outlets(): BelongsToMany
     {
         return $this->belongsToMany(Outlet::class, 'product_outlet')
-                    ->withPivot(['stock', 'low_stock_threshold'])
-                    ->withTimestamps();
+            ->withPivot(['stock', 'low_stock_threshold'])
+            ->withTimestamps();
     }
 
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function supplierProducts(): HasMany
+    {
+        return $this->hasMany(SupplierProduct::class);
+    }
+
+    public function suppliers(): BelongsToMany
+    {
+        return $this->belongsToMany(Supplier::class, 'supplier_products')
+            ->withPivot([
+                'id',
+                'supplier_sku',
+                'purchase_price',
+                'is_primary',
+                'min_order_qty',
+                'lead_time_days',
+                'purchase_unit',
+                'conversion_factor',
+                'notes',
+            ])
+            ->withTimestamps();
     }
 
     public function scopeActive($query)
@@ -71,6 +93,7 @@ class Product extends Model
     public function getStockForOutlet(int $outletId): float
     {
         $pivot = $this->outlets()->wherePivot('outlet_id', $outletId)->first();
+
         return $pivot ? (float) $pivot->pivot->stock : 0.0;
     }
 }

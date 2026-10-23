@@ -90,6 +90,17 @@
                     <dd class="mt-1 text-sm text-gray-900">{{ $tenant->business_type ?? '-' }}</dd>
                 </div>
                 <div>
+                    <dt class="text-xs font-medium text-gray-500 uppercase">Supplier Management Module</dt>
+                    <dd class="mt-1 flex items-center gap-2">
+                        @if ($tenant->isSupplierManagementEnabled())
+                            <span class="px-2 py-1 text-xs font-semibold bg-emerald-100 text-emerald-800 rounded-full">Enabled</span>
+                        @else
+                            <span class="px-2 py-1 text-xs font-semibold bg-gray-100 text-gray-700 rounded-full">Disabled (Optional)</span>
+                        @endif
+                        <span class="text-xs text-gray-500">(Override: {{ ucfirst($tenant->supplierManagementOverride()) }})</span>
+                    </dd>
+                </div>
+                <div>
                     <dt class="text-xs font-medium text-gray-500 uppercase">Created At</dt>
                     <dd class="mt-1 text-sm text-gray-900">{{ $tenant->created_at->format('d M Y, H:i') }}</dd>
                 </div>
