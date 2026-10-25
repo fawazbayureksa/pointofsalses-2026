@@ -5,9 +5,12 @@ namespace App\Services;
 use App\Events\OrderCreated;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Outlet;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class OrderService
 {
@@ -39,16 +42,22 @@ class OrderService
                 $payload['outlet_id']
             );
 
-            $cashier = \App\Models\User::find($userId);
+            $cashier = User::find($userId);
+            $outlet = Outlet::find($payload['outlet_id']);
+
+            $tenantId = $payload['tenant_id']
+                ?? $cashier?->tenant_id
+                ?? $outlet?->tenant_id;
 
             $order = Order::create([
-                'outlet_id'    => $payload['outlet_id'],
-                'user_id'      => $userId,
+                'tenant_id' => $tenantId,
+                'outlet_id' => $payload['outlet_id'],
+                'user_id' => $userId,
                 'cashier_name' => $cashier?->name,
-                'customer_id'  => $payload['customer_id'] ?? null,
-                'order_number' => $this->generateOrderNumber(),
-                'status'       => 'pending',
-                'notes'        => $payload['notes'] ?? null,
+                'customer_id' => $payload['customer_id'] ?? null,
+                'order_number' => $this->generateOrderNumber($tenantId),
+                'status' => 'pending',
+                'notes' => $payload['notes'] ?? null,
             ]);
 
             $this->attachItems($order, $payload['items']);
@@ -56,7 +65,7 @@ class OrderService
 
             // Apply order-level discount (e.g. supervisor override)
             $orderDiscountAmount = (float) ($payload['discount_amount'] ?? 0);
-            $orderDiscountType   = $payload['discount_type'] ?? 'fixed';
+            $orderDiscountType = $payload['discount_type'] ?? 'fixed';
 
             if ($orderDiscountAmount > 0) {
                 $this->applyOrderDiscount($order, $orderDiscountAmount, $orderDiscountType);
@@ -81,7 +90,7 @@ class OrderService
 
             $order->update([
                 'status' => 'cancelled',
-                'notes'  => $order->notes . ($reason ? " | Cancelled: {$reason}" : ''),
+                'notes' => $order->notes.($reason ? " | Cancelled: {$reason}" : ''),
             ]);
         });
 
@@ -91,7 +100,7 @@ class OrderService
     public function complete(Order $order): Order
     {
         $order->update([
-            'status'       => 'completed',
+            'status' => 'completed',
             'completed_at' => now(),
         ]);
 
@@ -119,7 +128,7 @@ class OrderService
         $order->refresh()->loadMissing('items');
 
         $itemsSubtotal = $order->items->sum('subtotal') + $order->items->sum('tax_amount');
-        $itemDiscount  = $order->items->sum('discount_amount');
+        $itemDiscount = $order->items->sum('discount_amount');
 
         if ($type === 'percentage') {
             $orderDiscount = round($itemsSubtotal * ($amount / 100), 2);
@@ -131,8 +140,8 @@ class OrderService
 
         $updateData = [
             'discount_amount' => $itemDiscount + $orderDiscount,
-            'discount_type'   => $type,
-            'total_amount'    => $total,
+            'discount_type' => $type,
+            'total_amount' => $total,
         ];
 
         if ($supervisorId !== null) {
@@ -148,20 +157,20 @@ class OrderService
      * Redeem loyalty points as a discount on a pending order.
      * 1 point = Rp 1. Points are deducted from the customer immediately.
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws ValidationException
      */
     public function redeemLoyaltyPoints(Order $order, int $points): Order
     {
         $customer = $order->customer;
 
         if (! $customer) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'loyalty_points_redeemed' => 'Order has no associated customer.',
             ]);
         }
 
         if ($customer->loyalty_points < $points) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'loyalty_points_redeemed' => "Customer only has {$customer->loyalty_points} loyalty points available.",
             ]);
         }
@@ -173,8 +182,8 @@ class OrderService
 
         $order->update([
             'discount_amount' => $order->discount_amount + $redemptionValue,
-            'total_amount'    => max(0, $order->total_amount - $redemptionValue),
-            'notes'           => trim(($order->notes ?? '') . " | Loyalty: {$pointsDeducted} pts redeemed"),
+            'total_amount' => max(0, $order->total_amount - $redemptionValue),
+            'notes' => trim(($order->notes ?? '')." | Loyalty: {$pointsDeducted} pts redeemed"),
         ]);
 
         $customer->decrement('loyalty_points', $pointsDeducted);
@@ -189,32 +198,37 @@ class OrderService
         foreach ($items as $item) {
             $product = Product::findOrFail($item['product_id']);
 
-            $unitPrice      = $product->price;
-            $quantity       = (float) $item['quantity'];
+            $unitPrice = $product->price;
+            $quantity = (float) $item['quantity'];
             $discountAmount = (float) ($item['discount_amount'] ?? 0);
-            $subtotal       = ($unitPrice * $quantity) - $discountAmount;
+            $subtotal = ($unitPrice * $quantity) - $discountAmount;
 
             OrderItem::create([
-                'order_id'        => $order->id,
-                'product_id'      => $product->id,
-                'product_name'    => $product->name,
-                'product_sku'     => $product->sku ?? '',
-                'unit_price'      => $unitPrice,
-                'cost_price'      => $product->cost_price,
-                'quantity'        => $quantity,
+                'order_id' => $order->id,
+                'product_id' => $product->id,
+                'product_name' => $product->name,
+                'product_sku' => $product->sku ?? '',
+                'unit_price' => $unitPrice,
+                'cost_price' => $product->cost_price,
+                'quantity' => $quantity,
                 'discount_amount' => $discountAmount,
-                'tax_amount'      => 0,
-                'subtotal'        => $subtotal,
+                'tax_amount' => 0,
+                'subtotal' => $subtotal,
             ]);
         }
     }
 
-    private function generateOrderNumber(): string
+    private function generateOrderNumber(?int $tenantId = null): string
     {
-        $tenantId = Auth::user()->tenant_id ?? 'SA';
-        $prefix   = strtoupper(substr((string) $tenantId, 0, 3));
-        $date     = now()->format('Ymd');
-        $seq      = str_pad((string) (Order::whereDate('created_at', today())->count() + 1), 4, '0', STR_PAD_LEFT);
+        $tenantCode = $tenantId ?? Auth::user()?->tenant_id ?? 'SA';
+        $prefix = strtoupper(substr((string) $tenantCode, 0, 3));
+        $date = now()->format('Ymd');
+
+        $query = Order::withoutGlobalScopes()->whereDate('created_at', today());
+        if ($tenantId) {
+            $query->where('tenant_id', $tenantId);
+        }
+        $seq = str_pad((string) ($query->count() + 1), 4, '0', STR_PAD_LEFT);
 
         return "{$prefix}-{$date}-{$seq}";
     }

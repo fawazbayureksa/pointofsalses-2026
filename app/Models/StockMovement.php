@@ -67,6 +67,7 @@ class StockMovement extends Model
         ?Model $reference = null,
     ): self {
         return static::create([
+            'tenant_id' => $product->tenant_id ?? $reference?->tenant_id ?? Auth::user()?->tenant_id,
             'product_id' => $product->id,
             'outlet_id' => $outletId,
             'type' => $type,
