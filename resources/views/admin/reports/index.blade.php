@@ -15,49 +15,49 @@
 
     {{-- Summary KPI Cards --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-5 text-white shadow">
+        <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-emerald-100">Revenue This Month</p>
-                    <p class="text-2xl font-bold mt-1">{{ number_format($totalRevenueThisMonth, 0) }}</p>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">Revenue This Month</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ number_format($totalRevenueThisMonth, 0) }}</p>
                 </div>
-                <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
                     <i class="fa-solid fa-money-bill-trend-up text-xl"></i>
                 </div>
             </div>
         </div>
 
-        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-5 text-white shadow">
+        <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-blue-100">Orders This Month</p>
-                    <p class="text-2xl font-bold mt-1">{{ number_format($totalOrdersThisMonth) }}</p>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">Orders This Month</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ number_format($totalOrdersThisMonth) }}</p>
                 </div>
-                <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
                     <i class="fa-solid fa-shopping-bag text-xl"></i>
                 </div>
             </div>
         </div>
 
-        <div class="bg-gradient-to-br from-violet-500 to-violet-600 rounded-xl p-5 text-white shadow">
+        <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-violet-100">Total Customers</p>
-                    <p class="text-2xl font-bold mt-1">{{ number_format($totalCustomers) }}</p>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">Total Customers</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ number_format($totalCustomers) }}</p>
                 </div>
-                <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                <div class="w-12 h-12 bg-violet-50 text-violet-600 rounded-xl flex items-center justify-center">
                     <i class="fa-solid fa-users text-xl"></i>
                 </div>
             </div>
         </div>
 
-        <div class="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-5 text-white shadow">
+        <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-amber-100">Active Products</p>
-                    <p class="text-2xl font-bold mt-1">{{ number_format($totalProducts) }}</p>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">Active Products</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ number_format($totalProducts) }}</p>
                 </div>
-                <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center">
                     <i class="fa-solid fa-box-open text-xl"></i>
                 </div>
             </div>

@@ -29,35 +29,34 @@
     }" class="max-w-6xl mx-auto space-y-6">
 
         {{-- ── Hero Banner ──────────────────────────────────────────────────── --}}
-        <div class="bg-gradient-to-r from-slate-800 via-slate-800 to-emerald-900 rounded-2xl p-6 md:p-8 text-white shadow-sm relative overflow-hidden">
-            <div class="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div class="bg-white rounded-xl p-6 md:p-8 text-gray-900 shadow-sm border border-gray-200">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                 <div class="max-w-2xl">
-                    <div class="inline-flex items-center space-x-2 bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-semibold px-3 py-1 rounded-full mb-3">
-                        <i class="fa-solid fa-sparkles"></i>
+                    <div class="inline-flex items-center space-x-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full mb-3">
                         <span>PANDUAN MEMULAI CEPAT (BAHASA INDONESIA)</span>
                     </div>
-                    <h1 class="text-2xl md:text-3xl font-bold tracking-tight">
+                    <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">
                         Selamat Datang di Sistem Point of Sales!
                     </h1>
-                    <p class="text-slate-300 text-sm md:text-base mt-2 leading-relaxed">
-                        Terima kasih telah berlangganan. Ikuti <strong>7 langkah persiapan awal</strong> di bawah ini agar toko Anda siap menerima transaksi kasir, mengelola stok multi-outlet, dan memantau laporan penjualan secara *real-time*.
+                    <p class="text-gray-600 text-sm md:text-base mt-2 leading-relaxed">
+                        Terima kasih telah berlangganan. Ikuti <strong>7 langkah persiapan awal</strong> di bawah ini agar toko Anda siap menerima transaksi kasir, mengelola stok multi-outlet, dan memantau laporan penjualan secara <em>real-time</em>.
                     </p>
                 </div>
 
                 {{-- Progress Tracker Card --}}
-                <div class="bg-white/10 backdrop-blur-sm border border-white/15 rounded-xl p-5 min-w-[260px]">
+                <div class="bg-gray-50 border border-gray-200 rounded-xl p-5 min-w-[260px]">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-300">Progres Persiapan Toko</span>
-                        <span class="text-sm font-bold text-emerald-400" x-text="`${completedSteps.length}/7 Selesai`"></span>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-gray-500">Progres Persiapan Toko</span>
+                        <span class="text-sm font-bold text-emerald-600" x-text="`${completedSteps.length}/7 Selesai`"></span>
                     </div>
-                    <div class="w-full bg-slate-700 rounded-full h-2.5 overflow-hidden">
-                        <div class="bg-emerald-400 h-2.5 rounded-full transition-all duration-500"
+                    <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                        <div class="bg-emerald-500 h-2.5 rounded-full transition-all duration-500"
                             :style="`width: ${progressPercent}%`"></div>
                     </div>
-                    <div class="mt-3 flex items-center justify-between text-xs text-slate-300">
+                    <div class="mt-3 flex items-center justify-between text-xs text-gray-500">
                         <span x-text="progressPercent === 100 ? '🎉 Toko siap beroperasi!' : 'Centang langkah yang sudah selesai'"></span>
                         <button x-show="completedSteps.length > 0" @click="resetProgress()"
-                            class="text-slate-400 hover:text-white underline ml-2">
+                            class="text-gray-500 hover:text-gray-800 underline ml-2">
                             Reset
                         </button>
                     </div>

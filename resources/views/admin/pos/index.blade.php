@@ -257,7 +257,7 @@
 
             {{-- Member info card --}}
             <div x-show="selectedCustomerObj && selectedCustomerObj.is_member"
-                class="px-5 pt-2 pb-3 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-100">
+                class="px-5 pt-2 pb-3 bg-indigo-50/50 border-b border-gray-100">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
