@@ -101,23 +101,23 @@
          SUPER ADMIN BAR & GLOBAL TENANT SUBSCRIPTIONS OVERVIEW
     ===================================================================== --}}
     @if ($isSuper)
-        <div class="bg-slate-900 text-white rounded-2xl p-6 shadow-lg border border-slate-800">
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div>
                     <div class="flex items-center gap-2">
-                        <span class="px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full">
-                            <i class="fa-solid fa-crown mr-1"></i> Super Admin Console
+                        <span class="px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider bg-amber-100 text-amber-800 rounded-full">
+                            Super Admin Console
                         </span>
-                        <h2 class="text-lg font-bold">Tenant Subscriptions &amp; SaaS Billing Control</h2>
+                        <h2 class="text-lg font-bold text-gray-900">Tenant Subscriptions &amp; SaaS Billing Control</h2>
                     </div>
-                    <p class="text-xs text-slate-400 mt-1">
+                    <p class="text-xs text-gray-500 mt-1">
                         Monitor recurring revenue, extend free trials, provision paid plans, or inspect any tenant's subscription portal.
                     </p>
                 </div>
 
                 <form method="GET" action="{{ route('admin.subscription.index') }}" class="flex items-center gap-2">
                     <select name="tenant_id" onchange="this.form.submit()"
-                        class="bg-slate-800 border border-slate-700 text-white text-sm rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500">
+                        class="bg-white border border-gray-300 text-gray-800 text-sm rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                         <option value="">— Global Overview (All Tenants) —</option>
                         @foreach ($allTenants as $t)
                             <option value="{{ $t->id }}" @selected($tenant && $tenant->id === $t->id)>
@@ -127,7 +127,7 @@
                     </select>
                     @if ($tenant)
                         <a href="{{ route('admin.subscription.index') }}"
-                            class="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-semibold text-slate-300 whitespace-nowrap">
+                            class="px-3 py-2 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 whitespace-nowrap transition">
                             Reset Filter
                         </a>
                     @endif
@@ -136,29 +136,29 @@
 
             @if ($adminStats)
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-6">
-                    <div class="bg-slate-800/90 border border-slate-700/70 rounded-xl p-4">
-                        <p class="text-xs text-slate-400">Total Tenants</p>
-                        <p class="text-2xl font-extrabold text-white mt-1">{{ $adminStats['total_tenants'] }}</p>
+                    <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Tenants</p>
+                        <p class="text-2xl font-bold text-gray-900 mt-1">{{ $adminStats['total_tenants'] }}</p>
                     </div>
-                    <div class="bg-slate-800/90 border border-emerald-500/30 rounded-xl p-4">
-                        <p class="text-xs text-emerald-400">Active Paid</p>
-                        <p class="text-2xl font-extrabold text-emerald-300 mt-1">{{ $adminStats['active_paid'] }}</p>
+                    <div class="bg-emerald-50/50 border border-emerald-200 rounded-xl p-4">
+                        <p class="text-xs font-medium text-emerald-700 uppercase tracking-wide">Active Paid</p>
+                        <p class="text-2xl font-bold text-emerald-600 mt-1">{{ $adminStats['active_paid'] }}</p>
                     </div>
-                    <div class="bg-slate-800/90 border border-indigo-500/30 rounded-xl p-4">
-                        <p class="text-xs text-indigo-300">Active 14d Trial</p>
-                        <p class="text-2xl font-extrabold text-indigo-200 mt-1">{{ $adminStats['on_trial'] }}</p>
+                    <div class="bg-blue-50/50 border border-blue-200 rounded-xl p-4">
+                        <p class="text-xs font-medium text-blue-700 uppercase tracking-wide">Active 14d Trial</p>
+                        <p class="text-2xl font-bold text-blue-600 mt-1">{{ $adminStats['on_trial'] }}</p>
                     </div>
-                    <div class="bg-slate-800/90 border border-amber-500/30 rounded-xl p-4">
-                        <p class="text-xs text-amber-300">VIP / Exempt</p>
-                        <p class="text-2xl font-extrabold text-amber-200 mt-1">{{ $adminStats['exempt'] }}</p>
+                    <div class="bg-amber-50/50 border border-amber-200 rounded-xl p-4">
+                        <p class="text-xs font-medium text-amber-700 uppercase tracking-wide">VIP / Exempt</p>
+                        <p class="text-2xl font-bold text-amber-600 mt-1">{{ $adminStats['exempt'] }}</p>
                     </div>
-                    <div class="bg-slate-800/90 border border-red-500/30 rounded-xl p-4">
-                        <p class="text-xs text-red-400">Expired / Inactive</p>
-                        <p class="text-2xl font-extrabold text-red-300 mt-1">{{ $adminStats['expired'] }}</p>
+                    <div class="bg-red-50/50 border border-red-200 rounded-xl p-4">
+                        <p class="text-xs font-medium text-red-700 uppercase tracking-wide">Expired / Inactive</p>
+                        <p class="text-2xl font-bold text-red-600 mt-1">{{ $adminStats['expired'] }}</p>
                     </div>
-                    <div class="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-xl p-4">
-                        <p class="text-xs text-indigo-100">Estimated MRR</p>
-                        <p class="text-xl font-extrabold text-white mt-1">
+                    <div class="bg-indigo-50/50 border border-indigo-200 rounded-xl p-4">
+                        <p class="text-xs font-medium text-indigo-700 uppercase tracking-wide">Estimated MRR</p>
+                        <p class="text-xl font-bold text-indigo-700 mt-1">
                             Rp {{ number_format($adminStats['estimated_mrr'], 0, ',', '.') }}
                         </p>
                     </div>
@@ -225,7 +225,7 @@
                                     <td class="px-4 py-3.5">
                                         @if ($item->isExempt())
                                             <span class="px-2.5 py-1 text-xs font-semibold bg-amber-100 text-amber-800 rounded-full">
-                                                <i class="fa-solid fa-crown mr-1"></i> VIP Exempt
+                                                VIP Exempt
                                             </span>
                                         @elseif ($item->isOnTrial())
                                             <span class="px-2.5 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full">
@@ -320,51 +320,48 @@
     ===================================================================== --}}
     @if ($tenant && $currentPlan)
         {{-- 1. Hero Subscription Banner --}}
-        <div class="relative rounded-3xl overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white p-8 shadow-xl border border-indigo-500/20">
-            <div class="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none"></div>
-            <div class="absolute -bottom-24 -left-24 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-            <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div class="rounded-xl bg-white text-gray-900 p-6 lg:p-8 shadow-sm border border-gray-200">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                 <div class="lg:col-span-7 space-y-4">
                     <div class="flex flex-wrap items-center gap-2.5">
-                        <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">
-                            <i class="fa-solid fa-crown text-amber-400 mr-1.5"></i> {{ $currentPlan['name'] }} Plan
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">
+                            {{ $currentPlan['name'] }} Plan
                         </span>
 
                         @if ($tenant->isExempt())
-                            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-400/30">
-                                <i class="fa-solid fa-star mr-1"></i> VIP Exempt (Unlimited Access)
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                VIP Exempt (Unlimited Access)
                             </span>
                         @elseif ($tenant->isOnTrial())
-                            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-                                <i class="fa-solid fa-gift mr-1"></i> 14-Day Free Trial Active
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                14-Day Free Trial Active
                             </span>
                         @elseif ($tenant->isSubscribed())
-                            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-                                <i class="fa-solid fa-circle-check mr-1"></i> Active Subscription
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                Active Subscription
                             </span>
                         @elseif ($tenant->plan === 'basic')
-                            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-700 text-slate-300">
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200">
                                 Free Forever Tier
                             </span>
                         @else
-                            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-red-500/20 text-red-300 border border-red-400/30">
-                                <i class="fa-solid fa-triangle-exclamation mr-1"></i> Subscription Expired
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-200">
+                                Subscription Expired
                             </span>
                         @endif
 
                         @if ($billingProfile['auto_renew'] ?? false)
-                            <span class="text-xs text-slate-400 flex items-center gap-1">
-                                <i class="fa-solid fa-rotate text-emerald-400"></i> Auto-renew enabled
+                            <span class="text-xs text-gray-500 flex items-center gap-1">
+                                <i class="fa-solid fa-rotate text-emerald-600"></i> Auto-renew enabled
                             </span>
                         @endif
                     </div>
 
                     <div>
-                        <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white">
+                        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
                             {{ $tenant->name }}
                         </h1>
-                        <p class="text-slate-300 text-sm mt-1">
+                        <p class="text-gray-500 text-sm mt-1">
                             {{ $currentPlan['tagline'] }}
                         </p>
                     </div>
@@ -375,32 +372,31 @@
                             $daysLeft = $tenant->trialDaysLeft();
                             $progress = $tenant->trialProgressPercent();
                         @endphp
-                        <div class="bg-white/5 border border-white/10 rounded-2xl p-4 max-w-xl">
+                        <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 max-w-xl">
                             <div class="flex items-center justify-between text-xs mb-2">
-                                <span class="font-semibold text-indigo-200">
-                                    <i class="fa-solid fa-hourglass-half mr-1 text-amber-400"></i>
+                                <span class="font-semibold text-gray-700">
                                     Free Trial Progress ({{ $daysLeft }} day{{ $daysLeft === 1 ? '' : 's' }} remaining)
                                 </span>
-                                <span class="text-slate-400">
+                                <span class="text-gray-500">
                                     Ends {{ $tenant->trial_ends_at?->format('d M Y, H:i') }}
                                 </span>
                             </div>
-                            <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
-                                <div class="h-full bg-gradient-to-r from-indigo-500 via-violet-500 to-emerald-400 rounded-full transition-all"
+                            <div class="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full bg-indigo-600 rounded-full transition-all"
                                     style="width: {{ $progress }}%"></div>
                             </div>
-                            <p class="text-xs text-slate-400 mt-2">
+                            <p class="text-xs text-gray-500 mt-2">
                                 Upgrade anytime to keep your multi-outlet, inventory, and financial report modules without interruption.
                             </p>
                         </div>
                     @elseif ($tenant->subscription_ends_at)
-                        <div class="bg-white/5 border border-white/10 rounded-2xl p-4 max-w-xl flex items-center justify-between">
+                        <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 max-w-xl flex items-center justify-between">
                             <div>
-                                <p class="text-xs text-slate-400 uppercase tracking-wider">Current Billing Period Ends</p>
-                                <p class="text-base font-bold text-white mt-0.5">
+                                <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Current Billing Period Ends</p>
+                                <p class="text-base font-bold text-gray-900 mt-0.5">
                                     {{ $tenant->subscription_ends_at->format('d F Y') }}
                                     @if ($tenant->subscriptionDaysLeft() !== null)
-                                        <span class="text-xs font-normal text-emerald-400 ml-1">
+                                        <span class="text-xs font-medium text-emerald-600 ml-1">
                                             ({{ $tenant->subscriptionDaysLeft() }} days remaining)
                                         </span>
                                     @endif
@@ -408,7 +404,7 @@
                             </div>
                             <button type="button"
                                 @click="openCheckout('{{ $tenant->plan === 'basic' ? 'professional' : $tenant->plan }}', '{{ $currentPlan['name'] }}', {{ $currentPlan['monthly_price'] ?: 299000 }}, {{ $currentPlan['annual_price'] ?: 2870000 }})"
-                                class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white transition">
+                                class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-xs font-semibold text-white transition">
                                 Extend / Renew
                             </button>
                         </div>
@@ -416,31 +412,30 @@
                 </div>
 
                 {{-- Right Price & Quick CTA Box --}}
-                <div class="lg:col-span-5 flex flex-col sm:flex-row lg:flex-col justify-between gap-4 bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-md">
+                <div class="lg:col-span-5 flex flex-col justify-between gap-4 bg-gray-50 border border-gray-200 rounded-xl p-6">
                     <div class="flex items-baseline justify-between">
                         <div>
-                            <p class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Current Plan Rate</p>
+                            <p class="text-xs uppercase tracking-wider text-gray-500 font-semibold">Current Plan Rate</p>
                             <div class="flex items-baseline gap-1 mt-1">
-                                <span class="text-3xl font-black text-white">{{ $currentPlan['price_label'] }}</span>
-                                <span class="text-xs text-slate-400">{{ $currentPlan['billing_period'] }}</span>
+                                <span class="text-3xl font-black text-gray-900">{{ $currentPlan['price_label'] }}</span>
+                                <span class="text-xs text-gray-500">{{ $currentPlan['billing_period'] }}</span>
                             </div>
                         </div>
                         <div class="text-right">
-                            <span class="text-xs text-slate-400 block">Account ID</span>
-                            <span class="text-xs font-mono text-indigo-300">{{ strtoupper($tenant->slug) }}</span>
+                            <span class="text-xs text-gray-500 block">Account ID</span>
+                            <span class="text-xs font-mono font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded">{{ strtoupper($tenant->slug) }}</span>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                         <button type="button"
                             @click="openCheckout('professional', 'Professional', 299000, 2870000)"
-                            class="px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white font-bold text-sm shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition">
-                            <i class="fa-solid fa-rocket"></i>
+                            class="px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-sm flex items-center justify-center transition">
                             {{ $tenant->plan === 'basic' || $tenant->isOnTrial() ? 'Upgrade Plan' : 'Renew / Change Plan' }}
                         </button>
                         <a href="#billing"
-                            class="px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-slate-200 font-semibold text-sm flex items-center justify-center gap-2 transition">
-                            <i class="fa-solid fa-file-invoice-dollar"></i> Billing &amp; Invoices
+                            class="px-4 py-2.5 rounded-lg bg-white hover:bg-gray-100 border border-gray-300 text-gray-700 font-semibold text-sm shadow-sm flex items-center justify-center transition">
+                            Billing &amp; Invoices
                         </a>
                     </div>
                 </div>
@@ -571,30 +566,30 @@
         </div>
 
         {{-- 3. Interactive Plans & Pricing Section (#plans) --}}
-        <div id="plans" class="scroll-mt-6 bg-slate-950 text-white rounded-3xl p-8 lg:p-10 shadow-xl border border-slate-800">
-            <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+        <div id="plans" class="scroll-mt-6 bg-white text-gray-900 rounded-xl p-6 lg:p-8 shadow-sm border border-gray-200">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
                 <div>
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 mb-3">
-                        <i class="fa-solid fa-bolt text-amber-400"></i> Flexible POS SaaS Plans
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 mb-2">
+                        Flexible POS SaaS Plans
                     </span>
-                    <h2 class="text-2xl lg:text-3xl font-black tracking-tight">Choose the Right Plan for Your Business</h2>
-                    <p class="text-slate-400 text-sm mt-1">
+                    <h2 class="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900">Choose the Right Plan for Your Business</h2>
+                    <p class="text-gray-500 text-sm mt-1">
                         Upgrade, switch billing cycles, or scale outlets anytime. Instant activation with zero downtime.
                     </p>
                 </div>
 
                 {{-- Monthly / Annual Toggle --}}
-                <div class="inline-flex items-center bg-slate-900 border border-slate-800 p-1.5 rounded-2xl self-start">
+                <div class="inline-flex items-center bg-gray-100 border border-gray-200 p-1 rounded-xl self-start">
                     <button type="button" @click="billingCycle = 'monthly'"
-                        :class="billingCycle === 'monthly' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'"
-                        class="px-4 py-2 rounded-xl text-xs font-bold transition">
+                        :class="billingCycle === 'monthly' ? 'bg-white text-gray-900 shadow-sm font-semibold' : 'text-gray-600 hover:text-gray-900 font-medium'"
+                        class="px-4 py-2 rounded-lg text-xs transition">
                         Monthly Billing
                     </button>
                     <button type="button" @click="billingCycle = 'annual'"
-                        :class="billingCycle === 'annual' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'"
-                        class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                        :class="billingCycle === 'annual' ? 'bg-white text-gray-900 shadow-sm font-semibold' : 'text-gray-600 hover:text-gray-900 font-medium'"
+                        class="px-4 py-2 rounded-lg text-xs transition flex items-center gap-1.5">
                         <span>Annual Billing</span>
-                        <span class="px-2 py-0.5 text-[10px] rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
                             Save 20%
                         </span>
                     </button>
@@ -604,34 +599,34 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
                 {{-- Starter (Basic) Card --}}
                 @php $basicPlan = $plans['basic']; @endphp
-                <div class="bg-slate-900/90 border {{ $tenant->plan === 'basic' && ! $tenant->isOnTrial() ? 'border-emerald-500/60 ring-1 ring-emerald-500/40' : 'border-slate-800' }} rounded-2xl p-7 flex flex-col justify-between">
+                <div class="bg-white border {{ $tenant->plan === 'basic' && ! $tenant->isOnTrial() ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-gray-200' }} rounded-xl p-6 flex flex-col justify-between">
                     <div>
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold uppercase tracking-widest text-slate-400">{{ $basicPlan['name'] }}</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-gray-500">{{ $basicPlan['name'] }}</span>
                             @if ($tenant->plan === 'basic' && ! $tenant->isOnTrial())
-                                <span class="px-2.5 py-0.5 text-xs font-bold bg-emerald-500/20 text-emerald-300 rounded-full">Current Plan</span>
+                                <span class="px-2.5 py-0.5 text-xs font-bold bg-emerald-100 text-emerald-800 rounded-full">Current Plan</span>
                             @endif
                         </div>
                         <div class="mt-4 flex items-baseline gap-1">
-                            <span class="text-4xl font-black text-white">Free</span>
-                            <span class="text-xs text-slate-400">Forever</span>
+                            <span class="text-3xl font-black text-gray-900">Free</span>
+                            <span class="text-xs text-gray-500">Forever</span>
                         </div>
-                        <p class="text-xs text-slate-400 mt-2">{{ $basicPlan['tagline'] }}</p>
+                        <p class="text-xs text-gray-500 mt-2">{{ $basicPlan['tagline'] }}</p>
 
-                        <hr class="my-6 border-slate-800">
+                        <hr class="my-6 border-gray-100">
 
-                        <ul class="space-y-3 text-sm text-slate-300">
+                        <ul class="space-y-3 text-sm text-gray-600">
                             @foreach ($basicPlan['highlights'] as $item)
                                 <li class="flex items-center gap-2.5">
-                                    <i class="fa-solid fa-check text-emerald-400 w-4"></i>
+                                    <i class="fa-solid fa-check text-emerald-600 w-4"></i>
                                     <span>{{ $item }}</span>
                                 </li>
                             @endforeach
-                            <li class="flex items-center gap-2.5 text-slate-600">
+                            <li class="flex items-center gap-2.5 text-gray-400">
                                 <i class="fa-solid fa-xmark w-4"></i>
                                 <span>Multi-Outlet &amp; Stock Transfers</span>
                             </li>
-                            <li class="flex items-center gap-2.5 text-slate-600">
+                            <li class="flex items-center gap-2.5 text-gray-400">
                                 <i class="fa-solid fa-xmark w-4"></i>
                                 <span>Finance &amp; Tax Reports</span>
                             </li>
@@ -641,7 +636,7 @@
                     <div class="mt-8">
                         @if ($tenant->plan === 'basic' && ! $tenant->isOnTrial())
                             <button type="button" disabled
-                                class="w-full py-3 rounded-xl bg-slate-800 text-slate-400 text-sm font-bold cursor-not-allowed">
+                                class="w-full py-2.5 rounded-lg bg-gray-100 text-gray-400 text-sm font-semibold cursor-not-allowed">
                                 Active Free Plan
                             </button>
                         @else
@@ -653,7 +648,7 @@
                                 @endif
                                 <input type="hidden" name="plan" value="basic">
                                 <button type="submit"
-                                    class="w-full py-3 rounded-xl border border-slate-700 hover:bg-slate-800 text-slate-300 text-sm font-semibold transition">
+                                    class="w-full py-2.5 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-semibold transition">
                                     Switch to Starter (Free)
                                 </button>
                             </form>
@@ -663,18 +658,18 @@
 
                 {{-- Professional Card --}}
                 @php $proPlan = $plans['professional']; @endphp
-                <div class="bg-gradient-to-b from-indigo-600/95 via-indigo-700/95 to-purple-800/95 border-2 border-indigo-400 rounded-2xl p-7 flex flex-col justify-between relative shadow-2xl shadow-indigo-950/60">
-                    <div class="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                        <span class="bg-amber-400 text-slate-950 text-xs font-black uppercase tracking-wider px-4 py-1 rounded-full shadow">
+                <div class="bg-white border-2 border-indigo-600 rounded-xl p-6 flex flex-col justify-between relative shadow-sm">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2">
+                        <span class="bg-indigo-600 text-white text-[11px] font-bold uppercase tracking-wider px-3.5 py-0.5 rounded-full shadow-sm">
                             Most Popular
                         </span>
                     </div>
 
                     <div>
                         <div class="flex items-center justify-between mt-1">
-                            <span class="text-xs font-bold uppercase tracking-widest text-indigo-200">{{ $proPlan['name'] }}</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-indigo-600">{{ $proPlan['name'] }}</span>
                             @if ($tenant->plan === 'professional')
-                                <span class="px-2.5 py-0.5 text-xs font-bold bg-white/20 text-white rounded-full">
+                                <span class="px-2.5 py-0.5 text-xs font-semibold bg-indigo-50 text-indigo-700 rounded-full">
                                     {{ $tenant->isOnTrial() ? 'Current Trial' : 'Current Plan' }}
                                 </span>
                             @endif
@@ -682,22 +677,22 @@
 
                         <div class="mt-4">
                             <div x-show="billingCycle === 'monthly'" class="flex items-baseline gap-1">
-                                <span class="text-4xl font-black text-white">Rp 299K</span>
-                                <span class="text-xs text-indigo-200">/ month</span>
+                                <span class="text-3xl font-black text-gray-900">Rp 299K</span>
+                                <span class="text-xs text-gray-500">/ month</span>
                             </div>
                             <div x-show="billingCycle === 'annual'" x-cloak class="flex items-baseline gap-1">
-                                <span class="text-4xl font-black text-white">Rp 239K</span>
-                                <span class="text-xs text-indigo-200">/ month (Rp 2.87M / yr)</span>
+                                <span class="text-3xl font-black text-gray-900">Rp 239K</span>
+                                <span class="text-xs text-gray-500">/ month (Rp 2.87M / yr)</span>
                             </div>
                         </div>
-                        <p class="text-xs text-indigo-100 mt-2">{{ $proPlan['tagline'] }}</p>
+                        <p class="text-xs text-gray-500 mt-2">{{ $proPlan['tagline'] }}</p>
 
-                        <hr class="my-6 border-indigo-400/30">
+                        <hr class="my-6 border-gray-100">
 
-                        <ul class="space-y-3 text-sm text-white">
+                        <ul class="space-y-3 text-sm text-gray-700">
                             @foreach ($proPlan['highlights'] as $item)
-                                <li class="flex items-center gap-2.5">
-                                    <i class="fa-solid fa-check text-amber-300 w-4"></i>
+                                <li class="flex items-center gap-2.5 font-medium">
+                                    <i class="fa-solid fa-check text-indigo-600 w-4"></i>
                                     <span>{{ $item }}</span>
                                 </li>
                             @endforeach
@@ -707,8 +702,7 @@
                     <div class="mt-8">
                         <button type="button"
                             @click="openCheckout('professional', 'Professional', {{ $proPlan['monthly_price'] }}, {{ $proPlan['annual_price'] }})"
-                            class="w-full py-3.5 rounded-xl bg-white hover:bg-indigo-50 text-indigo-700 font-black text-sm shadow-lg transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-bolt"></i>
+                            class="w-full py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-sm transition flex items-center justify-center">
                             @if ($tenant->plan === 'professional' && $tenant->isSubscribed())
                                 Renew / Extend Professional
                             @else
@@ -720,33 +714,33 @@
 
                 {{-- Enterprise Card --}}
                 @php $entPlan = $plans['enterprise']; @endphp
-                <div class="bg-slate-900/90 border {{ $tenant->plan === 'enterprise' ? 'border-amber-400/60 ring-1 ring-amber-400/40' : 'border-slate-800' }} rounded-2xl p-7 flex flex-col justify-between">
+                <div class="bg-white border {{ $tenant->plan === 'enterprise' ? 'border-purple-600 ring-2 ring-purple-600/20' : 'border-gray-200' }} rounded-xl p-6 flex flex-col justify-between">
                     <div>
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold uppercase tracking-widest text-amber-400">{{ $entPlan['name'] }}</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-purple-700">{{ $entPlan['name'] }}</span>
                             @if ($tenant->plan === 'enterprise')
-                                <span class="px-2.5 py-0.5 text-xs font-bold bg-amber-500/20 text-amber-300 rounded-full">Current Plan</span>
+                                <span class="px-2.5 py-0.5 text-xs font-semibold bg-purple-50 text-purple-700 rounded-full">Current Plan</span>
                             @endif
                         </div>
 
                         <div class="mt-4">
                             <div x-show="billingCycle === 'monthly'" class="flex items-baseline gap-1">
-                                <span class="text-4xl font-black text-white">Rp 799K</span>
-                                <span class="text-xs text-slate-400">/ month</span>
+                                <span class="text-3xl font-black text-gray-900">Rp 799K</span>
+                                <span class="text-xs text-gray-500">/ month</span>
                             </div>
                             <div x-show="billingCycle === 'annual'" x-cloak class="flex items-baseline gap-1">
-                                <span class="text-4xl font-black text-white">Rp 639K</span>
-                                <span class="text-xs text-slate-400">/ month (Rp 7.67M / yr)</span>
+                                <span class="text-3xl font-black text-gray-900">Rp 639K</span>
+                                <span class="text-xs text-gray-500">/ month (Rp 7.67M / yr)</span>
                             </div>
                         </div>
-                        <p class="text-xs text-slate-400 mt-2">{{ $entPlan['tagline'] }}</p>
+                        <p class="text-xs text-gray-500 mt-2">{{ $entPlan['tagline'] }}</p>
 
-                        <hr class="my-6 border-slate-800">
+                        <hr class="my-6 border-gray-100">
 
-                        <ul class="space-y-3 text-sm text-slate-300">
+                        <ul class="space-y-3 text-sm text-gray-600">
                             @foreach ($entPlan['highlights'] as $item)
                                 <li class="flex items-center gap-2.5">
-                                    <i class="fa-solid fa-check text-emerald-400 w-4"></i>
+                                    <i class="fa-solid fa-check text-purple-600 w-4"></i>
                                     <span>{{ $item }}</span>
                                 </li>
                             @endforeach
@@ -756,8 +750,7 @@
                     <div class="mt-8 space-y-2">
                         <button type="button"
                             @click="openCheckout('enterprise', 'Enterprise', {{ $entPlan['monthly_price'] }}, {{ $entPlan['annual_price'] }})"
-                            class="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-black text-sm transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-crown"></i>
+                            class="w-full py-2.5 rounded-lg bg-gray-900 hover:bg-gray-800 text-white font-semibold text-sm shadow-sm transition flex items-center justify-center">
                             @if ($tenant->plan === 'enterprise' && $tenant->isSubscribed())
                                 Renew Enterprise Plan
                             @else
@@ -796,7 +789,7 @@
                             </span>
                         @else
                             <a href="#plans" class="px-2 py-1 text-[11px] font-bold bg-indigo-50 text-indigo-600 rounded-md hover:bg-indigo-100">
-                                <i class="fa-solid fa-lock mr-1"></i>PRO
+                                PRO
                             </a>
                         @endif
                     </div>
@@ -963,15 +956,15 @@
              CHECKOUT / UPGRADE MODAL
         ===================================================================== --}}
         <div x-show="checkoutOpen" x-cloak
-            class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4">
+            class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm p-4">
             <div @click.away="checkoutOpen = false"
-                class="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-gray-200">
-                <div class="bg-gradient-to-r from-indigo-600 to-violet-700 px-6 py-5 text-white flex items-center justify-between">
+                class="bg-white rounded-xl shadow-xl max-w-lg w-full overflow-hidden border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
                     <div>
-                        <span class="text-xs uppercase tracking-wider text-indigo-200 font-semibold">Instant Plan Activation</span>
-                        <h3 class="text-xl font-black mt-0.5" x-text="'Subscribe to ' + selectedPlanName"></h3>
+                        <span class="text-xs uppercase tracking-wider text-gray-500 font-semibold">Instant Plan Activation</span>
+                        <h3 class="text-lg font-bold text-gray-900 mt-0.5" x-text="'Subscribe to ' + selectedPlanName"></h3>
                     </div>
-                    <button type="button" @click="checkoutOpen = false" class="text-white/80 hover:text-white">
+                    <button type="button" @click="checkoutOpen = false" class="text-gray-400 hover:text-gray-600 transition">
                         <i class="fa-solid fa-xmark text-lg"></i>
                     </button>
                 </div>
@@ -987,7 +980,7 @@
                     <div>
                         <label class="block text-xs font-bold uppercase text-gray-500 mb-2">1. Select Billing Cycle</label>
                         <div class="grid grid-cols-2 gap-3">
-                            <label class="cursor-pointer border rounded-2xl p-3.5 flex flex-col justify-between transition"
+                            <label class="cursor-pointer border rounded-xl p-3.5 flex flex-col justify-between transition"
                                 :class="billingCycle === 'monthly' ? 'border-indigo-600 bg-indigo-50/50 ring-2 ring-indigo-600/20' : 'border-gray-200 hover:border-gray-300'">
                                 <div class="flex items-center justify-between">
                                     <span class="text-sm font-bold text-gray-900">Monthly</span>
@@ -996,7 +989,7 @@
                                 <p class="text-xs text-gray-500 mt-1" x-text="formatRp(selectedMonthlyPrice) + ' / month'"></p>
                             </label>
 
-                            <label class="cursor-pointer border rounded-2xl p-3.5 flex flex-col justify-between transition relative"
+                            <label class="cursor-pointer border rounded-xl p-3.5 flex flex-col justify-between transition relative"
                                 :class="billingCycle === 'annual' ? 'border-indigo-600 bg-indigo-50/50 ring-2 ring-indigo-600/20' : 'border-gray-200 hover:border-gray-300'">
                                 <span class="absolute -top-2.5 right-3 bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
                                     SAVE 20%
@@ -1014,29 +1007,25 @@
                     <div>
                         <label class="block text-xs font-bold uppercase text-gray-500 mb-2">2. Select Payment Method</label>
                         <div class="grid grid-cols-2 gap-2.5 text-sm">
-                            <label class="cursor-pointer border rounded-xl px-3.5 py-2.5 flex items-center gap-2.5"
+                            <label class="cursor-pointer border rounded-xl px-3.5 py-2.5 flex items-center justify-between"
                                 :class="paymentMethod === 'qris' ? 'border-indigo-600 bg-indigo-50/40 font-semibold text-indigo-900' : 'border-gray-200 text-gray-700'">
-                                <input type="radio" name="payment_method" value="qris" x-model="paymentMethod" class="text-indigo-600">
-                                <i class="fa-solid fa-qrcode text-indigo-600"></i>
                                 <span>QRIS Instant</span>
+                                <input type="radio" name="payment_method" value="qris" x-model="paymentMethod" class="text-indigo-600">
                             </label>
-                            <label class="cursor-pointer border rounded-xl px-3.5 py-2.5 flex items-center gap-2.5"
+                            <label class="cursor-pointer border rounded-xl px-3.5 py-2.5 flex items-center justify-between"
                                 :class="paymentMethod === 'virtual_account' ? 'border-indigo-600 bg-indigo-50/40 font-semibold text-indigo-900' : 'border-gray-200 text-gray-700'">
-                                <input type="radio" name="payment_method" value="virtual_account" x-model="paymentMethod" class="text-indigo-600">
-                                <i class="fa-solid fa-building-columns text-indigo-600"></i>
                                 <span>Virtual Account</span>
+                                <input type="radio" name="payment_method" value="virtual_account" x-model="paymentMethod" class="text-indigo-600">
                             </label>
-                            <label class="cursor-pointer border rounded-xl px-3.5 py-2.5 flex items-center gap-2.5"
+                            <label class="cursor-pointer border rounded-xl px-3.5 py-2.5 flex items-center justify-between"
                                 :class="paymentMethod === 'credit_card' ? 'border-indigo-600 bg-indigo-50/40 font-semibold text-indigo-900' : 'border-gray-200 text-gray-700'">
-                                <input type="radio" name="payment_method" value="credit_card" x-model="paymentMethod" class="text-indigo-600">
-                                <i class="fa-regular fa-credit-card text-indigo-600"></i>
                                 <span>Credit / Debit Card</span>
+                                <input type="radio" name="payment_method" value="credit_card" x-model="paymentMethod" class="text-indigo-600">
                             </label>
-                            <label class="cursor-pointer border rounded-xl px-3.5 py-2.5 flex items-center gap-2.5"
+                            <label class="cursor-pointer border rounded-xl px-3.5 py-2.5 flex items-center justify-between"
                                 :class="paymentMethod === 'bank_transfer' ? 'border-indigo-600 bg-indigo-50/40 font-semibold text-indigo-900' : 'border-gray-200 text-gray-700'">
-                                <input type="radio" name="payment_method" value="bank_transfer" x-model="paymentMethod" class="text-indigo-600">
-                                <i class="fa-solid fa-money-bill-transfer text-indigo-600"></i>
                                 <span>Bank Transfer</span>
+                                <input type="radio" name="payment_method" value="bank_transfer" x-model="paymentMethod" class="text-indigo-600">
                             </label>
                         </div>
                     </div>
@@ -1050,7 +1039,7 @@
                     </div>
 
                     {{-- Order Summary --}}
-                    <div class="bg-gray-50 rounded-2xl p-4 space-y-2 border border-gray-200 text-sm">
+                    <div class="bg-gray-50 rounded-xl p-4 space-y-2 border border-gray-200 text-sm">
                         <div class="flex justify-between text-gray-600">
                             <span x-text="selectedPlanName + ' Plan (' + (billingCycle === 'annual' ? '12 Months' : '1 Month') + ')'"></span>
                             <span class="font-medium text-gray-900" x-text="formatRp(basePrice())"></span>
@@ -1067,12 +1056,12 @@
 
                     <div class="flex items-center justify-end gap-3 pt-2">
                         <button type="button" @click="checkoutOpen = false"
-                            class="px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 text-sm font-semibold hover:bg-gray-50">
+                            class="px-4 py-2.5 rounded-lg border border-gray-300 text-gray-700 text-sm font-semibold hover:bg-gray-50 transition">
                             Cancel
                         </button>
                         <button type="submit"
-                            class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold shadow-lg shadow-indigo-600/20 flex items-center gap-2">
-                            <i class="fa-solid fa-lock"></i> Confirm &amp; Activate Plan
+                            class="px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-sm transition">
+                            Confirm &amp; Activate Plan
                         </button>
                     </div>
                 </form>
@@ -1083,20 +1072,19 @@
              PRINTABLE INVOICE MODAL
         ===================================================================== --}}
         <div x-show="invoiceModalOpen" x-cloak
-            class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4">
+            class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm p-4">
             <div @click.away="invoiceModalOpen = false"
-                class="bg-white rounded-3xl shadow-2xl max-w-xl w-full overflow-hidden border border-gray-200">
-                <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-file-invoice-dollar text-emerald-400"></i>
-                        <span class="font-bold text-sm" x-text="activeInvoice ? activeInvoice.id : 'Invoice'"></span>
+                class="bg-white rounded-xl shadow-xl max-w-xl w-full overflow-hidden border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+                    <div>
+                        <span class="font-bold text-gray-900 text-base" x-text="activeInvoice ? activeInvoice.id : 'Invoice'"></span>
                     </div>
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2">
                         <button type="button" onclick="window.print()"
-                            class="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-semibold">
-                            <i class="fa-solid fa-print mr-1"></i> Print
+                            class="px-3 py-1.5 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 text-xs font-semibold text-gray-700 shadow-sm transition">
+                            Print
                         </button>
-                        <button type="button" @click="invoiceModalOpen = false" class="text-white/70 hover:text-white">
+                        <button type="button" @click="invoiceModalOpen = false" class="text-gray-400 hover:text-gray-600 transition p-1">
                             <i class="fa-solid fa-xmark"></i>
                         </button>
                     </div>
@@ -1132,7 +1120,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-gray-50 rounded-2xl p-4 border border-gray-200">
+                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
                         <div class="flex justify-between items-center pb-3 border-b border-gray-200">
                             <div>
                                 <p class="font-bold text-gray-900" x-text="activeInvoice?.description || 'POS Subscription'"></p>
@@ -1148,7 +1136,7 @@
 
                     <div class="flex justify-end">
                         <button type="button" @click="invoiceModalOpen = false"
-                            class="px-5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-xs">
+                            class="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-xs transition">
                             Close
                         </button>
                     </div>
@@ -1160,17 +1148,12 @@
              CANCEL / DOWNGRADE MODAL
         ===================================================================== --}}
         <div x-show="cancelModalOpen" x-cloak
-            class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4">
+            class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm p-4">
             <div @click.away="cancelModalOpen = false"
-                class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 border border-gray-200 space-y-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center">
-                        <i class="fa-solid fa-triangle-exclamation"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-base font-bold text-gray-900">Manage Subscription Cancellation</h3>
-                        <p class="text-xs text-gray-500">Choose how you would like to adjust your plan.</p>
-                    </div>
+                class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 border border-gray-200 space-y-4">
+                <div>
+                    <h3 class="text-base font-bold text-gray-900">Manage Subscription Cancellation</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">Choose how you would like to adjust your plan.</p>
                 </div>
 
                 <form method="POST" action="{{ route('admin.subscription.cancel') }}" class="space-y-4">
@@ -1197,11 +1180,11 @@
 
                     <div class="flex justify-end gap-2 pt-2">
                         <button type="button" @click="cancelModalOpen = false"
-                            class="px-4 py-2 rounded-xl border border-gray-300 text-xs font-semibold text-gray-700">
+                            class="px-4 py-2 rounded-lg border border-gray-300 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition">
                             Keep My Plan
                         </button>
                         <button type="submit"
-                            class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-xs font-bold text-white">
+                            class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-xs font-semibold text-white transition">
                             Confirm Change
                         </button>
                     </div>

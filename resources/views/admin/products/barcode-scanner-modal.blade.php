@@ -97,15 +97,15 @@
 
             {{-- Header --}}
             <div
-                class="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-600 to-blue-700">
+                class="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gray-50">
                 <div>
-                    <h3 class="text-base font-semibold text-white">
-                        <i class="fa-solid fa-barcode mr-2"></i>Scan Barcode
+                    <h3 class="text-base font-semibold text-gray-900">
+                        Scan Barcode
                     </h3>
-                    <p class="text-xs text-blue-200 mt-0.5">Point your camera at a product barcode</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Point your camera at a product barcode</p>
                 </div>
                 <button @click="closeScanner()"
-                    class="text-blue-200 hover:text-white transition-colors p-1 rounded-lg hover:bg-blue-600">
+                    class="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100">
                     <i class="fa-solid fa-times text-lg"></i>
                 </button>
             </div>

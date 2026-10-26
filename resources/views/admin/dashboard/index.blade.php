@@ -17,12 +17,12 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
 
             {{-- Today's Sales --}}
-            <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-5 text-white shadow-sm">
+            <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
                 <div class="flex items-start justify-between">
                     <div>
-                        <p class="text-emerald-100 text-xs font-medium uppercase tracking-wide">Sales Today</p>
-                        <p class="text-2xl font-bold mt-1">Rp {{ number_format($totalSalesToday, 0, ',', '.') }}</p>
-                        <p class="text-emerald-100 text-xs mt-2 flex items-center">
+                        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Sales Today</p>
+                        <p class="text-2xl font-bold text-gray-900 mt-1">Rp {{ number_format($totalSalesToday, 0, ',', '.') }}</p>
+                        <p class="text-xs mt-2 flex items-center {{ $salesGrowth >= 0 ? 'text-emerald-600' : 'text-red-600' }}">
                             @if ($salesGrowth >= 0)
                                 <i class="fa-solid fa-arrow-trend-up mr-1"></i>+{{ $salesGrowth }}% vs yesterday
                             @else
@@ -30,19 +30,19 @@
                             @endif
                         </p>
                     </div>
-                    <div class="bg-emerald-400 bg-opacity-30 rounded-lg p-2.5">
+                    <div class="bg-emerald-50 text-emerald-600 rounded-lg p-2.5">
                         <i class="fa-solid fa-chart-line text-xl"></i>
                     </div>
                 </div>
             </div>
 
             {{-- Monthly Revenue --}}
-            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-5 text-white shadow-sm">
+            <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
                 <div class="flex items-start justify-between">
                     <div>
-                        <p class="text-blue-100 text-xs font-medium uppercase tracking-wide">Revenue This Month</p>
-                        <p class="text-2xl font-bold mt-1">Rp {{ number_format($monthlySales, 0, ',', '.') }}</p>
-                        <p class="text-blue-100 text-xs mt-2 flex items-center">
+                        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Revenue This Month</p>
+                        <p class="text-2xl font-bold text-gray-900 mt-1">Rp {{ number_format($monthlySales, 0, ',', '.') }}</p>
+                        <p class="text-xs mt-2 flex items-center {{ $monthlyGrowth >= 0 ? 'text-blue-600' : 'text-red-600' }}">
                             @if ($monthlyGrowth >= 0)
                                 <i class="fa-solid fa-arrow-trend-up mr-1"></i>+{{ $monthlyGrowth }}% vs last month
                             @else
@@ -50,39 +50,39 @@
                             @endif
                         </p>
                     </div>
-                    <div class="bg-blue-400 bg-opacity-30 rounded-lg p-2.5">
+                    <div class="bg-blue-50 text-blue-600 rounded-lg p-2.5">
                         <i class="fa-solid fa-money-bill-wave text-xl"></i>
                     </div>
                 </div>
             </div>
 
             {{-- Orders Today --}}
-            <div class="bg-gradient-to-br from-violet-500 to-violet-600 rounded-xl p-5 text-white shadow-sm">
+            <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
                 <div class="flex items-start justify-between">
                     <div>
-                        <p class="text-violet-100 text-xs font-medium uppercase tracking-wide">Orders Today</p>
-                        <p class="text-2xl font-bold mt-1">{{ $totalOrders }}</p>
-                        <p class="text-violet-100 text-xs mt-2">
-                            <i class="fa-solid fa-check mr-1"></i>{{ $completedOrders }} completed
+                        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Orders Today</p>
+                        <p class="text-2xl font-bold text-gray-900 mt-1">{{ $totalOrders }}</p>
+                        <p class="text-gray-500 text-xs mt-2 flex items-center">
+                            <i class="fa-solid fa-check mr-1 text-emerald-600"></i>{{ $completedOrders }} completed
                         </p>
                     </div>
-                    <div class="bg-violet-400 bg-opacity-30 rounded-lg p-2.5">
+                    <div class="bg-violet-50 text-violet-600 rounded-lg p-2.5">
                         <i class="fa-solid fa-shopping-bag text-xl"></i>
                     </div>
                 </div>
             </div>
 
             {{-- Pending Orders --}}
-            <div class="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-5 text-white shadow-sm">
+            <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
                 <div class="flex items-start justify-between">
                     <div>
-                        <p class="text-amber-100 text-xs font-medium uppercase tracking-wide">Pending Orders</p>
-                        <p class="text-2xl font-bold mt-1">{{ $pendingOrders }}</p>
-                        <p class="text-amber-100 text-xs mt-2">
+                        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Pending Orders</p>
+                        <p class="text-2xl font-bold text-gray-900 mt-1">{{ $pendingOrders }}</p>
+                        <p class="text-amber-600 text-xs mt-2 flex items-center">
                             <i class="fa-solid fa-clock mr-1"></i>Awaiting processing
                         </p>
                     </div>
-                    <div class="bg-amber-400 bg-opacity-30 rounded-lg p-2.5">
+                    <div class="bg-amber-50 text-amber-600 rounded-lg p-2.5">
                         <i class="fa-solid fa-hourglass-half text-xl"></i>
                     </div>
                 </div>

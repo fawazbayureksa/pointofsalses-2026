@@ -7,17 +7,17 @@
     <div class="space-y-6">
         {{-- KPI Cards --}}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl p-5 text-white shadow">
-                <p class="text-xs font-semibold uppercase text-blue-100">Total Nilai Pembelian (PO)</p>
-                <p class="text-2xl font-bold mt-1">Rp {{ number_format($totalProcurementSpend, 0, ',', '.') }}</p>
+            <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">Total Nilai Pembelian (PO)</p>
+                <p class="text-2xl font-bold text-gray-900 mt-1">Rp {{ number_format($totalProcurementSpend, 0, ',', '.') }}</p>
             </div>
-            <div class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl p-5 text-white shadow">
-                <p class="text-xs font-semibold uppercase text-amber-100">Total Hutang Aktif (Payables)</p>
-                <p class="text-2xl font-bold mt-1">Rp {{ number_format($totalOutstandingDebt, 0, ',', '.') }}</p>
+            <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">Total Hutang Aktif (Payables)</p>
+                <p class="text-2xl font-bold text-gray-900 mt-1">Rp {{ number_format($totalOutstandingDebt, 0, ',', '.') }}</p>
             </div>
-            <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl p-5 text-white shadow">
-                <p class="text-xs font-semibold uppercase text-emerald-100">Rekomendasi Reorder Stok</p>
-                <p class="text-2xl font-bold mt-1">{{ $reorderSuggestions->count() }} Item</p>
+            <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">Rekomendasi Reorder Stok</p>
+                <p class="text-2xl font-bold text-gray-900 mt-1">{{ $reorderSuggestions->count() }} Item</p>
             </div>
         </div>
 
