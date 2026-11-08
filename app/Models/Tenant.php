@@ -485,4 +485,76 @@ class Tenant extends Model
 
         return $this->defaultSupplierManagementByBusinessType();
     }
+
+    /**
+     * Check whether Bank EDC Terminal integration is enabled for this tenant.
+     * Defaults to false so tenants without an EDC machine skip EDC flow.
+     */
+    public function isEdcEnabled(): bool
+    {
+        $tenantSetting = Setting::withoutGlobalScopes()
+            ->where('tenant_id', $this->id)
+            ->where('key', 'edc_enabled')
+            ->first();
+
+        if ($tenantSetting !== null) {
+            return filter_var($tenantSetting->value, FILTER_VALIDATE_BOOLEAN);
+        }
+
+        $jsonPref = $this->getSetting('edc_enabled');
+        if ($jsonPref !== null) {
+            return filter_var($jsonPref, FILTER_VALIDATE_BOOLEAN);
+        }
+
+        return false;
+    }
+
+    /**
+     * Retrieve the full EDC configuration array for this tenant.
+     */
+    public function edcConfig(): array
+    {
+        $records = Setting::withoutGlobalScopes()
+            ->where('tenant_id', $this->id)
+            ->whereIn('key', [
+                'edc_enabled',
+                'edc_connection_mode',
+                'edc_banks',
+                'edc_require_reference',
+                'edc_serial_baud_rate',
+            ])
+            ->get()
+            ->keyBy('key');
+
+        $enabled = $records->has('edc_enabled')
+            ? filter_var($records->get('edc_enabled')->value, FILTER_VALIDATE_BOOLEAN)
+            : (bool) $this->getSetting('edc_enabled', false);
+
+        $mode = $records->get('edc_connection_mode')?->value
+            ?? $this->getSetting('edc_connection_mode', 'semi_integrated');
+
+        $banksRaw = $records->get('edc_banks')?->value
+            ?? $this->getSetting('edc_banks', 'BCA, Mandiri, BRI, BNI, CIMB Niaga, Permata');
+
+        $banks = array_values(array_filter(array_map('trim', explode(',', (string) $banksRaw))));
+        if (empty($banks)) {
+            $banks = ['BCA', 'Mandiri', 'BRI', 'BNI'];
+        }
+
+        $requireRef = $records->has('edc_require_reference')
+            ? filter_var($records->get('edc_require_reference')->value, FILTER_VALIDATE_BOOLEAN)
+            : (bool) $this->getSetting('edc_require_reference', true);
+
+        $baudRate = (int) ($records->get('edc_serial_baud_rate')?->value
+            ?? $this->getSetting('edc_serial_baud_rate', 9600));
+
+        return [
+            'enabled' => $enabled,
+            'connection_mode' => in_array($mode, ['semi_integrated', 'ecr_serial', 'both'], true) ? $mode : 'semi_integrated',
+            'banks' => $banks,
+            'banks_raw' => implode(', ', $banks),
+            'require_reference' => $requireRef,
+            'serial_baud_rate' => $baudRate > 0 ? $baudRate : 9600,
+        ];
+    }
 }

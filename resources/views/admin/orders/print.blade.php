@@ -219,6 +219,12 @@
                     <td>Method</td>
                     <td class="right bold">{{ strtoupper($order->payment->payment_method) }}</td>
                 </tr>
+                @if ($order->payment->reference_number)
+                    <tr class="summary-row">
+                        <td>Ref / Approval</td>
+                        <td class="right">{{ $order->payment->reference_number }}</td>
+                    </tr>
+                @endif
                 <tr class="summary-row">
                     <td>Paid</td>
                     <td class="right">Rp {{ number_format($order->payment->amount, 0, ',', '.') }}</td>

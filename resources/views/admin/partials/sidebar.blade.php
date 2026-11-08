@@ -130,6 +130,27 @@
                     </a>
                 </li>
 
+                {{-- Notifications --}}
+                <li x-show="matches('Notifications', 'notifikasi pemberitahuan pesan alerts')">
+                    @php
+                        $sidebarUnreadCount = Auth::user()->unreadNotifications()->count();
+                    @endphp
+                    <a href="{{ route('admin.notifications.index') }}"
+                        :class="currentPage.includes('notifications') ? 'bg-slate-700 text-white active-menu-item' :
+                            'text-slate-300 hover:bg-slate-700 hover:text-white'"
+                        class="sidebar-link flex items-center px-3 py-2 rounded-lg transition-colors">
+                        <i class="fa-solid fa-bell w-5 text-center text-amber-400"></i>
+                        <span x-show="sidebarOpen" x-transition class="ml-3 flex items-center justify-between flex-1">
+                            <span>Notifications</span>
+                            @if ($sidebarUnreadCount > 0)
+                                <span class="text-[10px] font-bold bg-red-500 text-white px-1.5 py-0.5 rounded-full">
+                                    {{ $sidebarUnreadCount > 99 ? '99+' : $sidebarUnreadCount }}
+                                </span>
+                            @endif
+                        </span>
+                    </a>
+                </li>
+
                 {{-- Tenant Management (Super Admin) --}}
                 @role('super_admin')
                     <li x-show="matches('Tenants', 'tenant management penyewa toko merchant') || matches('Subscriptions', 'tenant management langganan paket billing pro')">

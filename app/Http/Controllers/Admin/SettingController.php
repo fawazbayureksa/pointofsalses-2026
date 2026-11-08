@@ -172,4 +172,48 @@ class SettingController extends Controller
         return redirect()->route('admin.settings.index')
             ->with('success', 'Pengaturan modul opsional (Supplier Management) berhasil diperbarui.');
     }
+
+    public function updateEdc(Request $request)
+    {
+        $validated = $request->validate([
+            'edc_enabled' => 'nullable|boolean',
+            'edc_connection_mode' => 'required|in:semi_integrated,ecr_serial,both',
+            'edc_banks' => 'nullable|string|max:500',
+            'edc_require_reference' => 'nullable|boolean',
+            'edc_serial_baud_rate' => 'nullable|integer|in:9600,19200,38400,57600,115200',
+        ]);
+
+        $enabled = $request->boolean('edc_enabled');
+        $mode = $validated['edc_connection_mode'] ?? 'semi_integrated';
+        $banks = trim((string) ($validated['edc_banks'] ?? '')) ?: 'BCA, Mandiri, BRI, BNI, CIMB Niaga, Permata';
+        $requireRef = $request->boolean('edc_require_reference');
+        $baudRate = (int) ($validated['edc_serial_baud_rate'] ?? 9600);
+
+        $edcSettings = [
+            'edc_enabled' => ['value' => $enabled ? 'true' : 'false', 'type' => 'boolean'],
+            'edc_connection_mode' => ['value' => $mode, 'type' => 'string'],
+            'edc_banks' => ['value' => $banks, 'type' => 'string'],
+            'edc_require_reference' => ['value' => $requireRef ? 'true' : 'false', 'type' => 'boolean'],
+            'edc_serial_baud_rate' => ['value' => (string) $baudRate, 'type' => 'integer'],
+        ];
+
+        foreach ($edcSettings as $key => $cfg) {
+            Setting::updateOrCreate(
+                ['key' => $key],
+                ['value' => $cfg['value'], 'type' => $cfg['type'], 'group' => 'edc']
+            );
+        }
+
+        $tenant = $request->user()?->tenant;
+        if ($tenant) {
+            $tenant->setSetting('edc_enabled', $enabled);
+            $tenant->setSetting('edc_connection_mode', $mode);
+            $tenant->setSetting('edc_banks', $banks);
+            $tenant->setSetting('edc_require_reference', $requireRef);
+            $tenant->setSetting('edc_serial_baud_rate', $baudRate);
+        }
+
+        return redirect()->route('admin.settings.index')
+            ->with('success', 'Konfigurasi Mesin EDC Bank berhasil diperbarui.');
+    }
 }
