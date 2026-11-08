@@ -662,50 +662,88 @@
         {{-- ============================================================ --}}
         {{-- Camera Barcode Scanner Modal --}}
         {{-- ============================================================ --}}
-        <div x-show="cameraOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+        <div x-show="cameraOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4"
             @keydown.escape.window="stopCamera()">
-            <div class="bg-white rounded-xl shadow-2xl w-full max-w-md flex flex-col">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden">
                 {{-- Modal Header --}}
-                <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gray-50">
                     <div>
-                        <h3 class="text-base font-semibold text-gray-800">
-                            <i class="fa-solid fa-camera mr-2 text-blue-500"></i>Scan with Camera
+                        <h3 class="text-base font-semibold text-gray-800 flex items-center gap-2">
+                            <i class="fa-solid fa-camera text-blue-600"></i>
+                            <span>Scan with Camera</span>
                         </h3>
-                        <p class="text-xs text-gray-400 mt-0.5">Point your camera at a barcode</p>
+                        <p class="text-xs text-gray-500 mt-0.5">Point camera at product barcode</p>
                     </div>
-                    <button @click="stopCamera()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <button @click="stopCamera()" class="text-gray-400 hover:text-gray-600 transition-colors p-1.5 rounded-lg hover:bg-gray-100">
                         <i class="fa-solid fa-times text-lg"></i>
                     </button>
                 </div>
 
                 {{-- Camera Preview --}}
-                <div class="px-5 py-4">
+                <div class="px-5 pt-4 pb-2">
                     <div class="relative bg-black rounded-xl overflow-hidden aspect-[4/3]">
                         <video x-ref="cameraVideo" class="w-full h-full object-cover" autoplay muted playsinline></video>
+
+                        {{-- Top status pill & controls --}}
+                        <div class="absolute top-2.5 inset-x-2.5 flex items-center justify-between pointer-events-none z-10" x-show="!cameraError">
+                            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-black/65 backdrop-blur-sm rounded-full text-xs text-white">
+                                <span class="w-2 h-2 rounded-full" :class="scannerActive ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'"></span>
+                                <span x-text="scannerStatusText"></span>
+                            </div>
+                            <div class="flex items-center gap-1 pointer-events-auto">
+                                <button type="button" x-show="hasMultipleCameras" @click="switchCamera()" title="Switch camera"
+                                    class="p-1.5 bg-black/65 hover:bg-black/90 backdrop-blur-sm rounded-full text-white text-xs transition-colors">
+                                    <i class="fa-solid fa-camera-rotate"></i>
+                                </button>
+                                <button type="button" x-show="hasTorch" @click="toggleTorch()" :title="torchOn ? 'Turn off flash' : 'Turn on flash'"
+                                    class="p-1.5 bg-black/65 hover:bg-black/90 backdrop-blur-sm rounded-full text-xs transition-colors"
+                                    :class="torchOn ? 'text-amber-300' : 'text-white'">
+                                    <i class="fa-solid fa-bolt"></i>
+                                </button>
+                            </div>
+                        </div>
+
                         {{-- Scanning overlay --}}
-                        <div class="absolute inset-0 pointer-events-none" x-show="!cameraError">
+                        <div class="absolute inset-0 pointer-events-none" x-show="!cameraError && !scannerSuccessCode">
                             <div class="scan-line"></div>
                             <div class="scan-corner scan-corner-tl"></div>
                             <div class="scan-corner scan-corner-tr"></div>
                             <div class="scan-corner scan-corner-bl"></div>
                             <div class="scan-corner scan-corner-br"></div>
+                            <div class="absolute bottom-2.5 inset-x-2.5 text-center">
+                                <span class="inline-block px-2.5 py-1 bg-black/65 backdrop-blur-sm rounded-full text-[11px] text-gray-200">
+                                    Center barcode horizontally & hold steady (~15 cm)
+                                </span>
+                            </div>
                         </div>
+
+                        {{-- Success flash overlay --}}
+                        <div x-show="scannerSuccessCode" x-cloak
+                            class="absolute inset-0 flex items-center justify-center bg-emerald-600/90 pointer-events-none transition-all duration-200 z-20">
+                            <div class="text-center px-4">
+                                <i class="fa-solid fa-circle-check text-white text-5xl animate-bounce"></i>
+                                <p class="text-white font-bold text-lg mt-2 tracking-wide font-mono" x-text="scannerSuccessCode"></p>
+                                <p class="text-emerald-100 text-xs mt-1">Barcode Read Successfully!</p>
+                            </div>
+                        </div>
+
                         {{-- Error overlay --}}
                         <div x-show="cameraError"
-                            class="absolute inset-0 flex flex-col items-center justify-center bg-black/80 p-4">
-                            <i class="fa-solid fa-video-slash text-white text-3xl mb-3"></i>
-                            <p class="text-white text-sm text-center" x-text="cameraError"></p>
+                            class="absolute inset-0 flex flex-col items-center justify-center bg-black/90 p-5 z-20">
+                            <i class="fa-solid fa-video-slash text-red-400 text-3xl mb-3"></i>
+                            <p class="text-white text-sm text-center leading-relaxed" x-text="cameraError"></p>
                         </div>
                     </div>
 
-                    <p class="text-xs text-gray-400 text-center mt-3">
+                    <p class="text-xs text-gray-500 text-center mt-2.5">
+                        <i class="fa-solid fa-circle-info text-blue-500 mr-1"></i>
                         Supports EAN-13, EAN-8, UPC-A, Code 128, Code 39, QR Code
                     </p>
                 </div>
 
-                <div class="px-5 pb-4">
+                <div class="px-5 pb-4 pt-2">
                     <button @click="stopCamera()"
-                        class="w-full py-2 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                        class="w-full py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
                         <i class="fa-solid fa-times mr-1"></i>Cancel
                     </button>
                 </div>
@@ -774,9 +812,17 @@
                     _productById: {},
                     cameraOpen: false,
                     cameraError: '',
+                    scannerStatusText: 'Starting camera...',
+                    scannerActive: false,
+                    scannerSuccessCode: '',
+                    hasMultipleCameras: false,
+                    hasTorch: false,
+                    torchOn: false,
+                    facingMode: 'environment',
                     _scannerStream: null,
                     _scannerInterval: null,
                     _zxingReader: null,
+                    _zxingControls: null,
                     _cameraIdealWidth: 1280,
 
                     // -- Lifecycle --
@@ -1111,12 +1157,16 @@
                     async openCamera() {
                         this.cameraError = '';
                         this.cameraOpen = true;
+                        this.scannerActive = false;
+                        this.scannerSuccessCode = '';
+                        this.scannerStatusText = 'Starting camera...';
+                        this.torchOn = false;
                         await this.$nextTick();
                         try {
                             const stream = await navigator.mediaDevices.getUserMedia({
                                 video: {
                                     facingMode: {
-                                        ideal: 'environment'
+                                        ideal: this.facingMode
                                     },
                                     width: {
                                         ideal: this._cameraIdealWidth
@@ -1127,8 +1177,22 @@
                             const video = this.$refs.cameraVideo;
                             video.srcObject = stream;
                             await video.play();
-                            this._startScanLoop();
+
+                            // Check torch capability
+                            const track = stream.getVideoTracks()[0];
+                            this.hasTorch = !!(track && track.getCapabilities && track.getCapabilities().torch);
+
+                            // Check multiple cameras
+                            if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+                                try {
+                                    const devices = await navigator.mediaDevices.enumerateDevices();
+                                    this.hasMultipleCameras = devices.filter(d => d.kind === 'videoinput').length > 1;
+                                } catch {}
+                            }
+
+                            await this._startScanLoop();
                         } catch (err) {
+                            this.scannerActive = false;
                             if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
                                 this.cameraError = 'Camera access denied. Please allow camera permission in your browser.';
                             } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
@@ -1143,12 +1207,13 @@
                             clearInterval(this._scannerInterval);
                             this._scannerInterval = null;
                         }
-                        if (this._zxingReader) {
+                        if (this._zxingControls) {
                             try {
-                                this._zxingReader.reset();
-                            } catch {
-                                /* reset() may throw if stream already closed */
-                            }
+                                this._zxingControls.stop();
+                            } catch {}
+                            this._zxingControls = null;
+                        }
+                        if (this._zxingReader) {
                             this._zxingReader = null;
                         }
                         if (this._scannerStream) {
@@ -1156,59 +1221,126 @@
                             this._scannerStream = null;
                         }
                         this.cameraOpen = false;
+                        this.scannerActive = false;
+                        this.scannerSuccessCode = '';
                         this.cameraError = '';
+                        this.torchOn = false;
                         this.$nextTick(() => this.$refs.barcodeInput?.focus());
                     },
+                    async switchCamera() {
+                        this.facingMode = (this.facingMode === 'environment') ? 'user' : 'environment';
+                        this.stopCamera();
+                        await this.openCamera();
+                    },
+                    async toggleTorch() {
+                        if (!this._scannerStream) return;
+                        const track = this._scannerStream.getVideoTracks()[0];
+                        if (track && track.getCapabilities && track.getCapabilities().torch) {
+                            this.torchOn = !this.torchOn;
+                            try {
+                                await track.applyConstraints({ advanced: [{ torch: this.torchOn }] });
+                            } catch {}
+                        }
+                    },
+                    _playScanBeep() {
+                        try {
+                            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                            if (!AudioCtx) return;
+                            const ctx = new AudioCtx();
+                            const osc = ctx.createOscillator();
+                            const gain = ctx.createGain();
+                            osc.type = 'sine';
+                            osc.frequency.setValueAtTime(1750, ctx.currentTime);
+                            gain.gain.setValueAtTime(0.18, ctx.currentTime);
+                            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+                            osc.connect(gain);
+                            gain.connect(ctx.destination);
+                            osc.start();
+                            osc.stop(ctx.currentTime + 0.12);
+                        } catch {}
+                    },
+                    _handleDetectedBarcode(code) {
+                        if (!code || this.scannerSuccessCode) return;
+                        this.scannerSuccessCode = code;
+                        this.scannerActive = false;
+                        this.scannerStatusText = 'Barcode detected!';
+                        this._playScanBeep();
+                        setTimeout(() => {
+                            this.stopCamera();
+                            this.barcodeInput = code;
+                            this.scanBarcode();
+                        }, 450);
+                    },
                     async _startScanLoop() {
+                        const video = this.$refs.cameraVideo;
+                        this.scannerStatusText = 'Scanning active...';
+                        this.scannerActive = true;
+
+                        // 1. Check if native BarcodeDetector is available AND supports 1D product barcode formats
+                        let canUseNative = false;
+                        let nativeDetector = null;
                         if ('BarcodeDetector' in window) {
-                            // Native BarcodeDetector (Chrome 83+, Edge 83+, Samsung Internet)
-                            let supported = ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39', 'code_93',
-                                'qr_code', 'data_matrix'
-                            ];
                             try {
                                 const detected = await BarcodeDetector.getSupportedFormats();
-                                supported = supported.filter(f => detected.includes(f));
-                            } catch {}
-                            const detector = new BarcodeDetector({
-                                formats: supported.length ? supported : ['ean_13', 'code_128']
-                            });
-                            const video = this.$refs.cameraVideo;
+                                const supported1D = ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39'].filter(f => detected.includes(f));
+                                if (supported1D.length > 0) {
+                                    const desired = [...supported1D, 'qr_code', 'data_matrix', 'code_93', 'itf'].filter(f => detected.includes(f));
+                                    nativeDetector = new BarcodeDetector({ formats: desired });
+                                    canUseNative = true;
+                                }
+                            } catch {
+                                canUseNative = false;
+                            }
+                        }
+
+                        if (canUseNative && nativeDetector) {
                             this._scannerInterval = setInterval(async () => {
                                 if (!this.cameraOpen || !video.readyState || video.readyState < 2) return;
                                 try {
-                                    const barcodes = await detector.detect(video);
-                                    if (barcodes.length > 0) {
-                                        const code = barcodes[0].rawValue;
-                                        this.stopCamera();
-                                        this.barcodeInput = code;
-                                        this.scanBarcode();
+                                    const barcodes = await nativeDetector.detect(video);
+                                    if (barcodes.length > 0 && barcodes[0].rawValue) {
+                                        this._handleDetectedBarcode(barcodes[0].rawValue);
                                     }
                                 } catch {}
-                            }, 300);
-                        } else {
-                            // Fallback: @zxing/browser (Firefox and other browsers)
+                            }, 200);
+                            return;
+                        }
+
+                        // 2. Fallback to ZXing Browser (Universal: works on macOS Chrome, Safari, Firefox, iOS, Android, etc.)
+                        try {
+                            this.scannerStatusText = 'Loading scanner engine...';
+                            await this._loadScript('https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js');
+                            this.scannerStatusText = 'Scanning active... Point at barcode';
+                            this.scannerActive = true;
+
+                            this._zxingReader = new ZXingBrowser.BrowserMultiFormatReader();
+                            this._zxingControls = await this._zxingReader.decodeFromVideoElement(video, (result, err) => {
+                                if (!this.cameraOpen) return;
+                                if (result && result.getText()) {
+                                    this._handleDetectedBarcode(result.getText());
+                                }
+                            });
+                        } catch (err) {
                             try {
-                                await this._loadScript(
-                                    'https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/index.min.js',
-                                    'sha384-OLBgp1GsljhM2TJ+sbHjaiH9txEUvgdDTAzHv2P24donTt6/529l+9Ua0vFImLlb'
-                                );
-                                const video = this.$refs.cameraVideo;
+                                await this._loadScript('https://unpkg.com/@zxing/browser@0.1.5/umd/zxing-browser.min.js');
+                                this.scannerStatusText = 'Scanning active... Point at barcode';
+                                this.scannerActive = true;
+
                                 this._zxingReader = new ZXingBrowser.BrowserMultiFormatReader();
-                                this._zxingReader.decodeFromVideoElement(video, (result, err) => {
-                                    if (result && this.cameraOpen) {
-                                        const code = result.getText();
-                                        this.stopCamera();
-                                        this.barcodeInput = code;
-                                        this.scanBarcode();
+                                this._zxingControls = await this._zxingReader.decodeFromVideoElement(video, (result, err) => {
+                                    if (!this.cameraOpen) return;
+                                    if (result && result.getText()) {
+                                        this._handleDetectedBarcode(result.getText());
                                     }
                                 });
-                            } catch (err) {
+                            } catch (backupErr) {
+                                this.scannerActive = false;
                                 this.cameraError =
-                                    'Barcode detection not available in this browser. Please use Chrome or Edge.';
+                                    'Barcode detection engine could not be loaded. Please enter barcode manually or use a physical scanner.';
                             }
                         }
                     },
-                    _loadScript(src, integrity) {
+                    _loadScript(src) {
                         return new Promise((resolve, reject) => {
                             if (document.querySelector(`script[src="${src}"]`)) {
                                 resolve();
@@ -1216,10 +1348,6 @@
                             }
                             const s = document.createElement('script');
                             s.src = src;
-                            if (integrity) {
-                                s.integrity = integrity;
-                                s.crossOrigin = 'anonymous';
-                            }
                             s.onload = resolve;
                             s.onerror = () => reject(new Error('Failed to load ' + src));
                             document.head.appendChild(s);

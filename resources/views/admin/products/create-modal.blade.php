@@ -1,5 +1,11 @@
-<div x-data="{ open: false, barcodeValue: '', photoPreview: null }" @open-create-modal.window="open = true"
-    @barcode-scanned.window="if ($event.detail.target === 'create') { barcodeValue = $event.detail.code }"
+<div x-data="{ open: false, barcodeValue: '', barcodeJustScanned: false, photoPreview: null }" @open-create-modal.window="open = true"
+    @barcode-scanned.window="
+        if ($event.detail.target === 'create') {
+            barcodeValue = $event.detail.code;
+            barcodeJustScanned = true;
+            setTimeout(() => barcodeJustScanned = false, 2500);
+        }
+    "
     @product-photo-captured.window="
         if ($event.detail.target === 'create') {
             photoPreview = $event.detail.dataUrl;
@@ -26,22 +32,36 @@
 
             {{-- Barcode field with scan button --}}
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Barcode</label>
+                <div class="flex items-center justify-between mb-1">
+                    <label class="block text-sm font-medium text-gray-700">Barcode</label>
+                    <span x-show="barcodeValue" x-cloak
+                        class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 transition-all">
+                        <i class="fa-solid fa-circle-check text-emerald-500"></i>
+                        <span>Barcode ready: <strong class="font-mono" x-text="barcodeValue"></strong></span>
+                    </span>
+                </div>
                 <div class="flex items-center gap-2">
                     <div class="relative flex-1">
                         <i class="fa-solid fa-barcode absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                        <input type="text" name="barcode" x-model="barcodeValue" placeholder="Scan or type barcode…"
-                            class="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <input type="text" name="barcode" x-model="barcodeValue" placeholder="Scan with camera or type barcode…"
+                            @keydown.enter.prevent="$el.closest('form').querySelector('input[name=price]')?.focus()"
+                            class="w-full pl-9 pr-8 py-2 border rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                            :class="barcodeJustScanned ? 'border-emerald-500 ring-2 ring-emerald-300 bg-emerald-50/50' : 'border-gray-300 focus:border-transparent'">
+                        <button type="button" x-show="barcodeValue" @click="barcodeValue = ''"
+                            class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors p-1"
+                            title="Clear barcode">
+                            <i class="fa-solid fa-xmark text-sm"></i>
+                        </button>
                     </div>
                     <button type="button"
                         @click="window.dispatchEvent(new CustomEvent('open-barcode-scanner', { detail: { target: 'create' } }))"
                         title="Scan with camera"
-                        class="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors shrink-0">
+                        class="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors shrink-0 shadow-sm hover:shadow">
                         <i class="fa-solid fa-camera"></i>
                         <span>Scan</span>
                     </button>
                 </div>
-                <p class="text-xs text-gray-400 mt-1">Use a USB barcode scanner or click Scan to use your camera.</p>
+                <p class="text-xs text-gray-400 mt-1">Use a USB barcode scanner (click field first) or click Scan to use your camera.</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
