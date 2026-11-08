@@ -334,7 +334,7 @@
                             <h3 class="text-lg font-bold text-gray-900">Tambahkan Akun Staf/Kasir & Data Pelanggan</h3>
                         </div>
                         <p class="text-sm text-gray-600 mt-1.5 leading-relaxed">
-                            Jangan gunakan akun pemilik utama untuk operasional kasir harian jika Anda memiliki karyawan. Buat akun khusus untuk kasir atau supervisor di menu <strong>Users</strong> dan atur hak aksesnya di menu <strong>Roles</strong>. Anda juga bisa mulai mendaftarkan pelanggan tetap di menu <strong>Customers</strong>.
+                            Jangan gunakan akun pemilik utama untuk operasional kasir harian jika Anda memiliki karyawan. Buat akun khusus untuk kasir atau manajer di menu <strong>Users</strong> dan tetapkan peran (Role) yang sesuai. Anda juga bisa mulai mendaftarkan pelanggan tetap di menu <strong>Customers</strong>.
                         </p>
                     </div>
 
@@ -550,7 +550,7 @@
                     <i :class="openFaq === 3 ? 'fa-chevron-up' : 'fa-chevron-down'" class="fa-solid text-xs text-gray-400"></i>
                 </button>
                 <div x-show="openFaq === 3" x-collapse class="px-6 pb-4 text-xs text-gray-600 leading-relaxed border-t border-gray-100 pt-3">
-                    Ya, sangat bisa. Melalui menu <strong>User Management &rarr; Roles</strong>, Anda dapat mengatur izin (*permissions*) apa saja yang dimiliki oleh peran Kasir. Saat membuat akun staf di menu <strong>Users</strong>, cukup berikan *role* yang sesuai agar menu pengaturan sistem dan manajemen pengguna tidak tampil di akun mereka.
+                    Ya, sangat bisa. Sistem telah menyediakan peran bawaan (seperti <strong>Cashier</strong>, <strong>Manager</strong>, dan <strong>Tenant Admin</strong>) dengan batasan izin yang ketat. Saat membuat akun staf di menu <strong>Users</strong>, cukup pilih <em>Role</em> yang sesuai (misal: Kasir) agar menu pengaturan sistem, laporan keuangan sensitif, dan manajemen pengguna tidak dapat diakses oleh staf tersebut.
                 </div>
             </div>
 

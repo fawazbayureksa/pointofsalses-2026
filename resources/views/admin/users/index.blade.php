@@ -168,10 +168,6 @@
             @php
                 $tableHeaders = [
                     [
-                        'label' => 'ID',
-                        'slot' => fn($user) => '<span class="text-xs font-semibold text-gray-500">#' . $user->id . '</span>',
-                    ],
-                    [
                         'label' => 'User Info',
                         'slot' => function ($user) {
                             $initial = strtoupper(substr($user->name ?? 'U', 0, 1));

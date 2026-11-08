@@ -44,12 +44,12 @@
                 <div class="space-y-4">
                     <div>
                         <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Price</span>
-                        <p class="mt-1 text-sm text-gray-900">{{ number_format($product->price, 2) }}</p>
+                        <p class="mt-1 text-sm text-gray-900">{{ format_currency($product->price) }}</p>
                     </div>
                     <div>
                         <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Cost Price</span>
                         <p class="mt-1 text-sm text-gray-900">
-                            {{ $product->cost_price ? number_format($product->cost_price, 2) : '—' }}</p>
+                            {{ $product->cost_price !== null ? format_currency($product->cost_price) : '—' }}</p>
                     </div>
                     <div>
                         <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Status</span>

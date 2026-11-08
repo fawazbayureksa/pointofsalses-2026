@@ -16,9 +16,11 @@
         'danger' => 'bg-red-600 hover:bg-red-700 text-white focus:ring-red-500',
         'warning' => 'bg-yellow-500 hover:bg-yellow-600 text-white focus:ring-yellow-500',
         'ghost' => 'bg-transparent hover:bg-gray-100 text-gray-700 focus:ring-gray-500',
+        'default' => 'bg-gray-200 hover:bg-gray-300 text-gray-700 focus:ring-gray-500',
     ];
 
     $sizeClasses = [
+        'xs' => 'px-2 py-1.5 text-xs',
         'sm' => 'px-3 py-1.5 text-sm',
         'md' => 'px-4 py-2 text-sm',
         'lg' => 'px-6 py-3 text-base',

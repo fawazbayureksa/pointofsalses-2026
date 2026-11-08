@@ -45,7 +45,6 @@
             </div>
 
             <x-admin-table :headers="[
-                ['label' => 'ID', 'key' => 'id'],
                 ['label' => 'Name', 'key' => 'name'],
                 ['label' => 'Slug', 'key' => 'slug'],
                 ['label' => 'Plan', 'key' => 'plan'],

@@ -70,3 +70,13 @@ if (! function_exists('supplier_management_enabled')) {
         return (bool) setting('supplier_management_enabled', true);
     }
 }
+
+if (! function_exists('format_currency')) {
+    /**
+     * Format a numeric/nominal value as currency (e.g., "Rp 25.000").
+     */
+    function format_currency(float|int|string|null $amount): string
+    {
+        return 'Rp '.number_format((float) ($amount ?? 0), 0, ',', '.');
+    }
+}

@@ -42,7 +42,6 @@
         <x-admin-card title="All Categories">
             @php
                 $tableHeaders = [
-                    ['label' => 'ID', 'key' => 'id'],
                     ['label' => 'Name', 'key' => 'name'],
                     ['label' => 'Slug', 'key' => 'slug'],
                     ['label' => 'Parent', 'slot' => fn($c) => $c->parent?->name ?? '—'],
@@ -60,9 +59,20 @@
                 <input type="text" placeholder="Search categories..."
                     class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64">
                 @can('create categories')
-                    <x-admin-button variant="primary" icon="fa-solid fa-plus" x-data @click="$dispatch('open-create-modal')">
-                        Add New Category
-                    </x-admin-button>
+                    <div class="flex items-center space-x-2">
+                        <x-admin-button variant="secondary" icon="fa-solid fa-download"
+                            href="{{ route('admin.categories.import-template') }}">
+                            Template CSV
+                        </x-admin-button>
+                        <x-admin-button variant="success" icon="fa-solid fa-file-import" x-data
+                            @click="$dispatch('open-import-category-modal')">
+                            Import CSV
+                        </x-admin-button>
+                        <x-admin-button variant="primary" icon="fa-solid fa-plus" x-data
+                            @click="$dispatch('open-create-modal')">
+                            Add New Category
+                        </x-admin-button>
+                    </div>
                 @endcan
             </div>
 
@@ -74,4 +84,5 @@
 
     @include('admin.categories.create-modal')
     @include('admin.categories.edit-modal')
+    @include('admin.categories.import-modal')
 @endsection

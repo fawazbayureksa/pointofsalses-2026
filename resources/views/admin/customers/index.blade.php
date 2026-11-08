@@ -41,7 +41,6 @@
 
         @php
             $tableHeaders = [
-                ['label' => 'ID', 'key' => 'id'],
                 ['label' => 'Name', 'key' => 'name'],
                 ['label' => 'Email', 'key' => 'email'],
                 ['label' => 'Phone', 'key' => 'phone'],

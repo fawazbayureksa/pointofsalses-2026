@@ -42,7 +42,6 @@
         <x-admin-card title="All Products">
             @php
                 $tableHeaders = [
-                    ['label' => 'ID', 'key' => 'id'],
                     ['label' => 'Name', 'key' => 'name'],
                     ['label' => 'SKU', 'key' => 'sku'],
                     [
@@ -62,7 +61,12 @@
                             return optional($product->category)->name ?? '-';
                         },
                     ],
-                    ['label' => 'Price', 'key' => 'price'],
+                    [
+                        'label' => 'Price',
+                        'slot' => function ($product) {
+                            return format_currency($product->price);
+                        },
+                    ],
                     [
                         'label' => 'Stock',
                         'slot' => function ($product) {
@@ -100,9 +104,20 @@
                     </select>
                 </div>
                 @can('create products')
-                    <x-admin-button variant="primary" icon="fa-solid fa-plus" x-data @click="$dispatch('open-create-modal')">
-                        Add New Product
-                    </x-admin-button>
+                    <div class="flex items-center space-x-2">
+                        <x-admin-button variant="default" icon="fa-solid fa-download" size="xs"
+                            href="{{ route('admin.products.import-template') }}">
+                            Template
+                        </x-admin-button>
+                        <x-admin-button variant="default" icon="fa-solid fa-file-import" size="xs" x-data
+                            @click="$dispatch('open-import-product-modal')">
+                            Import
+                        </x-admin-button>
+                        <x-admin-button variant="primary" icon="fa-solid fa-plus" size="xs" x-data
+                            @click="$dispatch('open-create-modal')">
+                            New Product
+                        </x-admin-button>
+                    </div>
                 @endcan
             </div>
 
@@ -112,6 +127,7 @@
 
     @include('admin.products.create-modal')
     @include('admin.products.edit-modal')
+    @include('admin.products.import-modal')
     @include('admin.products.barcode-scanner-modal')
     @include('admin.products.photo-capture-modal')
 @endsection

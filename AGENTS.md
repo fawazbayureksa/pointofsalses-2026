@@ -212,6 +212,8 @@ Jika menemukan test yang sudah gagal sebelum perubahan:
 
 - Gunakan komponen Blade yang sudah ada (`admin-card`, `admin-table`, `admin-modal`, dll.) jika cocok.
 - Ikuti gaya Tailwind dan layout admin yang ada.
+- Jangan menampilkan kolom database `ID` (`id`) pada tabel daftar data (seperti Products, Categories, Outlets, dll.) karena tidak diperlukan oleh pengguna; gunakan identifier bisnis seperti `SKU`, `Order Number`, atau `Name`.
+- Semua nilai nominal uang/harga (seperti `price`, `cost_price`, `total_amount`, dll.) wajib ditampilkan menggunakan format mata uang (misalnya melalui helper `format_currency($amount)` atau `'Rp ' . number_format($amount, 0, ',', '.')`), bukan angka mentah.
 - Jangan menambahkan framework JS baru tanpa persetujuan.
 - Pastikan tampilan tetap responsif dan tidak merusak halaman lain.
 

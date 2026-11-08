@@ -3,35 +3,37 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {
     public function index()
     {
-        $roles       = Role::with('permissions')->latest()->paginate(15);
+        $roles = Role::with('permissions')->latest()->paginate(15);
         $permissions = Permission::orderBy('name')->get();
+
         return view('admin.roles.index', compact('roles', 'permissions'));
     }
 
     public function create()
     {
         $permissions = Permission::all();
+
         return view('admin.roles.index', compact('permissions'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'        => 'required|string|max:255|unique:roles,name',
+            'name' => 'required|string|max:255|unique:roles,name',
             'permissions' => 'nullable|array',
         ]);
 
         $role = Role::create(['name' => $validated['name']]);
 
-        if (!empty($validated['permissions'])) {
+        if (! empty($validated['permissions'])) {
             $role->syncPermissions($validated['permissions']);
         }
 
@@ -46,13 +48,18 @@ class RoleController extends Controller
     public function edit(Role $role)
     {
         $permissions = Permission::all();
+
         return view('admin.roles.index', compact('role', 'permissions'));
     }
 
     public function update(Request $request, Role $role)
     {
+        if ($role->name === 'super_admin' && $request->input('name') !== 'super_admin') {
+            return redirect()->route('admin.roles.index')->withErrors(['error' => 'The super_admin role name cannot be modified.']);
+        }
+
         $validated = $request->validate([
-            'name'        => 'required|string|max:255|unique:roles,name,' . $role->id,
+            'name' => 'required|string|max:255|unique:roles,name,'.$role->id,
             'permissions' => 'nullable|array',
         ]);
 
@@ -64,6 +71,10 @@ class RoleController extends Controller
 
     public function destroy(Role $role)
     {
+        if (in_array($role->name, ['super_admin', 'tenant_admin'], true)) {
+            return redirect()->route('admin.roles.index')->withErrors(['error' => "The {$role->name} system role cannot be deleted."]);
+        }
+
         $role->delete();
 
         return redirect()->route('admin.roles.index')->with('success', 'Role deleted successfully.');

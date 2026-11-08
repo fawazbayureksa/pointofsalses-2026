@@ -84,7 +84,11 @@ Route::middleware(['auth', 'tenant.active', 'subscription.active'])
         });
 
         Route::resource('outlets', OutletController::class);
+        Route::get('categories/import-template', [CategoryController::class, 'downloadTemplate'])->name('categories.import-template');
+        Route::post('categories/import', [CategoryController::class, 'import'])->name('categories.import');
         Route::resource('categories', CategoryController::class);
+        Route::get('products/import-template', [ProductController::class, 'downloadTemplate'])->name('products.import-template');
+        Route::post('products/import', [ProductController::class, 'import'])->name('products.import');
         Route::resource('products', ProductController::class);
         Route::post('products/{product}/adjust-stock', [ProductController::class, 'adjustStock'])->name('products.adjust-stock');
         Route::post('products/transfer-stock', [ProductController::class, 'transferStock'])->name('products.transfer-stock');
@@ -162,6 +166,9 @@ Route::middleware(['auth', 'tenant.active', 'subscription.active'])
 
         Route::middleware('can:manage users')->group(function () {
             Route::resource('users', UserController::class);
+        });
+
+        Route::middleware('role:super_admin')->group(function () {
             Route::resource('roles', RoleController::class);
             Route::resource('permissions', PermissionController::class);
         });

@@ -42,7 +42,6 @@
         <x-admin-card title="All Outlets">
             @php
                 $tableHeaders = [
-                    ['label' => 'ID', 'key' => 'id'],
                     ['label' => 'Name', 'key' => 'name'],
                     ['label' => 'Address', 'key' => 'address'],
                     ['label' => 'Phone', 'key' => 'phone'],

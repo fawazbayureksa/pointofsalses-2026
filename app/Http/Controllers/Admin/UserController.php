@@ -118,7 +118,11 @@ class UserController extends Controller
         }
 
         $users = $query->paginate(15)->withQueryString();
-        $roles = Role::orderBy('name')->get();
+        $rolesQuery = Role::orderBy('name');
+        if (! $isSuperAdmin) {
+            $rolesQuery->where('name', '!=', 'super_admin');
+        }
+        $roles = $rolesQuery->get();
 
         $outletsQuery = Outlet::where('is_active', true)->orderBy('name');
         if (! $isSuperAdmin) {
@@ -140,6 +144,14 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
+        $authUser = Auth::user();
+        $isSuperAdmin = $authUser->hasRole('super_admin');
+
+        $roleRule = ['nullable', 'string', 'exists:roles,name'];
+        if (! $isSuperAdmin) {
+            $roleRule[] = Rule::notIn(['super_admin']);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
@@ -148,7 +160,7 @@ class UserController extends Controller
             'outlet_id' => 'nullable|exists:outlets,id',
             'is_active' => 'nullable|boolean',
             'status' => 'nullable|in:active,inactive',
-            'role' => 'nullable|string|exists:roles,name',
+            'role' => $roleRule,
             'tenant_id' => 'nullable|exists:tenants,id',
             'business_name' => 'nullable|string|max:255',
             'plan' => 'nullable|in:basic,professional,enterprise',
@@ -158,9 +170,6 @@ class UserController extends Controller
             'is_subscription_exempt' => 'nullable|boolean',
             'avatar' => 'nullable|image|max:2048',
         ]);
-
-        $authUser = Auth::user();
-        $isSuperAdmin = $authUser->hasRole('super_admin');
 
         $isActive = isset($validated['is_active'])
             ? (bool) $validated['is_active']
@@ -277,6 +286,11 @@ class UserController extends Controller
             abort(403);
         }
 
+        $roleRule = ['nullable', 'string', 'exists:roles,name'];
+        if (! $isSuperAdmin) {
+            $roleRule[] = Rule::notIn(['super_admin']);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
@@ -284,7 +298,7 @@ class UserController extends Controller
             'password' => 'nullable|string|min:8',
             'outlet_id' => 'nullable|exists:outlets,id',
             'is_active' => 'nullable|boolean',
-            'role' => 'nullable|string|exists:roles,name',
+            'role' => $roleRule,
             'business_name' => 'nullable|string|max:255',
             'plan' => 'nullable|in:basic,professional,enterprise',
             'subscription_status' => 'nullable|in:trial,active,expired,cancelled',
