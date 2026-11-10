@@ -17,36 +17,8 @@
                 </div>
             </div>
 
-            <div x-data="{ notificationsOpen: false }" class="relative">
-                <button @click="notificationsOpen = !notificationsOpen"
-                    class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors relative">
-                    <i class="fa-solid fa-bell"></i>
-                    <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                </button>
-                <div x-show="notificationsOpen" @click.away="notificationsOpen = false" x-transition
-                    class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                    <div class="p-4 border-b border-gray-200">
-                        <h3 class="font-semibold text-gray-800">Notifications</h3>
-                    </div>
-                    <div class="max-h-64 overflow-y-auto">
-                        <a href="#" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100">
-                            <p class="text-sm text-gray-800 font-medium">New order received</p>
-                            <p class="text-xs text-gray-500 mt-1">2 minutes ago</p>
-                        </a>
-                        <a href="#" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100">
-                            <p class="text-sm text-gray-800 font-medium">Low stock alert</p>
-                            <p class="text-xs text-gray-500 mt-1">15 minutes ago</p>
-                        </a>
-                        <a href="#" class="block px-4 py-3 hover:bg-gray-50">
-                            <p class="text-sm text-gray-800 font-medium">Payment received</p>
-                            <p class="text-xs text-gray-500 mt-1">1 hour ago</p>
-                        </a>
-                    </div>
-                    <div class="p-4 border-t border-gray-200">
-                        <a href="#" class="text-sm text-blue-600 hover:text-blue-700">View all notifications</a>
-                    </div>
-                </div>
-            </div>
+            {{-- Notifications Dropdown Component --}}
+            @include('admin.partials.notifications-dropdown')
 
             <div x-data="{ dropdownOpen: false }" class="relative">
                 <button @click="dropdownOpen = !dropdownOpen"

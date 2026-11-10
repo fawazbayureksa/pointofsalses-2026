@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\GoodsReceiptController;
+use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\OutletController;
 use App\Http\Controllers\Admin\PermissionController;
@@ -65,6 +66,16 @@ Route::middleware(['auth', 'tenant.active', 'subscription.active'])
         Route::put('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
         Route::put('/password', [UserController::class, 'updatePassword'])->name('password.change');
 
+        // Notifications
+        Route::prefix('notifications')->name('notifications.')->group(function () {
+            Route::get('/', [NotificationController::class, 'index'])->name('index');
+            Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
+            Route::post('/clear-all', [NotificationController::class, 'clearAll'])->name('clear-all');
+            Route::get('/count', [NotificationController::class, 'unreadCount'])->name('count');
+            Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
+            Route::delete('/{id}', [NotificationController::class, 'destroy'])->name('destroy');
+        });
+
         // Tenant & Super-Admin Subscription Management (accessible even if subscription expired so tenant can renew)
         Route::withoutMiddleware('subscription.active')
             ->prefix('subscription')
@@ -104,6 +115,7 @@ Route::middleware(['auth', 'tenant.active', 'subscription.active'])
         Route::delete('orders/{order}/items/{item}', [OrderController::class, 'removeItem'])->name('orders.items.destroy');
 
         Route::get('pos', [PosController::class, 'index'])->name('pos.index');
+        Route::get('pos/customer-display', [PosController::class, 'customerDisplay'])->name('pos.customer-display');
 
         // Reports
         Route::prefix('reports')->name('reports.')->group(function () {
@@ -156,6 +168,7 @@ Route::middleware(['auth', 'tenant.active', 'subscription.active'])
             Route::get('/', [SettingController::class, 'index'])->name('index');
             Route::put('/', [SettingController::class, 'update'])->name('update');
             Route::put('/modules', [SettingController::class, 'updateModules'])->name('modules.update');
+            Route::put('/edc', [SettingController::class, 'updateEdc'])->name('edc.update');
             Route::put('/email', [SettingController::class, 'updateEmail'])->name('email.update');
             Route::put('/backup', [SettingController::class, 'updateBackup'])->name('backup.update');
             Route::get('/tax', [SettingController::class, 'tax'])->name('tax');

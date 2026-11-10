@@ -56,6 +56,7 @@
         $currentTenant = auth()->user()?->tenant;
         $supplierOverride = $currentTenant ? $currentTenant->supplierManagementOverride() : 'auto';
         $isSupplierEnabled = supplier_management_enabled();
+        $edcConfig = edc_config();
     @endphp
 
     <x-admin-card title="Optional Business Modules (Per-Tenant)">
@@ -113,6 +114,117 @@
                         <x-admin-button type="submit" variant="primary" icon="fa-solid fa-sliders">
                             Save Module Preferences
                         </x-admin-button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        {{-- Bank EDC Terminal Configuration (Per-Tenant Optional) --}}
+        <form method="POST" action="{{ route('admin.settings.edc.update') }}" x-data="{ edcEnabled: {{ $edcConfig['enabled'] ? 'true' : 'false' }} }">
+            @csrf
+            @method('PUT')
+
+            <div class="p-4 rounded-xl border transition-colors"
+                :class="edcEnabled ? 'bg-blue-50/50 border-blue-200' : 'bg-gray-50 border-gray-200'">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
+                            :class="edcEnabled ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'">
+                            <i class="fa-solid fa-credit-card"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h4 class="text-sm font-bold text-gray-900">Bank EDC Terminal Integration (POS Cashier Flow)</h4>
+                                <span class="px-2 py-0.5 text-xs font-semibold rounded-full"
+                                    :class="edcEnabled ? 'bg-blue-100 text-blue-800' : 'bg-gray-200 text-gray-700'"
+                                    x-text="edcEnabled ? 'Active' : 'Disabled (Direct Checkout)'">
+                                </span>
+                            </div>
+                            <p class="text-xs text-gray-600 mt-1">
+                                Aktifkan fitur ini jika meja kasir Anda menggunakan mesin EDC Bank (BCA, Mandiri, BRI, BNI, dll.) dan memerlukan pemilihan Bank Acquirer, pencatatan Approval Code / RRN, atau pengiriman nominal otomatis via kabel USB/Serial ECR. Jika <strong>dinonaktifkan</strong>, kasir dapat langsung menyelesaikan transaksi kartu tanpa alur EDC tambahan.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 shrink-0">
+                        <input type="hidden" name="edc_enabled" value="0">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" name="edc_enabled" value="1" x-model="edcEnabled"
+                                class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                            <span class="ml-2 text-sm font-medium text-gray-800">Enable EDC Flow</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-gray-200/80 space-y-4">
+                    <div x-show="edcEnabled" x-cloak class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+                                EDC Connection Mode
+                            </label>
+                            <select name="edc_connection_mode"
+                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white">
+                                <option value="semi_integrated" {{ $edcConfig['connection_mode'] === 'semi_integrated' ? 'selected' : '' }}>
+                                    Semi-Integrated (Manual EDC + Approval Code)
+                                </option>
+                                <option value="ecr_serial" {{ $edcConfig['connection_mode'] === 'ecr_serial' ? 'selected' : '' }}>
+                                    Direct ECR Cable (USB / Serial WebSerial API)
+                                </option>
+                                <option value="both" {{ $edcConfig['connection_mode'] === 'both' ? 'selected' : '' }}>
+                                    Hybrid (USB/Serial ECR + Manual Fallback)
+                                </option>
+                            </select>
+                            <p class="text-xs text-gray-500 mt-1">Pilih cara POS berkomunikasi dengan mesin EDC di meja kasir.</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+                                Supported EDC Banks (Comma Separated)
+                            </label>
+                            <input type="text" name="edc_banks"
+                                value="{{ old('edc_banks', $edcConfig['banks_raw']) }}"
+                                placeholder="BCA, Mandiri, BRI, BNI, CIMB Niaga"
+                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white">
+                            <p class="text-xs text-gray-500 mt-1">Daftar pilihan mesin EDC bank yang tampil di layar kasir.</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+                                ECR Serial Baud Rate (USB/RS-232)
+                            </label>
+                            <select name="edc_serial_baud_rate"
+                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white">
+                                @foreach ([9600, 19200, 38400, 57600, 115200] as $baud)
+                                    <option value="{{ $baud }}" {{ (int) $edcConfig['serial_baud_rate'] === $baud ? 'selected' : '' }}>
+                                        {{ $baud }} bps {{ $baud === 9600 ? '(Default BCA/Mandiri)' : '' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <p class="text-xs text-gray-500 mt-1">Kecepatan port serial saat mode Direct ECR Cable digunakan.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div x-show="edcEnabled" x-cloak>
+                            <input type="hidden" name="edc_require_reference" value="0">
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="edc_require_reference" value="1"
+                                    {{ $edcConfig['require_reference'] ? 'checked' : '' }}
+                                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <span class="ml-2 text-xs font-medium text-gray-700">
+                                    Wajib isi Nomor Approval Code / Reference Number (RRN) dari struk EDC sebelum menyelesaikan pembayaran Kartu
+                                </span>
+                            </label>
+                        </div>
+                        <div x-show="!edcEnabled" class="text-xs text-gray-500 italic">
+                            Alur EDC saat ini nonaktif. Kasir tidak perlu mengisi Approval Code atau menghubungkan mesin EDC.
+                        </div>
+
+                        <div class="flex justify-end shrink-0">
+                            <x-admin-button type="submit" variant="primary" icon="fa-solid fa-credit-card">
+                                Save EDC Configuration
+                            </x-admin-button>
+                        </div>
                     </div>
                 </div>
             </div>

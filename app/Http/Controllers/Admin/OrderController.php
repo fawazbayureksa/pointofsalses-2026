@@ -3,15 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Outlet;
-use App\Models\Customer;
-use App\Models\Product;
 use App\Models\Payment;
+use App\Models\Product;
 use App\Services\OrderService;
 use App\Services\PaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -28,7 +29,7 @@ class OrderController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('order_number', 'like', "%{$search}%")
-                    ->orWhereHas('customer', fn($q) => $q->where('name', 'like', "%{$search}%"));
+                    ->orWhereHas('customer', fn ($q) => $q->where('name', 'like', "%{$search}%"));
             });
         }
 
@@ -48,52 +49,73 @@ class OrderController extends Controller
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
-        $orders    = $query->paginate(15)->withQueryString();
-        $outlets   = Outlet::where('is_active', true)->get();
+        $orders = $query->paginate(15)->withQueryString();
+        $outlets = Outlet::where('is_active', true)->get();
         $customers = Customer::orderBy('name')->get();
-        $products  = Product::where('is_active', true)->get();
+        $products = Product::where('is_active', true)->get();
 
         return view('admin.orders.index', compact('orders', 'outlets', 'customers', 'products'));
     }
 
     public function create()
     {
-        $outlets   = Outlet::where('is_active', true)->get();
+        $outlets = Outlet::where('is_active', true)->get();
         $customers = Customer::orderBy('name')->get();
-        $products  = Product::where('is_active', true)->get();
+        $products = Product::where('is_active', true)->get();
+
         return view('admin.orders.index', compact('outlets', 'customers', 'products'));
     }
 
-
     public function store(Request $request)
     {
+        $edcConfig = edc_config();
+        $requireEdcRef = $edcConfig['enabled']
+            && $edcConfig['require_reference']
+            && $request->input('payment_method') === 'card';
+
         $validated = $request->validate([
-            'outlet_id'               => 'required|exists:outlets,id',
-            'customer_id'             => 'nullable|exists:customers,id',
-            'notes'                   => 'nullable|string',
-            'discount_amount'         => 'nullable|numeric|min:0',
-            'discount_type'           => 'nullable|in:fixed,percentage',
-            'payment_method'          => 'required|in:cash,card,qris,transfer',
-            'amount_tendered'         => 'required|numeric|min:0',
-            'items'                   => 'required|array|min:1',
-            'items.*.product_id'      => 'required|exists:products,id',
-            'items.*.quantity'        => 'required|numeric|min:0.001',
+            'outlet_id' => 'required|exists:outlets,id',
+            'customer_id' => 'nullable|exists:customers,id',
+            'notes' => 'nullable|string',
+            'discount_amount' => 'nullable|numeric|min:0',
+            'discount_type' => 'nullable|in:fixed,percentage',
+            'tax_amount' => 'nullable|numeric|min:0',
+            'payment_method' => 'required|in:cash,card,qris,transfer',
+            'amount_tendered' => 'required|numeric|min:0',
+            'reference_number' => $requireEdcRef ? 'required|string|max:120' : 'nullable|string|max:120',
+            'items' => 'required|array|min:1',
+            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.quantity' => 'required|numeric|min:0.001',
             'items.*.discount_amount' => 'nullable|numeric|min:0',
+        ], [
+            'outlet_id.required' => 'Order failed to create: No outlet selected or you do not have an active outlet yet. Please select or create an outlet first.',
+            'outlet_id.exists' => 'Order failed to create: The selected outlet is invalid or no longer available.',
+            'items.required' => 'Order failed to create: Cart is empty. Please add at least one product.',
+            'items.min' => 'Order failed to create: Cart is empty. Please add at least one product.',
+            'payment_method.required' => 'Order failed to create: Please select a payment method.',
+            'amount_tendered.required' => 'Order failed to create: Please enter the payment amount.',
+            'reference_number.required' => 'Order failed to create: EDC Approval Code / Reference Number is required for Card payments.',
         ]);
 
-        $order = $this->orderService->create([
-            'outlet_id'       => $validated['outlet_id'],
-            'customer_id'     => $validated['customer_id'] ?? null,
-            'notes'           => $validated['notes'] ?? null,
-            'discount_amount' => $validated['discount_amount'] ?? 0,
-            'discount_type'   => $validated['discount_type'] ?? 'fixed',
-            'items'           => $validated['items'],
-        ], Auth::user()->id);
+        $order = DB::transaction(function () use ($validated) {
+            $order = $this->orderService->create([
+                'outlet_id' => $validated['outlet_id'],
+                'customer_id' => $validated['customer_id'] ?? null,
+                'notes' => $validated['notes'] ?? null,
+                'discount_amount' => $validated['discount_amount'] ?? 0,
+                'discount_type' => $validated['discount_type'] ?? 'fixed',
+                'tax_amount' => $validated['tax_amount'] ?? 0,
+                'items' => $validated['items'],
+            ], Auth::user()->id);
 
-        $this->paymentService->pay($order, [
-            'payment_method' => $validated['payment_method'],
-            'amount'         => (float) $validated['amount_tendered'],
-        ]);
+            $this->paymentService->pay($order, [
+                'payment_method' => $validated['payment_method'],
+                'amount' => (float) $validated['amount_tendered'],
+                'reference_number' => $validated['reference_number'] ?? null,
+            ]);
+
+            return $order;
+        });
 
         return redirect()->route('admin.orders.print', $order)->with('success', 'Order created and payment recorded.');
     }
@@ -104,29 +126,29 @@ class OrderController extends Controller
 
         if (request()->expectsJson()) {
             return response()->json([
-                'id'             => $order->id,
-                'order_number'   => $order->order_number ?? '#' . $order->id,
-                'status'         => $order->status,
-                'total_amount'   => $order->total_amount,
+                'id' => $order->id,
+                'order_number' => $order->order_number ?? '#'.$order->id,
+                'status' => $order->status,
+                'total_amount' => $order->total_amount,
                 'discount_amount' => $order->discount_amount,
-                'tax_amount'     => $order->tax_amount,
-                'notes'          => $order->notes,
-                'created_at'     => $order->created_at?->format('M d, Y H:i'),
-                'customer'       => $order->customer ? [
-                    'name'  => $order->customer->name,
+                'tax_amount' => $order->tax_amount,
+                'notes' => $order->notes,
+                'created_at' => $order->created_at?->format('M d, Y H:i'),
+                'customer' => $order->customer ? [
+                    'name' => $order->customer->name,
                     'email' => $order->customer->email,
                     'phone' => $order->customer->phone,
                 ] : null,
                 'outlet' => $order->outlet ? [
-                    'name'    => $order->outlet->name,
+                    'name' => $order->outlet->name,
                     'address' => $order->outlet->address,
                 ] : null,
                 'payment_method' => $order->payments->first()?->payment_method,
-                'items' => $order->items->map(fn($item) => [
+                'items' => $order->items->map(fn ($item) => [
                     'product_name' => $item->product_name ?? optional($item->product)->name ?? '-',
-                    'unit_price'   => $item->unit_price,
-                    'quantity'     => $item->quantity,
-                    'subtotal'     => $item->subtotal,
+                    'unit_price' => $item->unit_price,
+                    'quantity' => $item->quantity,
+                    'subtotal' => $item->subtotal,
                 ]),
             ]);
         }
@@ -143,7 +165,7 @@ class OrderController extends Controller
     {
         $validated = $request->validate([
             'status' => 'required|in:pending,processing,completed,cancelled',
-            'notes'  => 'nullable|string',
+            'notes' => 'nullable|string',
         ]);
 
         $order->update($validated);
@@ -161,6 +183,7 @@ class OrderController extends Controller
     public function print(Order $order)
     {
         $order->load(['items.product', 'customer', 'outlet']);
+
         return view('admin.orders.print', compact('order'));
     }
 
@@ -168,22 +191,22 @@ class OrderController extends Controller
     {
         $validated = $request->validate([
             'product_id' => 'required|exists:products,id',
-            'quantity'   => 'required|numeric|min:1',
+            'quantity' => 'required|numeric|min:1',
         ]);
 
         $product = Product::findOrFail($validated['product_id']);
-        $qty      = (float) $validated['quantity'];
+        $qty = (float) $validated['quantity'];
 
         $order->items()->create([
-            'product_id'      => $product->id,
-            'product_name'    => $product->name,
-            'product_sku'     => $product->sku ?? '',
-            'unit_price'      => $product->price,
-            'cost_price'      => $product->cost_price,
-            'quantity'        => $qty,
+            'product_id' => $product->id,
+            'product_name' => $product->name,
+            'product_sku' => $product->sku ?? '',
+            'unit_price' => $product->price,
+            'cost_price' => $product->cost_price,
+            'quantity' => $qty,
             'discount_amount' => 0,
-            'tax_amount'      => 0,
-            'subtotal'        => $product->price * $qty,
+            'tax_amount' => 0,
+            'subtotal' => $product->price * $qty,
         ]);
 
         $order->recalculateTotals();
@@ -202,6 +225,7 @@ class OrderController extends Controller
     public function payments()
     {
         $payments = Payment::with(['order.customer'])->latest()->paginate(15);
+
         return view('admin.orders.payments', compact('payments'));
     }
 
@@ -209,7 +233,7 @@ class OrderController extends Controller
     {
         $validated = $request->validate([
             'payment_method' => 'required|in:cash,card,qris,transfer',
-            'amount'         => 'required|numeric|min:0',
+            'amount' => 'required|numeric|min:0',
         ]);
 
         $this->paymentService->pay($order, $validated);
@@ -221,6 +245,7 @@ class OrderController extends Controller
     {
         $payment = $order->payments()->where('status', 'completed')->latest()->firstOrFail();
         $this->paymentService->refund($payment, $request->reason ?? '');
+
         return redirect()->back()->with('success', 'Payment refunded.');
     }
 }

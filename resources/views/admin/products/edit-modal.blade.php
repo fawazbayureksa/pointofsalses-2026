@@ -1,5 +1,15 @@
-<div x-data="{ open: false, currentId: null, record: {}, photoPreview: null }"
-    @barcode-scanned.window="if ($event.detail.target === 'edit' && open) { record.barcode = $event.detail.code; $nextTick(() => { const f = $el.querySelector('[name=barcode]'); if(f) f.value = $event.detail.code; }) }"
+<div x-data="{ open: false, currentId: null, record: {}, photoPreview: null, barcodeJustScanned: false }"
+    @barcode-scanned.window="
+        if ($event.detail.target === 'edit' && open) {
+            record.barcode = $event.detail.code;
+            barcodeJustScanned = true;
+            setTimeout(() => barcodeJustScanned = false, 2500);
+            $nextTick(() => {
+                const f = $el.querySelector('[name=barcode]');
+                if (f) f.value = $event.detail.code;
+            });
+        }
+    "
     @product-photo-captured.window="
         if ($event.detail.target === 'edit' && open) {
             photoPreview = $event.detail.dataUrl;
@@ -42,17 +52,33 @@
 
             {{-- Barcode field with scan button --}}
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Barcode</label>
+                <div class="flex items-center justify-between mb-1">
+                    <label class="block text-sm font-medium text-gray-700">Barcode</label>
+                    <span x-show="record.barcode" x-cloak
+                        class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 transition-all">
+                        <i class="fa-solid fa-circle-check text-emerald-500"></i>
+                        <span>Barcode: <strong class="font-mono" x-text="record.barcode"></strong></span>
+                    </span>
+                </div>
                 <div class="flex items-center gap-2">
                     <div class="relative flex-1">
                         <i class="fa-solid fa-barcode absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                        <input type="text" name="barcode" value="" placeholder="Scan or type barcode…"
-                            class="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <input type="text" name="barcode" value="" placeholder="Scan with camera or type barcode…"
+                            @input="record.barcode = $event.target.value"
+                            @keydown.enter.prevent="$el.closest('form').querySelector('input[name=price]')?.focus()"
+                            class="w-full pl-9 pr-8 py-2 border rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                            :class="barcodeJustScanned ? 'border-emerald-500 ring-2 ring-emerald-300 bg-emerald-50/50' : 'border-gray-300 focus:border-transparent'">
+                        <button type="button" x-show="record.barcode"
+                            @click="record.barcode = ''; const f = $el.closest('.relative').querySelector('input[name=barcode]'); if(f) f.value = '';"
+                            class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors p-1"
+                            title="Clear barcode">
+                            <i class="fa-solid fa-xmark text-sm"></i>
+                        </button>
                     </div>
                     <button type="button"
                         @click="window.dispatchEvent(new CustomEvent('open-barcode-scanner', { detail: { target: 'edit' } }))"
                         title="Scan with camera"
-                        class="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors shrink-0">
+                        class="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors shrink-0 shadow-sm hover:shadow">
                         <i class="fa-solid fa-camera"></i>
                         <span>Scan</span>
                     </button>

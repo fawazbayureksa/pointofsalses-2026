@@ -71,6 +71,16 @@ class OrderService
                 $this->applyOrderDiscount($order, $orderDiscountAmount, $orderDiscountType);
             }
 
+            // Apply order-level tax when provided (e.g. from POS tax settings)
+            $orderTaxAmount = (float) ($payload['tax_amount'] ?? 0);
+            if ($orderTaxAmount > 0) {
+                $order->update([
+                    'tax_amount' => $orderTaxAmount,
+                    'total_amount' => max(0, (float) $order->total_amount + $orderTaxAmount),
+                ]);
+                $order->refresh();
+            }
+
             // Apply loyalty points redemption (1 point = Rp 1)
             $pointsRedeemed = (int) ($payload['loyalty_points_redeemed'] ?? 0);
             if ($pointsRedeemed > 0 && $order->customer_id) {
